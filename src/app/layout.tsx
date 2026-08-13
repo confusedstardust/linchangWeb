@@ -1,26 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Ma_Shan_Zheng, Noto_Sans_SC, Noto_Serif_SC } from "next/font/google";
+import "@fontsource/noto-sans-sc/400.css";
+import "@fontsource/noto-sans-sc/500.css";
+import "@fontsource/noto-sans-sc/600.css";
+import "@fontsource/noto-serif-sc/400.css";
+import "@fontsource/noto-serif-sc/500.css";
+import "@fontsource/noto-serif-sc/600.css";
+import "@fontsource/ma-shan-zheng/400.css";
 import "./globals.css";
 import SmoothScroll from "@/components/smooth-scroll";
-
-const notoSans = Noto_Sans_SC({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const notoSerif = Noto_Serif_SC({
-  variable: "--font-noto-serif",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const maShan = Ma_Shan_Zheng({
-  variable: "--font-ma-shan",
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "NarrativeOS · AI 叙事课堂生成平台",
@@ -51,10 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="zh-CN"
-      className={`${notoSans.variable} ${notoSerif.variable} ${maShan.variable} h-full antialiased`}
-    >
+    <html lang="zh-CN" className="h-full antialiased">
       <body className="min-h-full">
         <SmoothScroll>{children}</SmoothScroll>
       </body>

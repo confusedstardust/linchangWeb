@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+  --font-noto-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI",
+    sans-serif;
+  --font-noto-serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-ma-shan: "Ma Shan Zheng", "Kaiti SC", cursive;
+}
+
 @theme {
   --color-paper: #f3ede1;
   --color-paper-soft: #faf7ef;

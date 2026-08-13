@@ -1,0 +1,481 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f3ede1;
+  --color-paper-soft: #faf7ef;
+  --color-paper-deep: #e8dfcd;
+  --color-ink: #262019;
+  --color-ink-soft: #453c32;
+  --color-ink-muted: #7d7367;
+  --color-line: #d8cdbb;
+  --color-cinnabar: #9c3340;
+  --color-cinnabar-deep: #70222e;
+  --color-cinnabar-soft: #f2dfe0;
+  --color-gold: #b18c45;
+  --color-gold-soft: #e5d2a3;
+  --color-night: #161310;
+  --color-night-soft: #221d18;
+
+  --font-sans: var(--font-noto-sans), "PingFang SC", "Microsoft YaHei UI",
+    sans-serif;
+  --font-serif: var(--font-noto-serif), "Songti SC", "SimSun", serif;
+  --font-brush: var(--font-ma-shan), var(--font-noto-serif), "Kaiti SC",
+    cursive;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-char: float-char 8s ease-in-out infinite;
+  --animate-drift: drift 32s linear infinite;
+  --animate-drift-rev: drift-rev 38s linear infinite;
+  --animate-breathe: breathe 3.2s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.2s ease-out infinite;
+  --animate-shine: shine 4.8s ease-in-out infinite;
+  --animate-scan: scan 6s linear infinite;
+  --animate-marquee: marquee 24s linear infinite;
+  --animate-marquee-rev: marquee-rev 24s linear infinite;
+  --animate-spin-slow: spin-slow 18s linear infinite;
+  --animate-ring: ring 5s linear infinite;
+  --animate-fade-up: fade-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-mode-flash: mode-flash 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-flip-in-right: flip-in-right 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-ink-breathe: ink-breathe 10s ease-in-out infinite;
+  --animate-blink: blink 1s steps(2, start) infinite;
+  --animate-scroll-hint: scroll-hint 2.2s ease-in-out infinite;
+  --animate-pan: pan 20s ease-in-out infinite alternate;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+
+  @keyframes float-char {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+      transform: translateY(-22px) rotate(3deg);
+    }
+  }
+
+  @keyframes drift {
+    0% {
+      transform: translateX(-32vw);
+    }
+    100% {
+      transform: translateX(108vw);
+    }
+  }
+
+  @keyframes drift-rev {
+    0% {
+      transform: translateX(108vw);
+    }
+    100% {
+      transform: translateX(-32vw);
+    }
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.75;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0% {
+      box-shadow: 0 0 0 0 rgba(156, 51, 64, 0.45);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(156, 51, 64, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(156, 51, 64, 0);
+    }
+  }
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-130%) skewX(-14deg);
+    }
+    60%,
+    100% {
+      transform: translateX(330%) skewX(-14deg);
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      top: -22%;
+    }
+    100% {
+      top: 118%;
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-rev {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes ring {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes mode-flash {
+    0% {
+      opacity: 0.35;
+      transform: translateY(8px);
+      filter: blur(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+
+  @keyframes flip-in-right {
+    from {
+      opacity: 0;
+      transform: perspective(1200px) rotateY(24deg) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: perspective(1200px) rotateY(0deg) scale(1);
+    }
+  }
+
+  @keyframes ink-breathe {
+    0%,
+    100% {
+      opacity: 0.75;
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.12) translateY(-14px);
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes scroll-hint {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    35% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+
+  @keyframes pan {
+    from {
+      transform: scale(1.04) translate3d(0, 0, 0);
+    }
+    to {
+      transform: scale(1.12) translate3d(-2.2%, 1.2%, 0);
+    }
+  }
+
+  @keyframes brush-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-cinnabar);
+    color: #fff;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /* Lenis 平滑滚动 */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  /* 宣纸颗粒 */
+  .paper-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .glass-paper {
+    background: rgba(243, 237, 225, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .text-shadow-ink {
+    text-shadow:
+      0 2px 30px rgba(12, 9, 7, 0.55),
+      0 1px 3px rgba(12, 9, 7, 0.5);
+  }
+
+  /* 印章 */
+  .seal-mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    outline: 1px solid rgba(156, 51, 64, 0.55);
+    outline-offset: 3px;
+    background: var(--color-cinnabar);
+    color: var(--color-paper-soft);
+    font-family: var(--font-brush);
+    font-size: 1.25rem;
+    line-height: 1;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.14),
+      0 8px 20px rgba(112, 34, 46, 0.22);
+    transform: rotate(-3deg);
+  }
+
+  .seal-mark::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .vertical-rl {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* 滚动进入动画 */
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition:
+      opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .brush-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .reveal.is-visible .brush-path {
+    animation: brush-draw 1.15s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+  }
+
+  .marquee-mask {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+  }
+
+  .ink-divider {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(156, 51, 64, 0.45),
+      rgba(177, 140, 69, 0.6),
+      rgba(156, 51, 64, 0.45),
+      transparent
+    );
+  }
+
+  /* 点击水墨晕染 */
+  .ink-drop,
+  .ink-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 9999px;
+    pointer-events: none;
+  }
+
+  .ink-drop {
+    width: 96px;
+    height: 96px;
+    margin: -48px 0 0 -48px;
+    background: radial-gradient(
+      circle at 42% 38%,
+      rgba(38, 32, 25, 0.4),
+      rgba(38, 32, 25, 0.12) 52%,
+      transparent 72%
+    );
+    filter: blur(1px);
+    animation: ink-drop 1.25s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+
+  .ink-drop-2 {
+    width: 64px;
+    height: 64px;
+    margin: -34px 0 0 -28px;
+    background: radial-gradient(
+      circle at 58% 62%,
+      rgba(177, 140, 69, 0.42),
+      rgba(177, 140, 69, 0.1) 55%,
+      transparent 74%
+    );
+    animation-duration: 1.6s;
+  }
+
+  .ink-ring {
+    width: 72px;
+    height: 72px;
+    margin: -36px 0 0 -36px;
+    border: 1px solid rgba(156, 51, 64, 0.5);
+    animation: ink-ring 1.25s ease-out forwards;
+  }
+
+  @keyframes ink-drop {
+    from {
+      transform: scale(0.28);
+      opacity: 0.65;
+    }
+    to {
+      transform: scale(3.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes ink-ring {
+    from {
+      transform: scale(0.35);
+      opacity: 0.65;
+    }
+    to {
+      transform: scale(2.7);
+      opacity: 0;
+    }
+  }
+}
+
+/* 自定义光标激活时隐藏系统光标（仅桌面） */
+@media (pointer: fine) {
+  .custom-cursor-enabled,
+  .custom-cursor-enabled * {
+    cursor: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .brush-path {
+    stroke-dashoffset: 0 !important;
+  }
+}

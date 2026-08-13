@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b241c"/>
+      <stop offset="1" stop-color="#14110d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.32" r="0.55">
+      <stop offset="0" stop-color="#b18c45" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#b18c45" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect width="1600" height="1000" fill="url(#glow)"/>
+  <circle cx="1350" cy="220" r="180" fill="none" stroke="#e5d2a3" stroke-opacity="0.18" stroke-width="2"/>
+  <text x="800" y="580" text-anchor="middle" font-size="240" fill="#f3ede1" fill-opacity="0.16" font-family="STKaiti, KaiTi, Kaiti SC, serif">待</text>
+  <text x="800" y="790" text-anchor="middle" font-size="38" letter-spacing="10" fill="#e5d2a3" fill-opacity="0.5" font-family="Songti SC, SimSun, serif">第三课例 · 敬请期待</text>
+</svg>

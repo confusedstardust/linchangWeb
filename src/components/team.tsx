@@ -1,7 +1,8 @@
 import { teamRoles } from "@/lib/content";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
-import { SectionLabel, SealMark } from "@/components/decorations";
+import BrandLogo from "@/components/brand-logo";
+import { SectionLabel } from "@/components/decorations";
 
 export default function Team() {
   return (
@@ -19,7 +20,7 @@ export default function Team() {
             工程师组成的跨学科团队。我们希望借助生成式 AI，把抽象知识转化为学生可以进入、选择和反思的课堂体验。
           </p>
           <div className="mt-9 flex items-center gap-4 border-t border-line pt-6">
-            <SealMark char="叙" />
+            <BrandLogo />
             <div>
               <strong className="block font-serif text-base text-ink">
                 NarrativeOS 创作团队

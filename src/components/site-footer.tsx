@@ -1,12 +1,12 @@
 import { navLinks } from "@/lib/content";
-import { SealMark } from "@/components/decorations";
+import BrandLogo from "@/components/brand-logo";
 
 export default function SiteFooter() {
   return (
     <footer className="bg-[#151412] px-5 py-10 text-paper-soft md:px-[6vw]">
       <div className="mx-auto flex max-w-[1320px] flex-col items-start gap-7 md:flex-row md:items-center md:justify-between">
         <a href="#top" className="flex items-center gap-3">
-          <SealMark char="叙" size={34} />
+          <BrandLogo size={34} />
           <span className="flex flex-col gap-0.5">
             <strong className="font-serif text-sm">临场</strong>
             <small className="text-[8px] tracking-[0.2em] text-[#8f8880]">

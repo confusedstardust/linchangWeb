@@ -30,11 +30,11 @@ export function SectionLabel({
 }
 
 export function SealMark({
-  char = "叙",
+  char,
   className,
   size,
 }: {
-  char?: string;
+  char: string;
   className?: string;
   size?: number;
 }) {

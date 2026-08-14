@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
+import BrandLogo from "@/components/brand-logo";
 import { InkBlob, SectionLabel } from "@/components/decorations";
 
 gsap.registerPlugin(useGSAP);
@@ -292,9 +293,7 @@ export default function Experience() {
               </div>
 
               <div className="mt-6 grid grid-cols-[34px_1fr] gap-3">
-                <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-cinnabar font-serif text-sm italic text-paper-soft">
-                  N
-                </span>
+                <BrandLogo size={34} />
                 <div className="rounded-[2px_9px_9px_9px] border border-line bg-white px-4 py-3.5">
                   <small className="text-[9px] tracking-wider text-gold">
                     NARRATIVEOS 正在编排叙事…

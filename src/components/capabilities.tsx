@@ -14,7 +14,8 @@ gsap.registerPlugin(useGSAP, CustomEase);
 
 const FRONT = {
   z: 60,
-  scale: 1.06,
+  scaleX: 1.06,
+  scaleY: 1.06,
   y: -12,
   rotationX: 0,
   rotationY: 0,
@@ -26,7 +27,8 @@ const FRONT = {
 
 const BACK = {
   z: -36,
-  scale: 0.95,
+  scaleX: 0.95,
+  scaleY: 0.95,
   y: 10,
   rotationX: 4,
   rotationY: 8,
@@ -58,7 +60,8 @@ export default function Capabilities() {
           filter: "blur(0px)",
           z: 0,
           y: 0,
-          scale: 1,
+          scaleX: 1,
+          scaleY: 1,
           rotationX: 0,
           rotationY: 0,
           boxShadow: "0 14px 34px rgba(56,44,31,0.12)",
@@ -91,7 +94,8 @@ export default function Capabilities() {
           card,
           {
             y: 6,
-            scale: 0.945,
+            scaleX: 0.945,
+            scaleY: 0.945,
             duration: 0.55,
             ease: "sine.inOut",
             yoyo: true,
@@ -114,7 +118,8 @@ export default function Capabilities() {
           card,
           {
             y: FRONT.y - 5,
-            scale: FRONT.scale * 1.02,
+            scaleX: FRONT.scaleX * 1.02,
+            scaleY: FRONT.scaleY * 1.02,
             duration: 1.2,
             ease: "sine.inOut",
             yoyo: true,
@@ -149,7 +154,8 @@ export default function Capabilities() {
           raisedIndex = hoveredIndex;
           raiseTween = gsap.to(cards[hoveredIndex], {
             z: 96,
-            scale: 1.09,
+            scaleX: 1.09,
+            scaleY: 1.09,
             y: -16,
             rotationX: 0,
             rotationY: 0,

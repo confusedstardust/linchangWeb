@@ -66,7 +66,8 @@ export default function Experience() {
         gsap.set(panel, {
           opacity: 0,
           y: 70,
-          scale: 0.92,
+          scaleX: 0.92,
+          scaleY: 0.92,
           rotationX: index === 1 ? -84 : 0,
           rotationY: index === 0 ? -82 : index === 2 ? 82 : 0,
           transformOrigin:
@@ -89,7 +90,8 @@ export default function Experience() {
           {
             opacity: 1,
             y: 0,
-            scale: 1,
+            scaleX: 1,
+            scaleY: 1,
             rotationX: 0,
             rotationY: 0,
             filter: "blur(0px)",

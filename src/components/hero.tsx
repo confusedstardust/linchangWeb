@@ -138,8 +138,8 @@ export default function Hero() {
         timeline
           .fromTo(
             mediaRef.current,
-            { scale: 1 },
-            { scale: 1.16, ease: "none" },
+            { scaleX: 1, scaleY: 1 },
+            { scaleX: 1.16, scaleY: 1.16, ease: "none" },
             0,
           );
       });

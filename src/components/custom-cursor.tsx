@@ -14,7 +14,7 @@ export default function CustomCursor() {
     if (!ring) return;
 
     document.documentElement.classList.add("custom-cursor-enabled");
-    gsap.set(ring, { xPercent: -50, yPercent: -50, autoAlpha: 1 });
+    gsap.set(ring, { xPercent: -50, yPercent: -50, opacity: 1 });
 
     const ringX = gsap.quickTo(ring, "x", { duration: 0.22, ease: "power3.out" });
     const ringY = gsap.quickTo(ring, "y", { duration: 0.22, ease: "power3.out" });
@@ -29,7 +29,8 @@ export default function CustomCursor() {
         "a, button, [role='tab'], [data-cursor]",
       );
       gsap.to(ring, {
-        scale: interactive ? 1.55 : 1,
+        scaleX: interactive ? 1.55 : 1,
+        scaleY: interactive ? 1.55 : 1,
         opacity: interactive ? 1 : 0.82,
         backgroundColor: interactive ? "rgba(156,51,64,0.16)" : "rgba(156,51,64,0.08)",
         duration: 0.28,

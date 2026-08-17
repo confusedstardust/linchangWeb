@@ -90,7 +90,8 @@ export default function ProductsDock() {
       const setters = cards.map((card) => ({
         x: gsap.quickSetter(card, "x", "px"),
         y: gsap.quickSetter(card, "y", "px"),
-        scale: gsap.quickSetter(card, "scale"),
+        scaleX: gsap.quickSetter(card, "scaleX"),
+        scaleY: gsap.quickSetter(card, "scaleY"),
         opacity: gsap.quickSetter(card, "opacity"),
         zIndex: gsap.quickSetter(card, "zIndex"),
         rotationX: gsap.quickSetter(card, "rotationX", "deg"),
@@ -124,7 +125,8 @@ export default function ProductsDock() {
 
           setters[index].x(x);
           setters[index].y(y);
-          setters[index].scale(0.74 + 0.46 * depth);
+          setters[index].scaleX(0.74 + 0.46 * depth);
+          setters[index].scaleY(0.74 + 0.46 * depth);
           setters[index].opacity(reducedMotion ? 1 : 0.42 + 0.58 * depth);
           setters[index].zIndex(Math.round(depth * 10));
           setters[index].rotationX((depth - 0.5) * 26);

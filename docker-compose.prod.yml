@@ -1,0 +1,7 @@
+services:
+  website:
+    image: ${WEBSITE_IMAGE:?set WEBSITE_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEBSITE_PORT:-3002}:80"
+

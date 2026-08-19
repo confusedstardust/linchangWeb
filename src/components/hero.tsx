@@ -11,8 +11,8 @@ import {
   BrushUnderline,
   InkBlob,
   Mountains,
-  SealMark,
 } from "@/components/decorations";
+import BrandLogo from "@/components/brand-logo";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -21,6 +21,7 @@ export default function Hero() {
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const startedRef = useRef(false);
+  const playbackTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [curtainGone, setCurtainGone] = useState(false);
@@ -58,7 +59,9 @@ export default function Hero() {
       sectionRef.current,
     );
 
+    playbackTimelineRef.current?.kill();
     const timeline = gsap.timeline({ delay: 0.05 });
+    playbackTimelineRef.current = timeline;
     timeline
       .to(
         charsLine1,
@@ -107,13 +110,56 @@ export default function Hero() {
       );
   }, [curtainGone]);
 
+  const restoreIntroContent = useCallback(() => {
+    if (!startedRef.current || !curtainGone) return;
+    startedRef.current = false;
+    playbackTimelineRef.current?.kill();
+    playbackTimelineRef.current = null;
+    videoRef.current?.pause();
+
+    const chars = gsap.utils.toArray<HTMLElement>(
+      ".hero-line-char",
+      sectionRef.current,
+    );
+    const fades = gsap.utils.toArray<HTMLElement>(
+      ".hero-fade",
+      sectionRef.current,
+    );
+
+    gsap.killTweensOf([...chars, ...fades]);
+    gsap.killTweensOf(".hero-brush-path");
+    gsap.to(chars, {
+      xPercent: 0,
+      yPercent: 0,
+      opacity: 1,
+      duration: 0.65,
+      ease: "power3.out",
+      stagger: 0.015,
+    });
+    gsap.to(fades, {
+      y: 0,
+      yPercent: 0,
+      opacity: 1,
+      duration: 0.45,
+      ease: "power3.out",
+      stagger: 0.035,
+    });
+    gsap.to(".hero-brush-path", {
+      opacity: 1,
+      strokeDashoffset: 0,
+      duration: 0.35,
+      ease: "power2.out",
+    });
+  }, [curtainGone]);
+
   useEffect(() => {
     const onScroll = () => {
       if (window.scrollY > 30) beginPlayback();
+      else restoreIntroContent();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [beginPlayback]);
+  }, [beginPlayback, restoreIntroContent]);
 
   useGSAP(
     () => {
@@ -396,7 +442,7 @@ export default function Hero() {
             }`}
           >
             <span className="relative">
-              <SealMark char="叙" size={84} className="text-[2.6rem]" />
+              <BrandLogo size={84} />
               <span className="absolute -inset-4 -z-10 animate-breathe rounded-full bg-cinnabar/20 blur-2xl" />
             </span>
             <span className="font-brush text-2xl tracking-[0.2em] text-paper-soft">

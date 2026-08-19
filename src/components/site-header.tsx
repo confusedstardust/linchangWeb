@@ -4,7 +4,7 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { useLenis } from "lenis/react";
 import { navLinks, WORKBENCH_URL } from "@/lib/content";
 import { cn } from "@/lib/utils";
-import { SealMark } from "@/components/decorations";
+import BrandLogo from "@/components/brand-logo";
 import WeChatCommunity from "@/components/wechat-community";
 
 export default function SiteHeader() {
@@ -61,7 +61,7 @@ export default function SiteHeader() {
           className="group flex items-center gap-3"
           aria-label="返回顶部"
         >
-          <SealMark char="叙" className="shrink-0 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105" />
+          <BrandLogo className="transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105" />
           <span className="flex flex-col gap-0.5">
             <strong className="font-serif text-[15px] font-semibold leading-none text-ink">
               临场 · AI 叙事课堂生成平台

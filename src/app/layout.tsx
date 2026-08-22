@@ -10,6 +10,7 @@ import "./globals.css";
 import SmoothScroll from "@/components/smooth-scroll";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.narrativeos.cn"),
   title: "NarrativeOS · AI 叙事课堂生成平台",
   description:
     "将课文、知识点与教学目标，转化为一场学生可以进入、选择和反思的 AI 叙事课堂。",
@@ -21,12 +22,47 @@ export const metadata: Metadata = {
     "闯关解谜",
     "NarrativeOS",
   ],
+  alternates: {
+    canonical: "/",
+  },
+  authors: [{ name: "NarrativeOS" }],
+  creator: "NarrativeOS",
+  publisher: "NarrativeOS",
+  category: "education",
   openGraph: {
     title: "NarrativeOS · AI 叙事课堂生成平台",
     description:
       "让知识不只被讲述，而是被亲历。从一份教学材料，到一场完整体验。",
     type: "website",
     locale: "zh_CN",
+    url: "/",
+    siteName: "NarrativeOS",
+    images: [
+      {
+        url: "/hero-poster.jpg",
+        width: 1920,
+        height: 1080,
+        alt: "NarrativeOS AI 叙事课堂生成平台",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NarrativeOS · AI 叙事课堂生成平台",
+    description:
+      "将课文、知识点与教学目标，转化为学生可以进入的 AI 叙事课堂。",
+    images: ["/hero-poster.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
+    },
   },
 };
 

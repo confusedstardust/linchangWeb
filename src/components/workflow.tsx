@@ -5,7 +5,7 @@ import { InkBlob, SectionLabel } from "@/components/decorations";
 
 export default function Workflow() {
   return (
-    <section className="relative overflow-hidden py-24 md:py-32">
+    <section className="relative overflow-hidden py-10 md:py-32">
       <InkBlob className="-left-24 top-1/3 h-96 w-96" color="rgba(177,140,69,0.12)" />
 
       <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 gap-16 px-5 md:px-[8vw] lg:grid-cols-[0.85fr_1.15fr] lg:gap-[8vw]">
@@ -13,7 +13,7 @@ export default function Workflow() {
           <SectionLabel>HOW IT WORKS</SectionLabel>
           <SplitHeading
             lines={["四步，让课堂", "从文本走向现场。"]}
-            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[3.4rem]"
+            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:whitespace-nowrap md:text-[3.4rem]"
           />
           <p className="mt-6 max-w-[390px] text-[13px] leading-[1.9] text-ink-muted">
             不必学习复杂工具。保持你原本备课的方式，把叙事编排交给

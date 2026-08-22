@@ -198,7 +198,7 @@ export default function Capabilities() {
   );
 
   return (
-    <section id="capabilities" className="relative overflow-hidden py-24 md:py-32">
+    <section id="capabilities" className="relative overflow-hidden py-10 md:py-32">
       <InkBlob className="right-[-8rem] top-24 h-96 w-96" color="rgba(156,51,64,0.08)" />
 
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-[6vw]">

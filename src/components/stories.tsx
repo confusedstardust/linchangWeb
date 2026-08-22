@@ -146,7 +146,7 @@ export default function Stories() {
       className="relative border-t border-line bg-paper-soft lg:h-screen lg:overflow-hidden"
     >
       {/* 移动端 / 平板：纵向布局 */}
-      <div className="py-24 md:py-32 lg:hidden">
+      <div className="py-10 md:py-32 lg:hidden">
         <div className="mx-auto max-w-[1320px] px-5 md:px-[6vw]">
           <Reveal className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>

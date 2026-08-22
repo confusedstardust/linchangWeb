@@ -280,6 +280,49 @@ export const teamRoles: TeamRole[] = [
   },
 ];
 
+export type TeamMember = {
+  name: string;
+  nameEn: string;
+  role: string;
+  discipline: string;
+  image: string;
+  accent: string;
+  short: string;
+  bio: string;
+  tags: string[];
+};
+
+export const teamMembers: TeamMember[] = [
+  {
+    name: "Josephine", nameEn: "THE LINGUIST", role: "文学教育与语言研究", discipline: "EDUCATION / LANGUAGE", image: "/team/josephine.jpg", accent: "#d99aa7",
+    short: "把语言的细部，变成可以进入的情境。", bio: "小红书：@约瑟芬的日与夜。语言学博士在读，曾任广东国际学校中国语文与中国文学年级统筹，出版多部香港高中文学教材，并拥有多篇 ACL、ACCL 等顶刊经历。", tags: ["语言学", "文学教育", "课程设计"],
+  },
+  {
+    name: "Nicc", nameEn: "THE RESEARCHER", role: "学习科学与学术研究", discipline: "RESEARCH / LEARNING", image: "/team/nicc.jpg", accent: "#7da8c8",
+    short: "让每一个有趣的体验，都能回答学习问题。", bio: "曾获 ICAIE2025 最佳论文报告奖，并在中国高等教育学会学习科学研究分会 2025 学术年会发表研究成果，持续探索技术、学习与课堂之间的连接。", tags: ["学习科学", "学术研究", "效果评估"],
+  },
+  {
+    name: "Flynt", nameEn: "THE BUILDER", role: "AI 产品与互动工程", discipline: "AI / ENGINEERING", image: "/team/flynt.jpg", accent: "#b18c45",
+    short: "把复杂系统，做成有温度的交互。", bio: "React 开发者 × AI 驱动开发实践者，擅长 Next.js / Remix 全栈架构与 Fiber 级性能调优，探索 LangChain、OpenAI 与 React 边界的融合。", tags: ["Next.js", "AI Native", "互动体验"],
+  },
+  {
+    name: "Stella", nameEn: "THE ADVOCATE", role: "叙事策略与表达设计", discipline: "NARRATIVE / DEBATE", image: "/team/stella.jpg", accent: "#d68b61",
+    short: "在不同立场之间，找到值得讨论的问题。", bio: "连续创业者，曾获第五届“领军杯”涉外模拟法庭全英文辩论赛全国二等奖、第十五届“挑战杯”广东省省赛铜奖等经历，曾在律师事务所与人民检察院工作。", tags: ["辩论表达", "法律思维", "创业实践"],
+  },
+  {
+    name: "Eden", nameEn: "THE ARCHITECT", role: "后端架构与云原生", discipline: "BACKEND / CLOUD", image: "/team/eden.jpg", accent: "#6e9eb7",
+    short: "让每一次灵感，都有可靠的系统接住。", bio: "AI Native 应用探索者、开发工程师，拥有六年以上开发经验，曾参与企业数字化转型与云原生架构建设，负责后端架构设计、核心功能开发与性能优化。", tags: ["后端架构", "云原生", "系统工程"],
+  },
+  {
+    name: "Cathy", nameEn: "THE BRIDGE", role: "国际中文与语言教学", discipline: "LANGUAGE / TEACHING", image: "/team/cathy.jpg", accent: "#d8a04f",
+    short: "让语言跨过边界，也让课堂抵达真实的人。", bio: "曾任北京国际汉语研修院中文培优普北班项目中文教师，获全国大学生英语翻译大赛省级三等奖、复旦大学汉语教学技能大赛二等奖，现于上海从事国际中文教学。", tags: ["国际中文", "语言教学", "跨文化"],
+  },
+  {
+    name: "Roy", nameEn: "THE EXPLORER", role: "市场研究与创新实践", discipline: "RESEARCH / PRACTICE", image: "/team/roy.jpg", accent: "#7c9ed0",
+    short: "从真实世界里，寻找下一条可行的路径。", bio: "2026 年安徽省优秀毕业生、安徽大学优秀毕业生，曾获“挑战杯”大学生创业计划竞赛银奖、安徽省大学生创新大赛金奖等多项奖项。", tags: ["市场研究", "创新实践", "项目策划"],
+  },
+];
+
 export const techNotes = [
   "多模型协同",
   "节点式生成",

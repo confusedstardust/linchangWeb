@@ -32,7 +32,7 @@ export default function CustomCursor() {
         scaleX: interactive ? 1.55 : 1,
         scaleY: interactive ? 1.55 : 1,
         opacity: interactive ? 1 : 0.82,
-        backgroundColor: interactive ? "rgba(156,51,64,0.16)" : "rgba(156,51,64,0.08)",
+        backgroundColor: interactive ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.1)",
         duration: 0.28,
         ease: "power3.out",
       });
@@ -51,7 +51,7 @@ export default function CustomCursor() {
   return (
     <div
       ref={ringRef}
-      className="pointer-events-none fixed left-0 top-0 z-[90] h-[22px] w-[22px] rounded-full border border-cinnabar/80 bg-cinnabar/10 opacity-0 shadow-[0_0_0_1px_rgba(156,51,64,0.12),0_2px_16px_rgba(156,51,64,0.28)] backdrop-blur-[1px]"
+      className="pointer-events-none fixed left-0 top-0 z-[90] h-[22px] w-[22px] rounded-full border border-white/95 bg-white/10 opacity-0 mix-blend-difference shadow-[0_0_0_1px_rgba(255,255,255,0.4),0_2px_16px_rgba(255,255,255,0.45)] backdrop-blur-[1px]"
       aria-hidden
     />
   );

@@ -41,8 +41,13 @@ export default function SiteHeader() {
 
     const target = document.querySelector<HTMLElement>(href);
     if (!target) return;
-    if (lenis) lenis.scrollTo(target, { offset: -72, duration: 1.3 });
-    else target.scrollIntoView({ behavior: "smooth" });
+    const currentScroll = lenis?.scroll ?? window.scrollY;
+    const targetTop = target.getBoundingClientRect().top + currentScroll;
+    const topOffset = href === "#about" ? 148 : 82;
+    const destination = Math.max(0, targetTop - topOffset);
+
+    if (lenis) lenis.scrollTo(destination, { duration: 1.3 });
+    else window.scrollTo({ top: destination, behavior: "smooth" });
   };
 
   return (

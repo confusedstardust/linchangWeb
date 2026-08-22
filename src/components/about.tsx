@@ -54,7 +54,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-night py-20 text-paper-soft md:py-24"
+      className="relative overflow-hidden bg-night py-10 text-paper-soft md:py-24"
     >
       <div
         className="paper-grain absolute inset-0 opacity-[0.06] mix-blend-overlay"
@@ -67,7 +67,7 @@ export default function About() {
         N
       </span>
 
-      <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-12 px-5 md:px-[8vw] lg:grid-cols-[0.5fr_1.25fr_0.7fr] lg:gap-[7vw]">
+      <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-12 px-5 md:px-[8vw] lg:grid-cols-[0.42fr_1.55fr_0.62fr] lg:gap-[5vw]">
         <Reveal className="hidden lg:block">
           <span className="font-serif text-[19rem] italic leading-none text-gold-soft/10">
             N
@@ -78,12 +78,14 @@ export default function About() {
           <SectionLabel className="text-gold-soft" dark>
             ABOUT NARRATIVEOS
           </SectionLabel>
-          <blockquote className="mt-6 font-serif text-[1.9rem] font-medium leading-[1.5] sm:text-4xl md:text-[3.25rem]">
-            真正的理解，往往发生在学生
-            <em className="font-brush font-normal text-gold-soft not-italic">
-              必须做出选择
-            </em>
-            的那一刻。
+          <blockquote className="mt-6 max-w-[680px] font-serif text-[1.9rem] font-medium leading-[1.5] sm:text-4xl md:text-[3.25rem] lg:text-[2.7rem] xl:text-[3.25rem]">
+            <span className="block lg:whitespace-nowrap">真正的理解，往往发生在学生</span>
+            <span className="block lg:whitespace-nowrap">
+              <em className="font-brush font-normal text-gold-soft not-italic">
+                必须做出选择
+              </em>
+              的那一刻。
+            </span>
           </blockquote>
           <p className="mt-5 text-xs leading-relaxed text-[#9e968d]">
             NarrativeOS 希望让每一堂课，都拥有一次值得记住的亲历。

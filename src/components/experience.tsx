@@ -191,18 +191,18 @@ export default function Experience() {
   return (
     <section
       id="experience"
-      className="relative overflow-hidden bg-paper-deep py-24 md:py-32"
+      className="relative overflow-hidden bg-paper-deep py-8 md:py-32"
     >
       <InkBlob className="-left-28 top-10 h-96 w-96" color="rgba(177,140,69,0.16)" />
       <InkBlob className="-right-32 bottom-0 h-[28rem] w-[28rem]" color="rgba(156,51,64,0.12)" />
 
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-[6vw]">
-        <Reveal className="mb-14 flex flex-col justify-between gap-6 md:mb-16 md:flex-row md:items-end">
+        <Reveal className="mb-4 flex flex-col justify-between gap-0 md:mb-16 md:flex-row md:items-end md:gap-6">
           <div>
             <SectionLabel>AGENT 与叙事</SectionLabel>
             <SplitHeading
               lines={["把教学意图，", "变成可以进入的故事。"]}
-              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[3.4rem]"
+              className="mt-3 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:mt-5 sm:text-4xl md:mt-5 md:text-[3.4rem]"
             />
           </div>
           <p className="max-w-[390px] text-[13px] leading-[1.9] text-ink-muted md:mb-2">

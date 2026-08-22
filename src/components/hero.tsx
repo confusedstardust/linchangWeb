@@ -372,27 +372,24 @@ export default function Hero() {
             AI 叙事课堂。
           </p>
 
-          <div className="hero-fade mt-9 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-            <Magnetic className="w-full sm:w-auto">
+          <div className="hero-fade mt-9 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
+            <Magnetic className="flex h-12 w-full sm:w-auto">
               <a
                 href={WORKBENCH_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex min-h-[48px] w-full items-center justify-center gap-10 overflow-hidden rounded-md bg-cinnabar px-7 text-sm text-paper-soft shadow-[0_14px_34px_rgba(112,34,46,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-cinnabar-deep hover:shadow-[0_18px_42px_rgba(112,34,46,0.45)]"
+                className="group relative flex h-full w-full items-center justify-center gap-5 overflow-hidden rounded-md bg-cinnabar px-7 text-sm text-paper-soft shadow-[0_14px_34px_rgba(112,34,46,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-cinnabar-deep hover:shadow-[0_18px_42px_rgba(112,34,46,0.45)] sm:gap-10"
               >
                 <span
                   className="absolute left-0 top-0 h-full w-[38%] animate-shine bg-gradient-to-r from-transparent via-white/35 to-transparent"
                   aria-hidden
                 />
                 开始创作
-                <span className="transition-transform duration-300 group-hover:translate-x-1.5">
-                  →
-                </span>
               </a>
             </Magnetic>
             <a
               href="#experience"
-              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-md border border-paper-soft/35 bg-paper-soft/10 px-7 text-sm text-paper-soft backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-paper-soft/60 hover:bg-paper-soft/20 sm:w-auto"
+              className="inline-flex h-12 w-full items-center justify-center rounded-md border border-paper-soft/35 bg-paper-soft/10 px-7 text-sm text-paper-soft backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-paper-soft/60 hover:bg-paper-soft/20 sm:w-auto"
             >
               了解更多
             </a>

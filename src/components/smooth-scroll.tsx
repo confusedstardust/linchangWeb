@@ -37,10 +37,10 @@ function ScrollSync() {
       if (target === 0) {
         lenis.scrollTo(0, { duration: 1.3 });
       } else {
-        lenis.scrollTo(target as HTMLElement, {
-          offset: -72,
-          duration: 1.3,
-        });
+        const element = target as HTMLElement;
+        const targetTop = element.getBoundingClientRect().top + lenis.scroll;
+        const topOffset = href === "#about" ? 148 : 82;
+        lenis.scrollTo(Math.max(0, targetTop - topOffset), { duration: 1.3 });
       }
     };
 

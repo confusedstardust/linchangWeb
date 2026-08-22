@@ -14,7 +14,7 @@ export default function FeaturedCases() {
   const active = pinned ?? hovered;
 
   return (
-    <section id="cases" className="border-t border-line py-24 md:py-32">
+    <section id="cases" className="border-t border-line py-10 md:py-32">
       <div className="mx-auto max-w-[1292px] px-5 md:px-[6vw]">
         <Reveal className="mb-12 flex flex-col justify-between gap-6 md:mb-14 md:flex-row md:items-end">
           <div>
@@ -31,7 +31,7 @@ export default function FeaturedCases() {
 
         <Reveal delay={100}>
           <div
-            className="flex h-[480px] gap-4 [--case-grow:9] md:aspect-[3.08/1] md:h-auto md:[--case-grow:2.8]"
+            className="grid grid-cols-1 gap-4 md:flex md:aspect-[3.08/1] md:h-auto [--case-grow:2.8]"
             onPointerLeave={() => setHovered(null)}
           >
             {featuredCases.map((item, index) => {
@@ -42,7 +42,8 @@ export default function FeaturedCases() {
                   onPointerEnter={() => setHovered(index)}
                   onClick={() => setPinned(pinned === index ? null : index)}
                   className={cn(
-                    "relative h-full min-w-0 cursor-pointer overflow-hidden rounded-xl border bg-night transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    "relative min-w-0 w-full cursor-pointer overflow-hidden rounded-xl border bg-night transition-[height,flex-grow,border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] md:h-full",
+                    isActive ? "h-[540px] md:h-full" : "h-[220px]",
                     isActive
                       ? "border-gold/40 shadow-[0_30px_70px_rgba(56,44,31,0.24)]"
                       : "border-line shadow-[0_14px_34px_rgba(56,44,31,0.10)]",
@@ -71,7 +72,7 @@ export default function FeaturedCases() {
                     <span className="font-serif text-[10px] tracking-[0.22em] text-gold-soft">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="vertical-rl font-brush text-lg tracking-[0.3em] text-paper-soft md:text-xl">
+                    <span className="case-title font-brush text-lg tracking-[0.3em] text-paper-soft md:text-xl">
                       {item.shortTitle}
                     </span>
                     <span
@@ -91,7 +92,7 @@ export default function FeaturedCases() {
                       isActive ? "opacity-100" : "pointer-events-none opacity-0",
                     )}
                   >
-                    <div className="animate-fade-up relative mx-auto flex w-[280px] flex-col justify-center bg-paper-soft/97 p-6 md:mx-0 md:w-auto md:p-9">
+                    <div className="animate-fade-up relative mx-auto flex w-full flex-col justify-center bg-paper-soft/97 p-6 md:mx-0 md:w-auto md:p-9">
                       <span className="text-[10px] font-semibold tracking-[0.22em] text-gold">
                         {item.category}
                       </span>
@@ -112,7 +113,7 @@ export default function FeaturedCases() {
                       </a>
                     </div>
 
-                    <div className="animate-flip-in-right relative min-h-[220px] overflow-hidden bg-night">
+                    <div className="animate-flip-in-right relative min-h-[280px] overflow-hidden bg-night md:min-h-[220px]">
                       {item.video ? (
                         <video
                           src={item.video}

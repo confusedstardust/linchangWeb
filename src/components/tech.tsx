@@ -19,7 +19,7 @@ export default function Tech() {
   return (
     <section
       id="tech"
-      className="relative overflow-hidden border-t border-line bg-paper-deep py-24 md:py-32"
+      className="relative overflow-hidden border-t border-line bg-paper-deep py-10 md:py-32"
     >
       <InkBlob className="-left-24 bottom-10 h-96 w-96" color="rgba(156,51,64,0.1)" />
 
@@ -28,7 +28,7 @@ export default function Tech() {
           <SectionLabel>TECHNOLOGY FRAMEWORK</SectionLabel>
           <SplitHeading
             lines={["一套围绕课堂目标", "组织的生成架构。"]}
-            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[3.4rem]"
+            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:whitespace-nowrap md:text-[3.4rem]"
           />
           <p className="mt-6 max-w-[430px] text-[13px] leading-[1.95] text-ink-muted">
             从教学材料理解，到叙事规划、内容生成与课堂交付，NarrativeOS

@@ -26,23 +26,30 @@ export default function SplitHeading({
   useGSAP(
     () => {
       if (reducedMotion || !ref.current) return;
-      const chars = ref.current.querySelectorAll(".split-char");
 
-      gsap.set(chars, { yPercent: 120, opacity: 0, rotate: 3 });
-      gsap.to(chars, {
-        yPercent: 0,
-        opacity: 1,
-        rotate: 0,
-        duration: 0.9,
-        ease: "power4.out",
-        stagger: 0.028,
-        delay,
-        scrollTrigger: {
-          trigger: ref.current,
-          start: "top 84%",
-          once: true,
-        },
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 768px)", () => {
+        const chars = ref.current?.querySelectorAll(".split-char");
+        if (!chars?.length || !ref.current) return;
+
+        gsap.set(chars, { yPercent: 120, opacity: 0, rotate: 3 });
+        gsap.to(chars, {
+          yPercent: 0,
+          opacity: 1,
+          rotate: 0,
+          duration: 0.9,
+          ease: "power4.out",
+          stagger: 0.028,
+          delay,
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 84%",
+            once: true,
+          },
+        });
       });
+
+      return () => mm.revert();
     },
     { scope: ref, dependencies: [reducedMotion, delay] },
   );

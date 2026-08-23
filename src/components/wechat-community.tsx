@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { QrPlaceholder } from "@/components/decorations";
 
 export function WeChatIcon({ className }: { className?: string }) {
   return (
@@ -91,11 +91,14 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
               与老师们一起共创叙事课堂，第一时间获取新课例与玩法。
             </p>
 
-            <div className="mx-auto mt-6 w-fit rounded-xl border border-line bg-white p-4">
-              <QrPlaceholder className="h-56 w-56 text-ink" />
-              <p className="mt-3 text-[9px] tracking-[0.14em] text-ink-muted">
-                社群二维码 · 占位图
-              </p>
+            <div className="mx-auto mt-6 w-fit max-w-full rounded-xl border border-line bg-white p-3">
+              <Image
+                src="/community-qr.jpg"
+                alt="NarrativeOS 用户内测微信群二维码"
+                width={280}
+                height={392}
+                className="block h-auto w-[280px] max-w-full rounded-lg"
+              />
             </div>
 
             <p className="mt-5 text-[10px] tracking-wider text-gold">

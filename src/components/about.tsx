@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { stats } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import { SectionLabel } from "@/components/decorations";
 
@@ -51,6 +52,9 @@ function CountUp({ target, suffix }: { target: number; suffix: string }) {
 }
 
 export default function About() {
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.about;
+  const localizedStats = messages.content.stats;
   return (
     <section
       id="about"
@@ -74,32 +78,44 @@ export default function About() {
           </span>
         </Reveal>
 
-        <Reveal delay={80}>
+        <Reveal className="min-w-0" delay={80}>
           <SectionLabel className="text-gold-soft" dark>
-            ABOUT NARRATIVEOS
+            {copy.label}
           </SectionLabel>
-          <blockquote className="mt-6 max-w-[680px] font-serif text-[1.9rem] font-medium leading-[1.5] sm:text-4xl md:text-[3.25rem] lg:text-[2.7rem] xl:text-[3.25rem]">
-            <span className="block lg:whitespace-nowrap">真正的理解，往往发生在学生</span>
-            <span className="block lg:whitespace-nowrap">
+          <blockquote
+            className={cn(
+              "mt-6 max-w-[680px] font-serif text-[1.9rem] font-medium leading-[1.5]",
+              locale === "en"
+                ? "sm:text-[2.35rem] md:text-[2.7rem] lg:text-[2.25rem] xl:text-[2.35rem]"
+                : "sm:text-4xl md:text-[3.25rem] lg:text-[2.7rem] xl:text-[3.25rem]",
+            )}
+          >
+            <span className={cn("block", locale !== "en" && "lg:whitespace-nowrap")}>
+              {copy.quoteFirst}
+            </span>
+            <span className={cn("block", locale !== "en" && "lg:whitespace-nowrap")}>
               <em className="font-brush font-normal text-gold-soft not-italic">
-                必须做出选择
+                {copy.quoteEmphasis}
               </em>
-              的那一刻。
+              {copy.quoteLast}
             </span>
           </blockquote>
           <p className="mt-5 text-xs leading-relaxed text-[#9e968d]">
-            NarrativeOS 希望让每一堂课，都拥有一次值得记住的亲历。
+            {copy.description}
           </p>
         </Reveal>
 
-        <Reveal delay={160} className="border-l border-white/15 lg:justify-self-end">
-          {stats.map((stat, index) => (
+        <Reveal
+          delay={160}
+          className="border-l border-white/15 lg:translate-x-[4vw] lg:justify-self-end"
+        >
+          {localizedStats.map((stat, index) => (
             <div
               key={stat.label}
               className="flex flex-col gap-1 px-5 py-5 lg:px-6"
               style={{
                 borderBottom:
-                  index === stats.length - 1 ? "none" : "1px solid rgba(255,255,255,0.14)",
+                  index === localizedStats.length - 1 ? "none" : "1px solid rgba(255,255,255,0.14)",
               }}
             >
               <strong className="font-serif text-3xl font-medium text-gold-soft">

@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { WORKBENCH_URL } from "@/lib/content";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { useI18n } from "@/components/i18n-provider";
 import Magnetic from "@/components/magnetic";
 import {
   BrushUnderline,
@@ -26,6 +27,8 @@ export default function Hero() {
   const [introDone, setIntroDone] = useState(false);
   const [curtainGone, setCurtainGone] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.hero;
 
   useEffect(() => {
     const openTimer = setTimeout(() => setIntroDone(true), 420);
@@ -46,12 +49,12 @@ export default function Hero() {
     if (startedRef.current || !curtainGone) return;
     startedRef.current = true;
 
-    const charsLine1 = gsap.utils.toArray<HTMLElement>(
-      ".hero-line-1 .hero-line-char",
+    const line1 = gsap.utils.toArray<HTMLElement>(
+      ".hero-line-1",
       sectionRef.current,
     );
-    const charsLine2 = gsap.utils.toArray<HTMLElement>(
-      ".hero-line-2 .hero-line-char",
+    const line2 = gsap.utils.toArray<HTMLElement>(
+      ".hero-line-2",
       sectionRef.current,
     );
     const fades = gsap.utils.toArray<HTMLElement>(
@@ -64,24 +67,22 @@ export default function Hero() {
     playbackTimelineRef.current = timeline;
     timeline
       .to(
-        charsLine1,
+        line1,
         {
-          xPercent: -160,
+          xPercent: -18,
           opacity: 0,
           duration: 0.85,
           ease: "power2.in",
-          stagger: 0.035,
         },
         0,
       )
       .to(
-        charsLine2,
+        line2,
         {
-          xPercent: 160,
+          xPercent: 18,
           opacity: 0,
           duration: 0.85,
           ease: "power2.in",
-          stagger: 0.035,
         },
         0,
       )
@@ -121,15 +122,24 @@ export default function Hero() {
       ".hero-line-char",
       sectionRef.current,
     );
+    const lines = gsap.utils.toArray<HTMLElement>(
+      ".hero-title-line",
+      sectionRef.current,
+    );
     const fades = gsap.utils.toArray<HTMLElement>(
       ".hero-fade",
       sectionRef.current,
     );
 
-    gsap.killTweensOf([...chars, ...fades]);
+    gsap.killTweensOf([...lines, ...chars, ...fades]);
     gsap.killTweensOf(".hero-brush-path");
-    gsap.to(chars, {
+    gsap.to(lines, {
       xPercent: 0,
+      opacity: 1,
+      duration: 0.65,
+      ease: "power3.out",
+    });
+    gsap.to(chars, {
       yPercent: 0,
       opacity: 1,
       duration: 0.65,
@@ -256,7 +266,7 @@ export default function Hero() {
           underlineDelay,
         );
     },
-    { scope: sectionRef, dependencies: [introDone, reducedMotion] },
+    { scope: sectionRef, dependencies: [introDone, reducedMotion, locale] },
   );
 
   const onSectionClick = (event: MouseEvent<HTMLElement>) => {
@@ -323,16 +333,19 @@ export default function Hero() {
               className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-cinnabar"
               aria-hidden
             />
-            已接入 AI 叙事课堂生成引擎
+            {copy.engine}
           </span>
 
           <p className="hero-fade mt-7 text-[10px] font-medium tracking-[0.32em] text-gold-soft">
             NARRATIVE LEARNING, REIMAGINED
           </p>
 
-          <h1 className="mt-4 font-serif text-[2.75rem] font-semibold leading-[1.18] tracking-tight text-shadow-ink sm:text-6xl md:text-7xl lg:text-[5.3rem]">
-            <span className="hero-line-1 block">
-              {Array.from("让知识不只被讲述，").map((char, index) => (
+          <h1
+            key={locale}
+            className="mt-4 font-serif text-[2.75rem] font-semibold leading-[1.18] tracking-tight text-shadow-ink sm:text-6xl md:text-7xl lg:text-[5.3rem]"
+          >
+            <span className="hero-title-line hero-line-1 block will-change-transform">
+              {Array.from(copy.line1).map((char, index) => (
                 <span
                   key={`line1-${index}`}
                   className="hero-line-char inline-block will-change-transform"
@@ -341,8 +354,8 @@ export default function Hero() {
                 </span>
               ))}
             </span>
-            <span className="hero-line-2 block">
-              {Array.from("而是被").map((char, index) => (
+            <span className="hero-title-line hero-line-2 block will-change-transform">
+              {Array.from(copy.line2Prefix).map((char, index) => (
                 <span
                   key={`line2-${index}`}
                   className="hero-line-char inline-block will-change-transform"
@@ -351,7 +364,7 @@ export default function Hero() {
                 </span>
               ))}
               <em className="relative mx-1 inline-block font-brush font-normal not-italic text-gold-soft">
-                {Array.from("亲历").map((char, index) => (
+                {Array.from(copy.emphasis).map((char, index) => (
                   <span
                     key={`em-${index}`}
                     className="hero-line-char inline-block will-change-transform"
@@ -362,14 +375,13 @@ export default function Hero() {
                 <BrushUnderline className="hero-brush-path" />
               </em>
               <span className="hero-line-char inline-block will-change-transform">
-                。
+                {locale === "en" ? "." : "。"}
               </span>
             </span>
           </h1>
 
           <p className="hero-fade mt-7 max-w-[640px] font-serif text-base leading-[1.9] text-paper-soft/85 text-shadow-ink md:text-lg">
-            将课文、知识点与教学目标，转化为一场学生可以进入、选择和反思的
-            AI 叙事课堂。
+            {copy.description}
           </p>
 
           <div className="hero-fade mt-9 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
@@ -384,14 +396,14 @@ export default function Hero() {
                   className="absolute left-0 top-0 h-full w-[38%] animate-shine bg-gradient-to-r from-transparent via-white/35 to-transparent"
                   aria-hidden
                 />
-                开始创作
+                {copy.start}
               </a>
             </Magnetic>
             <a
               href="#experience"
               className="inline-flex h-12 w-full items-center justify-center rounded-md border border-paper-soft/35 bg-paper-soft/10 px-7 text-sm text-paper-soft backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-paper-soft/60 hover:bg-paper-soft/20 sm:w-auto"
             >
-              了解更多
+              {copy.learnMore}
             </a>
           </div>
         </div>
@@ -443,7 +455,7 @@ export default function Hero() {
               <span className="absolute -inset-4 -z-10 animate-breathe rounded-full bg-cinnabar/20 blur-2xl" />
             </span>
             <span className="font-brush text-2xl tracking-[0.2em] text-paper-soft">
-              AI 叙事课堂
+              {copy.introTitle}
             </span>
             <span className="text-[9px] tracking-[0.42em] text-gold-soft">
               NARRATIVEOS

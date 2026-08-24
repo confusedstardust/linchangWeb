@@ -4,7 +4,8 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { CustomEase } from "gsap/CustomEase";
 import { useGSAP } from "@gsap/react";
-import { features, WORKBENCH_URL } from "@/lib/content";
+import { WORKBENCH_URL } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
@@ -46,6 +47,9 @@ export default function Capabilities() {
   const gridRef = useRef<HTMLDivElement>(null);
   const handlersRef = useRef<CardHandlers>({ pause: () => {}, resume: () => {} });
   const reducedMotion = usePrefersReducedMotion();
+  const { messages } = useI18n();
+  const copy = messages.ui.capabilities;
+  const localizedFeatures = messages.content.features;
 
   useGSAP(
     () => {
@@ -204,14 +208,14 @@ export default function Capabilities() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-[6vw]">
         <Reveal className="mb-14 flex flex-col justify-between gap-6 md:mb-16 md:flex-row md:items-end">
           <div>
-            <SectionLabel>PLATFORM FEATURE</SectionLabel>
+            <SectionLabel>{copy.label}</SectionLabel>
             <SplitHeading
-              lines={["从一份材料，", "到一场完整体验。"]}
-              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[3.4rem]"
+              lines={copy.title}
+              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[2.8rem] lg:text-[2.8rem]"
             />
           </div>
           <p className="max-w-[390px] text-[13px] leading-[1.9] text-ink-muted md:mb-2">
-            AI 负责搭建复杂叙事结构，教师始终掌握教学目标、内容边界与最终判断。
+            {copy.description}
           </p>
         </Reveal>
 
@@ -219,7 +223,7 @@ export default function Capabilities() {
           ref={gridRef}
           className="grid grid-cols-1 gap-4 [perspective:1600px] sm:grid-cols-2 xl:grid-cols-4"
         >
-          {features.map((feature, index) => (
+          {localizedFeatures.map((feature, index) => (
             <Reveal key={feature.num} delay={index * 90}>
               <article
                 className="capability-card group relative flex min-h-[350px] flex-col rounded-xl border border-line bg-paper-soft p-6 will-change-transform md:p-7"
@@ -250,7 +254,7 @@ export default function Capabilities() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-6 right-6 flex h-8 w-8 items-center justify-center rounded-full border border-line text-cinnabar transition-all duration-300 group-hover:-translate-y-1 group-hover:border-cinnabar group-hover:bg-cinnabar group-hover:text-paper-soft"
-                  aria-label={`了解「${feature.title}」`}
+                  aria-label={`${copy.learn} 「${feature.title}」`}
                 >
                   →
                 </a>

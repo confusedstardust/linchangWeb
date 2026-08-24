@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { featuredCases } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
@@ -12,20 +12,23 @@ export default function FeaturedCases() {
   const [hovered, setHovered] = useState<number | null>(null);
   const [pinned, setPinned] = useState<number | null>(null);
   const active = pinned ?? hovered;
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.cases;
+  const localizedCases = messages.content.featuredCases;
 
   return (
     <section id="cases" className="border-t border-line py-10 md:py-32">
       <div className="mx-auto max-w-[1292px] px-5 md:px-[6vw]">
         <Reveal className="mb-12 flex flex-col justify-between gap-6 md:mb-14 md:flex-row md:items-end">
           <div>
-            <SectionLabel>FEATURED CASES</SectionLabel>
+            <SectionLabel>{copy.label}</SectionLabel>
             <SplitHeading
-              lines={["优质案例"]}
-              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[3.4rem]"
+              lines={[copy.title]}
+              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[2.8rem] lg:text-[2.8rem]"
             />
           </div>
           <p className="max-w-[390px] text-[13px] leading-[1.9] text-ink-muted md:mb-2">
-            来自一线课堂的完整体验。悬停或点击一块，展开文字与画面。
+            {copy.description}
           </p>
         </Reveal>
 
@@ -34,7 +37,7 @@ export default function FeaturedCases() {
             className="grid grid-cols-1 gap-4 md:flex md:aspect-[3.08/1] md:h-auto [--case-grow:2.8]"
             onPointerLeave={() => setHovered(null)}
           >
-            {featuredCases.map((item, index) => {
+            {localizedCases.map((item, index) => {
               const isActive = active === index;
               return (
                 <article
@@ -72,7 +75,14 @@ export default function FeaturedCases() {
                     <span className="font-serif text-[10px] tracking-[0.22em] text-gold-soft">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="case-title font-brush text-lg tracking-[0.3em] text-paper-soft md:text-xl">
+                    <span
+                      className={cn(
+                        "text-lg text-paper-soft md:text-xl",
+                        locale === "en"
+                          ? "max-w-[85%] text-center font-sans font-medium leading-[1.35] tracking-[0.12em]"
+                          : "case-title font-brush tracking-[0.3em]",
+                      )}
+                    >
                       {item.shortTitle}
                     </span>
                     <span
@@ -99,6 +109,11 @@ export default function FeaturedCases() {
                       <h3 className="mt-3 font-serif text-2xl font-medium leading-[1.3] text-ink md:text-[1.9rem]">
                         {item.title}
                       </h3>
+                      {item.author && (
+                        <p className="mt-2 text-[10px] tracking-[0.16em] text-gold">
+                          {copy.author}: {item.author}
+                        </p>
+                      )}
                       <p className="mt-3 text-xs leading-[1.9] text-ink-muted">
                         {item.description}
                       </p>
@@ -108,7 +123,7 @@ export default function FeaturedCases() {
                         rel="noopener noreferrer"
                         className="mt-5 inline-flex items-center gap-5 text-[11px] text-ink transition-colors hover:text-cinnabar"
                       >
-                        进入课堂体验
+                        {copy.enter}
                         <span className="text-cinnabar">↗</span>
                       </a>
                     </div>
@@ -145,7 +160,7 @@ export default function FeaturedCases() {
                             </span>
                           </div>
                           <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-paper-soft/20 bg-night/35 px-3.5 py-1 text-[9px] tracking-[0.2em] text-paper-soft backdrop-blur-sm">
-                            VIDEO · 即将上线
+                            {copy.comingSoon}
                           </span>
                         </>
                       )}

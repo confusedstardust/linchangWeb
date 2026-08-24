@@ -1,4 +1,7 @@
-import { techLayers, techNotes, type TechLayer } from "@/lib/content";
+"use client";
+
+import { type TechLayer } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
@@ -16,6 +19,9 @@ function chipClass(tone: TechLayer["tone"]) {
 }
 
 export default function Tech() {
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.tech;
+  const { techNotes, techLayers } = messages.content;
   return (
     <section
       id="tech"
@@ -23,16 +29,20 @@ export default function Tech() {
     >
       <InkBlob className="-left-24 bottom-10 h-96 w-96" color="rgba(156,51,64,0.1)" />
 
-      <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-14 px-5 md:px-[6vw] lg:grid-cols-[0.72fr_1.28fr] lg:gap-[7vw]">
-        <Reveal>
-          <SectionLabel>TECHNOLOGY FRAMEWORK</SectionLabel>
+      <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-14 px-5 md:px-[6vw] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-[7vw]">
+        <Reveal className="min-w-0">
+          <SectionLabel>{copy.label}</SectionLabel>
           <SplitHeading
-            lines={["一套围绕课堂目标", "组织的生成架构。"]}
-            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:whitespace-nowrap md:text-[3.4rem]"
+            lines={copy.title}
+            className={cn(
+              "mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl",
+              locale === "en"
+                ? "whitespace-nowrap md:text-[2.55rem] lg:text-[2.65rem]"
+                : "md:text-[2.8rem] lg:text-[2.8rem]",
+            )}
           />
           <p className="mt-6 max-w-[430px] text-[13px] leading-[1.95] text-ink-muted">
-            从教学材料理解，到叙事规划、内容生成与课堂交付，NarrativeOS
-            以分层工作流保持内容的一致性、可编辑性和教学可控性。
+            {copy.description}
           </p>
           <div className="mt-7 flex flex-wrap gap-2">
             {techNotes.map((note) => (
@@ -46,7 +56,7 @@ export default function Tech() {
           </div>
         </Reveal>
 
-        <Reveal delay={120}>
+        <Reveal className="min-w-0" delay={120}>
           <div
             className="relative overflow-hidden rounded-2xl bg-night p-6 text-paper-soft shadow-[0_26px_60px_rgba(47,37,27,0.18)] md:p-8"
             style={{
@@ -61,9 +71,9 @@ export default function Tech() {
             />
 
             <div className="relative flex items-center justify-between border-b border-white/15 pb-5">
-              <strong className="font-serif text-lg">NarrativeOS Architecture</strong>
+              <strong className="font-serif text-lg">{copy.architecture}</strong>
               <span className="text-[8px] tracking-[0.16em] text-gold-soft">
-                FROM MATERIAL TO EXPERIENCE
+                {copy.fromMaterial}
               </span>
             </div>
 
@@ -71,7 +81,7 @@ export default function Tech() {
               {techLayers.map((layer) => (
                 <div
                   key={layer.name}
-                  className="group grid grid-cols-1 gap-2 border-b border-white/10 py-5 transition-all duration-300 last:border-b-0 hover:bg-white/[0.04] md:grid-cols-[112px_1fr] md:items-center md:gap-4 md:px-2 md:group-hover:px-4"
+                  className="group grid grid-cols-1 gap-3 border-b border-white/10 py-5 transition-all duration-300 last:border-b-0 hover:bg-white/[0.04] lg:grid-cols-[128px_1fr] lg:items-center lg:gap-4 lg:px-2 lg:group-hover:px-4"
                 >
                   <div className="font-serif text-[11px] text-gold-soft">
                     {layer.name}

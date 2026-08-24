@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { teamMembers } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import Reveal from "@/components/reveal";
@@ -18,15 +18,18 @@ export default function Team() {
   const [activeIndex, setActiveIndex] = useState(2);
   const stageRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const active = teamMembers[activeIndex];
+  const { messages } = useI18n();
+  const copy = messages.ui.team;
+  const localizedMembers = messages.content.teamMembers;
+  const active = localizedMembers[activeIndex];
 
   useEffect(() => {
     if (reducedMotion) return;
     const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % teamMembers.length);
+      setActiveIndex((current) => (current + 1) % localizedMembers.length);
     }, 4800);
     return () => window.clearInterval(timer);
-  }, [reducedMotion]);
+  }, [localizedMembers.length, reducedMotion]);
 
   useGSAP(
     () => {
@@ -55,14 +58,14 @@ export default function Team() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-[6vw]">
         <Reveal className="mb-14 flex flex-col justify-between gap-7 md:mb-16 md:flex-row md:items-end">
           <div>
-            <SectionLabel className="text-gold-soft" dark>THE PEOPLE BEHIND THE STORY</SectionLabel>
+            <SectionLabel className="text-gold-soft" dark>{copy.label}</SectionLabel>
             <SplitHeading
-              lines={["来自不同世界，", "在同一张桌上工作。"]}
-              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-paper-soft sm:text-4xl md:text-[3.4rem]"
+              lines={copy.title}
+              className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-paper-soft sm:text-4xl md:text-[2.8rem] lg:text-[2.8rem]"
             />
           </div>
           <p className="max-w-[380px] text-[13px] leading-[1.9] text-[#aaa198] md:mb-2">
-            教育、语言、叙事与工程，在这里不是四条平行线，而是一支真正会互相影响的创作团队。
+            {copy.description}
           </p>
         </Reveal>
 
@@ -70,11 +73,11 @@ export default function Team() {
           <Reveal className="relative flex flex-col justify-between border-t border-white/15 pt-6">
             <div>
               <div className="flex items-center justify-between text-[9px] tracking-[0.2em] text-gold-soft/75">
-                <span>FIELD NOTES / 0{activeIndex + 1}</span>
-                <span>7 MEMBERS</span>
+                <span>{copy.fieldNotes} / 0{activeIndex + 1}</span>
+                <span>{localizedMembers.length} {copy.members}</span>
               </div>
               <div className="mt-10 hidden h-px bg-white/15 lg:block">
-                <div className="h-px bg-gold-soft transition-all duration-700" style={{ width: `${((activeIndex + 1) / teamMembers.length) * 100}%` }} />
+                <div className="h-px bg-gold-soft transition-all duration-700" style={{ width: `${((activeIndex + 1) / localizedMembers.length) * 100}%` }} />
               </div>
             </div>
             <div className="mt-10 lg:mt-auto">
@@ -89,7 +92,7 @@ export default function Team() {
           <div className="relative min-h-[520px] md:min-h-[600px]">
             <div className="absolute right-0 top-0 z-10 text-right">
               <span className="block text-[9px] tracking-[0.24em] text-gold-soft/70">
-                CURRENT MEMBER / 0{activeIndex + 1}
+                {copy.current} / 0{activeIndex + 1}
               </span>
               <strong className="mt-1 block font-serif text-xl text-paper-soft md:text-2xl">
                 {active.name}
@@ -101,7 +104,7 @@ export default function Team() {
 
             <div className="absolute left-[7%] top-[11%] h-[68%] w-[74%] overflow-hidden rounded-2xl border bg-night p-2 shadow-[0_30px_100px_rgba(0,0,0,0.45)] transition-all duration-700 md:p-3" style={{ transform: `rotate(${activeIndex % 2 ? 1 : -1}deg)`, borderColor: `${active.accent}88` }}>
               <div className="relative h-full w-full overflow-hidden rounded-xl bg-night-soft">
-                <Image key={active.image} src={active.image} alt={`${active.name} 的团队头像`} fill sizes="(max-width: 1024px) 70vw, 42vw" className="object-contain transition-transform duration-1000 hover:scale-105" priority={activeIndex === 2} />
+                <Image key={active.image} src={active.image} alt={copy.imageAlt.replace("{name}", active.name)} fill sizes="(max-width: 1024px) 70vw, 42vw" className="object-contain transition-transform duration-1000 hover:scale-105" priority={activeIndex === 2} />
                 <div className="absolute inset-0 bg-gradient-to-t from-night/80 via-transparent to-night/5" aria-hidden />
               </div>
               <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
@@ -113,14 +116,14 @@ export default function Team() {
 
             <div className="absolute bottom-[-2rem] left-[-4%] right-[-4%] overflow-hidden border-y border-white/10 bg-night/80 py-2 backdrop-blur-sm lg:bottom-[-1.5rem]">
               <div className={cn("flex w-max hover:[animation-play-state:paused]", !reducedMotion && "animate-marquee")} style={{ animationDuration: "30s" }}>
-                {[...teamMembers, ...teamMembers].map((member, index) => {
-                  const memberIndex = index % teamMembers.length;
+                {[...localizedMembers, ...localizedMembers].map((member, index) => {
+                  const memberIndex = index % localizedMembers.length;
                   const isActive = activeIndex === memberIndex;
                   return (
                     <button
                       key={`${member.name}-${index}`}
                       type="button"
-                      aria-label={`查看 ${member.name} 的介绍`}
+                      aria-label={copy.viewMember.replace("{name}", member.name)}
                       aria-pressed={isActive}
                       onMouseEnter={() => setActiveIndex(memberIndex)}
                       onFocus={() => setActiveIndex(memberIndex)}

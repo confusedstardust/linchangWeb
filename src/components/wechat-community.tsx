@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n-provider";
 
 export function WeChatIcon({ className }: { className?: string }) {
   return (
@@ -21,6 +22,8 @@ export function WeChatIcon({ className }: { className?: string }) {
 export default function WeChatCommunity({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const { messages } = useI18n();
+  const copy = messages.ui.wechat;
 
   useEffect(() => {
     if (!open) return;
@@ -46,14 +49,14 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        aria-label="扫码进官方社群"
+        aria-label={copy.ariaLabel}
         className={cn(
           "inline-flex items-center justify-center gap-1.5 text-ink-soft transition-colors hover:text-cinnabar",
           compact ? "h-11 w-11" : "text-xs",
         )}
       >
         <WeChatIcon className="h-[17px] w-[17px]" />
-        {!compact && <span>官方社群</span>}
+        {!compact && <span>{messages.ui.header.community}</span>}
       </button>
 
       {open && (
@@ -61,13 +64,13 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
           className="fixed inset-0 z-[85] flex items-center justify-center p-5"
           role="dialog"
           aria-modal="true"
-          aria-label="扫码进官方社群"
+          aria-label={copy.ariaLabel}
         >
           <button
             type="button"
             className="absolute inset-0 bg-night/65 backdrop-blur-sm"
             onClick={() => setOpen(false)}
-            aria-label="关闭弹窗"
+            aria-label={copy.closeDialog}
           />
 
           <div className="relative w-full max-w-sm animate-fade-up rounded-2xl border border-line bg-paper-soft p-8 text-center shadow-[0_30px_80px_rgba(22,19,16,0.4)]">
@@ -76,7 +79,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
               type="button"
               onClick={() => setOpen(false)}
               className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-cinnabar/50 hover:text-cinnabar"
-              aria-label="关闭"
+              aria-label={copy.close}
             >
               ✕
             </button>
@@ -85,16 +88,16 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
               <WeChatIcon className="h-6 w-6" />
             </span>
             <h3 className="mt-4 font-serif text-xl font-semibold text-ink">
-              扫码进官方社群
+              {copy.title}
             </h3>
             <p className="mx-auto mt-2 max-w-[280px] text-[11px] leading-[1.8] text-ink-muted">
-              与老师们一起共创叙事课堂，第一时间获取新课例与玩法。
+              {copy.description}
             </p>
 
             <div className="mx-auto mt-6 w-fit max-w-full rounded-xl border border-line bg-white p-3">
               <Image
                 src="/community-qr.jpg"
-                alt="NarrativeOS 用户内测微信群二维码"
+                alt={copy.qrAlt}
                 width={280}
                 height={392}
                 className="block h-auto w-[280px] max-w-full rounded-lg"
@@ -102,7 +105,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
             </div>
 
             <p className="mt-5 text-[10px] tracking-wider text-gold">
-              打开微信「扫一扫」加入
+              {copy.instruction}
             </p>
           </div>
         </div>

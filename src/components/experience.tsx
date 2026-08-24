@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { narrativeModes, WORKBENCH_URL } from "@/lib/content";
+import { WORKBENCH_URL } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import Reveal from "@/components/reveal";
@@ -52,7 +53,10 @@ export default function Experience() {
   const [paused, setPaused] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const mode = narrativeModes[activeIndex];
+  const { messages } = useI18n();
+  const copy = messages.ui.experience;
+  const localizedModes = messages.content.narrativeModes;
+  const mode = localizedModes[activeIndex];
 
   useGSAP(
     () => {
@@ -182,11 +186,11 @@ export default function Experience() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const timer = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % narrativeModes.length);
+      setActiveIndex((current) => (current + 1) % localizedModes.length);
     }, 5200);
 
     return () => clearInterval(timer);
-  }, [paused, activeIndex]);
+  }, [paused, activeIndex, localizedModes.length]);
 
   return (
     <section
@@ -199,15 +203,14 @@ export default function Experience() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-[6vw]">
         <Reveal className="mb-4 flex flex-col justify-between gap-0 md:mb-16 md:flex-row md:items-end md:gap-6">
           <div>
-            <SectionLabel>AGENT 与叙事</SectionLabel>
+            <SectionLabel>{copy.label}</SectionLabel>
             <SplitHeading
-              lines={["把教学意图，", "变成可以进入的故事。"]}
-              className="mt-3 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:mt-5 sm:text-4xl md:mt-5 md:text-[3.4rem]"
+              lines={copy.title}
+              className="mt-3 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:mt-5 sm:text-4xl md:mt-5 md:text-[2.8rem] lg:text-[2.8rem]"
             />
           </div>
           <p className="max-w-[390px] text-[13px] leading-[1.9] text-ink-muted md:mb-2">
-            老师保留判断与修改权，NarrativeOS
-            负责把复杂的角色、场景、任务和分支组织成完整体验。
+            {copy.description}
           </p>
         </Reveal>
 
@@ -221,9 +224,9 @@ export default function Experience() {
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
-            <p className="text-[11px] text-ink-muted">选择一个叙事入口</p>
-            <div className="mt-3 border-t border-line" role="tablist" aria-label="叙事模式">
-              {narrativeModes.map((item, index) => (
+            <p className="text-[11px] text-ink-muted">{copy.choose}</p>
+            <div className="mt-3 border-t border-line" role="tablist" aria-label={copy.tabLabel}>
+              {localizedModes.map((item, index) => (
                 <button
                   key={item.id}
                   type="button"
@@ -249,7 +252,7 @@ export default function Experience() {
                   <span className="font-serif text-[9px] tracking-wider text-gold">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  {["角色扮演", "闯关解谜", "分支选择"][index]}
+                  {copy.tabs[index]}
                 </button>
               ))}
             </div>
@@ -259,7 +262,7 @@ export default function Experience() {
               rel="noopener noreferrer"
               className="mt-7 inline-flex items-center gap-6 text-xs text-ink transition-colors hover:text-cinnabar"
             >
-              探索全部叙事模式
+              {copy.explore}
               <span className="text-cinnabar">→</span>
             </a>
           </div>
@@ -287,7 +290,7 @@ export default function Experience() {
 
               <div className="mt-6 grid grid-cols-[34px_1fr] gap-3">
                 <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-line font-serif text-[13px] text-ink-muted">
-                  师
+                  {copy.teacher}
                 </span>
                 <p className="rounded-[2px_9px_9px_9px] bg-paper-deep px-4 py-3 text-xs leading-[1.75] text-ink">
                   {mode.prompt}
@@ -298,7 +301,7 @@ export default function Experience() {
                 <BrandLogo size={34} />
                 <div className="rounded-[2px_9px_9px_9px] border border-line bg-white px-4 py-3.5">
                   <small className="text-[9px] tracking-wider text-gold">
-                    NARRATIVEOS 正在编排叙事…
+                    {copy.generating}
                   </small>
                   <p className="mt-3 min-h-[66px] font-serif text-[13px] leading-[1.85] text-ink">
                     <Typewriter text={mode.reply} />
@@ -317,7 +320,7 @@ export default function Experience() {
               </div>
 
               <div className="mt-6 flex items-center justify-between rounded-md border border-line px-3 py-2 text-[11px] text-ink-muted md:ml-[46px]">
-                <span>继续修改这场课堂…</span>
+                <span>{copy.edit}</span>
                 <b className="flex h-7 w-7 items-center justify-center rounded bg-night text-xs text-paper-soft">
                   →
                 </b>
@@ -333,7 +336,7 @@ export default function Experience() {
           >
             <div key={`preview-${mode.id}`} className="animate-mode-flash p-6">
               <div className="flex items-center justify-between text-[8px] tracking-[0.16em] text-gold-soft">
-                <span>即将生成 · PREVIEW</span>
+                <span>{copy.preview}</span>
                 <i className="h-1.5 w-1.5 rounded-full bg-cinnabar" aria-hidden />
               </div>
               <p className="mt-9 text-[10px] text-[#aca49b]">

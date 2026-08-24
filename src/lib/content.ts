@@ -210,6 +210,7 @@ export type FeaturedCase = {
   image: string;
   video?: string;
   shortTitle: string;
+  author?: string;
   category: string;
   title: string;
   description: string;
@@ -221,6 +222,7 @@ export const featuredCases: FeaturedCase[] = [
     image: "/cases/bg-cabin-night.webp",
     video: "/cases/case-heng.mp4",
     shortTitle: "衡阳舟中梦",
+    author: "赵老师",
     category: "文学 · 人物分析",
     title: "《衡阳舟中梦：刘柳千年知己》",
     description: "夜泊衡阳，随刘禹锡在梦境中重访与柳宗元的半生知己之情。",
@@ -230,6 +232,7 @@ export const featuredCases: FeaturedCase[] = [
     image: "/cases/bg-phase5.webp",
     video: "/cases/case-guanju.mp4",
     shortTitle: "关雎",
+    author: "张老师",
     category: "语文 · 经典研读",
     title: "《关雎》",
     description: "走进《诗经》开篇，在雎鸠关关的水岸，读懂君子之思与礼乐之美。",
@@ -379,6 +382,6 @@ export const steps: Step[] = [
 
 export const stats = [
   { value: 6, suffix: "+", label: "叙事模式" },
-  { value: 2, suffix: "", label: "生成工作流" },
+  { value: 2, suffix: "", label: "工作模式" },
   { value: Infinity, suffix: "", label: "课堂可能" },
 ];

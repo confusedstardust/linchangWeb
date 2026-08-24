@@ -1,23 +1,28 @@
-import { steps, WORKBENCH_URL } from "@/lib/content";
+"use client";
+
+import { WORKBENCH_URL } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import { InkBlob, SectionLabel } from "@/components/decorations";
 
 export default function Workflow() {
+  const { messages } = useI18n();
+  const copy = messages.ui.workflow;
+  const localizedSteps = messages.content.steps;
   return (
     <section className="relative overflow-hidden py-10 md:py-32">
       <InkBlob className="-left-24 top-1/3 h-96 w-96" color="rgba(177,140,69,0.12)" />
 
       <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 gap-16 px-5 md:px-[8vw] lg:grid-cols-[0.85fr_1.15fr] lg:gap-[8vw]">
         <Reveal>
-          <SectionLabel>HOW IT WORKS</SectionLabel>
+          <SectionLabel>{copy.label}</SectionLabel>
           <SplitHeading
-            lines={["四步，让课堂", "从文本走向现场。"]}
-            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:whitespace-nowrap md:text-[3.4rem]"
+            lines={copy.title}
+            className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[2.8rem] lg:text-[2.8rem]"
           />
           <p className="mt-6 max-w-[390px] text-[13px] leading-[1.9] text-ink-muted">
-            不必学习复杂工具。保持你原本备课的方式，把叙事编排交给
-            NarrativeOS。
+            {copy.description}
           </p>
           <a
             href={WORKBENCH_URL}
@@ -25,7 +30,7 @@ export default function Workflow() {
             rel="noopener noreferrer"
             className="group mt-8 inline-flex min-h-[48px] items-center justify-center gap-10 rounded-md border border-ink px-6 text-[13px] text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper-soft"
           >
-            现在开始创作
+            {copy.start}
             <span className="transition-transform duration-300 group-hover:translate-x-1.5">
               →
             </span>
@@ -33,7 +38,7 @@ export default function Workflow() {
         </Reveal>
 
         <Reveal delay={120} className="border-t border-line">
-          {steps.map((step, index) => (
+          {localizedSteps.map((step, index) => (
             <div
               key={step.num}
               className="group grid min-h-[112px] grid-cols-[42px_1fr_24px] items-center gap-5 border-b border-line px-2 transition-colors duration-300 hover:bg-paper-soft"
@@ -51,7 +56,7 @@ export default function Workflow() {
                 className="text-right text-gold transition-transform duration-300 group-hover:translate-y-1"
                 aria-hidden
               >
-                {index === steps.length - 1 ? "↗" : "↓"}
+                {index === localizedSteps.length - 1 ? "↗" : "↓"}
               </b>
             </div>
           ))}

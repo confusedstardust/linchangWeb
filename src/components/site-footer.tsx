@@ -1,34 +1,40 @@
+"use client";
+
 import { navLinks } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import BrandLogo from "@/components/brand-logo";
 
 export default function SiteFooter() {
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.footer;
+  const brand = locale === "en" ? "Linchang" : locale === "zh-Hant" ? "臨場" : "临场";
   return (
     <footer className="border-t border-line bg-paper-soft px-5 pb-10 pt-14 text-ink md:px-[6vw] md:pt-16">
       <div className="mx-auto flex max-w-[1320px] flex-row items-start justify-between gap-5 md:gap-8">
         <div className="flex flex-col items-start gap-3">
-          <a href="#top" className="flex items-center gap-3">
+          <a href="#top" className="flex items-center gap-3" aria-label={copy.backToTop}>
             <BrandLogo size={34} />
             <span className="flex flex-col gap-0.5">
-              <strong className="font-serif text-base">临场</strong>
+              <strong className="font-serif text-base">{brand}</strong>
               <small className="text-[8px] tracking-[0.2em] text-ink-muted">
                 NARRATIVEOS
               </small>
             </span>
           </a>
           <p className="ml-[46px] hidden text-[11px] text-ink-muted sm:block">
-            让每一次的选择都成为理解的入口
+            {copy.slogan}
           </p>
         </div>
 
         <div className="flex min-w-0 flex-col items-end gap-3">
-          <nav className="hidden flex-wrap gap-6 sm:flex" aria-label="页脚导航">
-            {navLinks.slice(0, 4).map((link) => (
+          <nav className="hidden flex-wrap gap-6 sm:flex" aria-label={copy.nav}>
+            {navLinks.slice(0, 4).map((link, index) => (
               <a
                 key={link.href}
                 href={link.href}
                 className="text-[11px] text-ink-soft transition-colors hover:text-cinnabar"
               >
-                {link.label}
+                {messages.ui.header.nav[index]}
               </a>
             ))}
           </nav>

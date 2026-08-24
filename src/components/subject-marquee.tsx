@@ -1,7 +1,9 @@
-import { subjects } from "@/lib/content";
+"use client";
+
+import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 
-function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
+function MarqueeRow({ subjects, reverse = false }: { subjects: string[]; reverse?: boolean }) {
   const items = reverse ? [...subjects].reverse() : subjects;
   const row = (
     <div className="flex shrink-0 items-center">
@@ -35,26 +37,29 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
 }
 
 export default function SubjectMarquee() {
+  const { messages } = useI18n();
+  const copy = messages.ui.subjects;
+  const localizedSubjects = messages.content.subjects;
   return (
     <div
       className="marquee-mask relative overflow-hidden border-y border-line bg-paper-soft py-4 md:py-5"
-      aria-label="支持的学科"
+      aria-label={copy.ariaLabel}
     >
-      <MarqueeRow />
+      <MarqueeRow subjects={localizedSubjects} />
       <div className="mt-2 border-t border-line/60 pt-2">
-        <MarqueeRow reverse />
+        <MarqueeRow subjects={localizedSubjects} reverse />
       </div>
       <span
         className="vertical-rl pointer-events-none absolute left-3 top-1/2 hidden -translate-y-1/2 font-brush text-[10px] tracking-[0.3em] text-cinnabar/70 md:block"
         aria-hidden
       >
-        文以载道
+        {copy.firstMark}
       </span>
       <span
         className="vertical-rl pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 font-brush text-[10px] tracking-[0.3em] text-gold md:block"
         aria-hidden
       >
-        学以致用
+        {copy.secondMark}
       </span>
     </div>
   );

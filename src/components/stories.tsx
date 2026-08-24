@@ -4,8 +4,10 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { stories, WORKBENCH_URL, type Story } from "@/lib/content";
+import { WORKBENCH_URL, type Story } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import { SectionLabel, SealMark } from "@/components/decorations";
@@ -13,6 +15,7 @@ import { SectionLabel, SealMark } from "@/components/decorations";
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 function HorizontalStory({ story }: { story: Story }) {
+  const { messages } = useI18n();
   return (
     <article className="group relative h-[68vh] w-[42vw] shrink-0 overflow-hidden border border-line bg-paper xl:w-[34vw]">
       <div className={`absolute inset-0 ${story.visualClass}`}>
@@ -48,7 +51,7 @@ function HorizontalStory({ story }: { story: Story }) {
           rel="noopener noreferrer"
           className="mt-5 flex items-center justify-between border-t border-white/15 pt-4 text-[11px] text-paper-soft transition-colors hover:text-gold-soft"
         >
-          查看模板
+          {messages.ui.stories.templates}
           <span className="text-gold-soft transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
             ↗
           </span>
@@ -59,6 +62,7 @@ function HorizontalStory({ story }: { story: Story }) {
 }
 
 function VerticalStory({ story, index }: { story: Story; index: number }) {
+  const { messages } = useI18n();
   return (
     <Reveal key={story.title} delay={index * 100}>
       <article className="group h-full border border-line bg-paper transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(55,43,31,0.13)]">
@@ -93,7 +97,7 @@ function VerticalStory({ story, index }: { story: Story; index: number }) {
             rel="noopener noreferrer"
             className="absolute inset-x-6 bottom-6 flex items-center justify-between border-t border-line pt-4 text-[11px] text-ink transition-colors hover:text-cinnabar"
           >
-            查看模板
+            {messages.ui.stories.templates}
             <span className="text-cinnabar transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
               ↗
             </span>
@@ -108,6 +112,10 @@ export default function Stories() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const { locale, messages } = useI18n();
+  const copy = messages.ui.stories;
+  const localizedStories = messages.content.stories;
+  const desktopTitle = locale === "en" ? ["Fresh", "classroom", "inspiration"] : copy.title;
 
   useGSAP(
     () => {
@@ -150,10 +158,10 @@ export default function Stories() {
         <div className="mx-auto max-w-[1320px] px-5 md:px-[6vw]">
           <Reveal className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <SectionLabel>STORY LIBRARY</SectionLabel>
+              <SectionLabel>{copy.label}</SectionLabel>
               <SplitHeading
-                lines={["最新课堂灵感"]}
-                className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl"
+                lines={[copy.title.join("")]}
+                className="mt-5 font-serif text-[2.15rem] font-medium leading-[1.35] text-ink sm:text-4xl md:text-[2.8rem]"
               />
             </div>
             <a
@@ -162,13 +170,13 @@ export default function Stories() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-6 text-xs text-ink transition-colors hover:text-cinnabar md:mb-2"
             >
-              进入资源模板
+              {copy.templates}
               <span className="text-cinnabar">→</span>
             </a>
           </Reveal>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {stories.map((story, index) => (
+            {localizedStories.map((story, index) => (
               <VerticalStory key={story.title} story={story} index={index} />
             ))}
           </div>
@@ -182,14 +190,21 @@ export default function Stories() {
             ref={trackRef}
             className="flex w-max items-center gap-[6vw] pl-[7vw] pr-[8vw] will-change-transform"
           >
-            <div className="w-[32vw] shrink-0 xl:w-[28vw]">
-              <SectionLabel>STORY LIBRARY</SectionLabel>
+            <div
+              className={cn(
+                "shrink-0",
+                locale === "en" ? "w-[34vw] xl:w-[34vw]" : "w-[32vw] xl:w-[28vw]",
+              )}
+            >
+              <SectionLabel>{copy.label}</SectionLabel>
               <SplitHeading
-                lines={["最新", "课堂灵感"]}
-                className="mt-7 font-serif text-[4.6rem] font-medium leading-[1.12] text-ink xl:text-[5.6rem]"
+                lines={desktopTitle}
+                className={cn(
+                  "mt-7 font-serif text-[2.8rem] font-medium leading-[1.12] text-ink",
+                )}
               />
               <p className="mt-8 max-w-[24rem] text-[13px] leading-[1.9] text-ink-muted">
-                从语文到信息科技，把真实课堂变成可以被学生亲历的故事。每一份模板，都是一个可以直接开场的世界。
+                {copy.description}
               </p>
               <a
                 href={WORKBENCH_URL}
@@ -197,18 +212,18 @@ export default function Stories() {
                 rel="noopener noreferrer"
                 className="mt-9 inline-flex items-center gap-6 text-xs text-ink transition-colors hover:text-cinnabar"
               >
-                进入资源模板
+                {copy.templates}
                 <span className="text-cinnabar">→</span>
               </a>
               <div className="mt-12 flex items-center gap-4">
                 <SealMark char="录" />
                 <span className="font-brush text-sm text-ink-muted">
-                  每一课，都是一场亲历
+                  {copy.lesson}
                 </span>
               </div>
             </div>
 
-            {stories.map((story) => (
+            {localizedStories.map((story) => (
               <HorizontalStory key={story.title} story={story} />
             ))}
           </div>

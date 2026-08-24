@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { products, WORKBENCH_URL, type Product } from "@/lib/content";
+import { useI18n } from "@/components/i18n-provider";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/brand-logo";
@@ -97,6 +98,8 @@ export default function ProductsDock() {
     resume: () => {},
   });
   const reducedMotion = usePrefersReducedMotion();
+  const { messages } = useI18n();
+  const localizedProducts = messages.content.products;
 
   useGSAP(
     () => {
@@ -287,7 +290,7 @@ export default function ProductsDock() {
               <BrandLogo size={64} />
             </span>
 
-            {products.map((product, index) => (
+            {localizedProducts.map((product, index) => (
               <OrbitCard
                 key={product.title}
                 product={product}

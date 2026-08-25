@@ -1,14 +1,54 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 type SplitHeadingProps = {
   lines: string[];
   className?: string;
   delay?: number;
 };
+
+function SplitLine({ line, lineIndex }: { line: string; lineIndex: number }) {
+  const tokens = line.split(/(\s+)/);
+
+  return tokens.map((token, tokenIndex) => {
+    if (!token) return null;
+
+    if (/^\s+$/.test(token)) {
+      return (
+        <span
+          key={`${lineIndex}-space-${tokenIndex}`}
+          className="split-char inline-block will-change-transform"
+        >
+          {"\u00A0"}
+        </span>
+      );
+    }
+
+    return (
+      <span
+        key={`${lineIndex}-word-${tokenIndex}`}
+        className="inline-block whitespace-nowrap"
+      >
+        {Array.from(token).map((char, charIndex) => (
+          <span
+            key={`${lineIndex}-${tokenIndex}-${charIndex}`}
+            className="split-char inline-block will-change-transform"
+          >
+            {char}
+          </span>
+        ))}
+      </span>
+    );
+  });
+}
 
 export default function SplitHeading({
   lines,
@@ -17,49 +57,38 @@ export default function SplitHeading({
 }: SplitHeadingProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const [visible, setVisible] = useState(false);
   const linesKey = lines.join("\u0000");
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || visible) return;
+  useGSAP(
+    () => {
+      if (reducedMotion || !ref.current) return;
 
-    let frame = 0;
-    let fallback = 0;
-    let observer: IntersectionObserver | null = null;
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 768px)", () => {
+        const chars = ref.current?.querySelectorAll(".split-char");
+        if (!chars?.length || !ref.current) return;
 
-    const show = () => {
-      observer?.disconnect();
-      window.clearTimeout(fallback);
-      frame = window.requestAnimationFrame(() => setVisible(true));
-    };
+        gsap.set(chars, { yPercent: 120, opacity: 0, rotate: 3 });
+        gsap.to(chars, {
+          yPercent: 0,
+          opacity: 1,
+          rotate: 0,
+          duration: 0.9,
+          ease: "power4.out",
+          stagger: 0.028,
+          delay,
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 84%",
+            once: true,
+          },
+        });
+      });
 
-    if (reducedMotion || !window.matchMedia("(min-width: 768px)").matches) {
-      show();
-      return () => window.cancelAnimationFrame(frame);
-    }
-
-    observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) show();
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
-    );
-
-    observer.observe(node);
-    fallback = window.setTimeout(show, 1800);
-
-    const rect = node.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.94 && rect.bottom > 0) {
-      show();
-    }
-
-    return () => {
-      observer?.disconnect();
-      window.clearTimeout(fallback);
-      window.cancelAnimationFrame(frame);
-    };
-  }, [linesKey, reducedMotion, visible]);
+      return () => mm.revert();
+    },
+    { scope: ref, dependencies: [reducedMotion, delay, linesKey] },
+  );
 
   return (
     <h2 ref={ref} className={cn(className)}>
@@ -68,17 +97,7 @@ export default function SplitHeading({
           key={`${linesKey}-${lineIndex}`}
           className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
         >
-          <span
-            className={cn(
-              "block transform-gpu transition-[transform,opacity] duration-[900ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]",
-              visible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-[105%] opacity-0",
-            )}
-            style={{ transitionDelay: `${delay * 1000 + lineIndex * 80}ms` }}
-          >
-            {line}
-          </span>
+          <SplitLine line={line} lineIndex={lineIndex} />
         </span>
       ))}
     </h2>

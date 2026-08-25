@@ -1,18 +1,12 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef } from "react";
 import { WORKBENCH_URL, type Story } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
-import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import { SectionLabel, SealMark } from "@/components/decorations";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 function HorizontalStory({ story }: { story: Story }) {
   const { messages } = useI18n();
@@ -109,49 +103,62 @@ function VerticalStory({ story, index }: { story: Story; index: number }) {
 }
 
 export default function Stories() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = usePrefersReducedMotion();
   const { locale, messages } = useI18n();
   const copy = messages.ui.stories;
   const localizedStories = messages.content.stories;
   const desktopTitle = locale === "en" ? ["Fresh", "classroom", "inspiration"] : copy.title;
 
-  useGSAP(
-    () => {
-      if (reducedMotion || !sectionRef.current || !trackRef.current) return;
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const track = trackRef.current;
+    if (!scroller || !track) return;
 
-      const mm = gsap.matchMedia();
-      mm.add("(min-width: 1024px)", () => {
-        const track = trackRef.current;
-        if (!track) return;
-        const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let frame = 0;
 
-        gsap.to(track, {
-          x: () => -distance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: () => `+=${distance()}`,
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-      });
+    const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
 
-      return () => mm.revert();
-    },
-    { scope: sectionRef, dependencies: [reducedMotion] },
-  );
+    const layout = () => {
+      if (!mq.matches) {
+        scroller.style.height = "";
+        track.style.transform = "";
+        return;
+      }
+      scroller.style.height = `${window.innerHeight + distance()}px`;
+    };
+
+    const tick = () => {
+      if (mq.matches) {
+        const max = distance();
+        scroller.style.height = `${window.innerHeight + max}px`;
+        const top = scroller.getBoundingClientRect().top;
+        const x = Math.min(max, Math.max(0, -top));
+        track.style.transform = `translate3d(${-x}px, 0, 0)`;
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    layout();
+    const onResize = () => layout();
+    mq.addEventListener("change", onResize);
+    window.addEventListener("resize", onResize);
+    frame = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      mq.removeEventListener("change", onResize);
+      window.removeEventListener("resize", onResize);
+      scroller.style.height = "";
+      track.style.transform = "";
+    };
+  }, [locale, localizedStories]);
 
   return (
     <section
-      ref={sectionRef}
       id="stories"
-      className="relative border-t border-line bg-paper-soft lg:h-screen lg:overflow-hidden"
+      className="relative border-t border-line bg-paper-soft"
     >
       {/* 移动端 / 平板：纵向布局 */}
       <div className="py-10 md:py-32 lg:hidden">
@@ -184,8 +191,8 @@ export default function Stories() {
       </div>
 
       {/* 桌面端：横向滚动画廊 */}
-      <div className="hidden lg:block">
-        <div className="flex h-screen items-center overflow-hidden">
+      <div ref={scrollerRef} className="hidden lg:block">
+        <div className="sticky top-0 flex h-screen items-center overflow-hidden">
           <div
             ref={trackRef}
             className="flex w-max items-center gap-[6vw] pl-[7vw] pr-[8vw] will-change-transform"

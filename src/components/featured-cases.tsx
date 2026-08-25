@@ -77,7 +77,7 @@ export default function FeaturedCases() {
                     </span>
                     <span
                       className={cn(
-                        "text-lg text-paper-soft md:text-xl",
+                        "text-base text-paper-soft md:text-lg",
                         locale === "en"
                           ? "max-w-[85%] text-center font-sans font-medium leading-[1.35] tracking-[0.12em]"
                           : "case-title font-brush tracking-[0.3em]",
@@ -103,18 +103,18 @@ export default function FeaturedCases() {
                     )}
                   >
                     <div className="animate-fade-up relative mx-auto flex w-full flex-col justify-center bg-paper-soft/97 p-6 md:mx-0 md:w-auto md:p-9">
-                      <span className="text-[10px] font-semibold tracking-[0.22em] text-gold">
+                      <span className="text-[8px] font-semibold tracking-[0.22em] text-gold">
                         {item.category}
                       </span>
-                      <h3 className="mt-3 font-serif text-2xl font-medium leading-[1.3] text-ink md:text-[1.9rem]">
+                      <h3 className="mt-3 font-serif text-lg font-medium leading-[1.3] text-ink md:text-[1.55rem]">
                         {item.title}
                       </h3>
                       {item.author && (
-                        <p className="mt-2 text-[10px] tracking-[0.16em] text-gold">
+                        <p className="mt-2 text-[8px] tracking-[0.16em] text-gold">
                           {copy.author}: {item.author}
                         </p>
                       )}
-                      <p className="mt-3 text-xs leading-[1.9] text-ink-muted">
+                      <p className="mt-3 text-[10px] leading-[1.9] text-ink-muted">
                         {item.description}
                       </p>
                       <a

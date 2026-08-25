@@ -55,6 +55,9 @@ export default function About() {
   const { locale, messages } = useI18n();
   const copy = messages.ui.about;
   const localizedStats = messages.content.stats;
+  const quoteWords = copy.quoteFirst.trim().split(/\s+/);
+  const quoteLead = quoteWords.slice(0, -1).join(" ");
+  const quoteTail = quoteWords.at(-1) ?? "";
   return (
     <section
       id="about"
@@ -90,15 +93,28 @@ export default function About() {
                 : "sm:text-4xl md:text-[3.25rem] lg:text-[2.7rem] xl:text-[3.25rem]",
             )}
           >
-            <span className={cn("block", locale !== "en" && "lg:whitespace-nowrap")}>
-              {copy.quoteFirst}
-            </span>
-            <span className={cn("block", locale !== "en" && "lg:whitespace-nowrap")}>
-              <em className="font-brush font-normal text-gold-soft not-italic">
-                {copy.quoteEmphasis}
-              </em>
-              {copy.quoteLast}
-            </span>
+            {locale === "en" ? (
+              <>
+                {quoteLead}{" "}
+                <span className="md:whitespace-nowrap">
+                  {quoteTail}{" "}
+                  <em className="font-brush font-normal text-gold-soft not-italic">
+                    {copy.quoteEmphasis}
+                  </em>
+                  {copy.quoteLast}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block lg:whitespace-nowrap">{copy.quoteFirst}</span>
+                <span className="block lg:whitespace-nowrap">
+                  <em className="font-brush font-normal text-gold-soft not-italic">
+                    {copy.quoteEmphasis}
+                  </em>
+                  {copy.quoteLast}
+                </span>
+              </>
+            )}
           </blockquote>
           <p className="mt-5 text-xs leading-relaxed text-[#9e968d]">
             {copy.description}

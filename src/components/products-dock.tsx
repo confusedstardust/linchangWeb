@@ -1,19 +1,14 @@
 "use client";
 
-import { useRef, type RefObject } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef, type RefObject } from "react";
 import { products, WORKBENCH_URL, type Product } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
-import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/brand-logo";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
-
 const CARD_COUNT = products.length;
 const ANGLE_STEP = (Math.PI * 2) / CARD_COUNT;
+const ORBIT_SECONDS = 30;
 
 type OrbitHandlers = {
   pause: (source: string) => void;
@@ -93,174 +88,93 @@ export default function ProductsDock() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
   const handlersRef = useRef<OrbitHandlers>({
     pause: () => {},
     resume: () => {},
   });
-  const reducedMotion = usePrefersReducedMotion();
-  const { messages } = useI18n();
+  const { locale, messages } = useI18n();
   const localizedProducts = messages.content.products;
 
-  useGSAP(
-    () => {
-      const stage = stageRef.current;
-      const orbit = orbitRef.current;
-      if (!stage) return;
+  useEffect(() => {
+    const stage = stageRef.current;
+    const orbit = orbitRef.current;
+    if (!stage) return;
 
-      const cards = gsap.utils.toArray<HTMLElement>(".orbit-card", stage);
-      const state = { progress: Math.PI / 2 };
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>(".orbit-card"));
+    if (!cards.length) return;
 
-      const setters = cards.map((card) => ({
-        x: gsap.quickSetter(card, "x", "px"),
-        y: gsap.quickSetter(card, "y", "px"),
-        scaleX: gsap.quickSetter(card, "scaleX"),
-        scaleY: gsap.quickSetter(card, "scaleY"),
-        opacity: gsap.quickSetter(card, "opacity"),
-        zIndex: gsap.quickSetter(card, "zIndex"),
-        rotationX: gsap.quickSetter(card, "rotationX", "deg"),
-        filter: gsap.quickSetter(card, "filter"),
-      }));
+    let rx = 0;
+    let ry = 0;
+    let progress = Math.PI / 2;
 
-      let rx = 0;
-      let ry = 0;
+    const measure = () => {
+      const width = stage.clientWidth;
+      const isMobile = width < 768;
+      const cardWidth = isMobile ? 250 : 300;
+      rx = Math.min(Math.max(width * 0.5 - cardWidth * 0.58, 150), 440);
+      ry = isMobile ? 70 : 106;
+      if (orbit) {
+        orbit.style.width = `${rx * 2}px`;
+        orbit.style.height = `${ry * 2}px`;
+        orbit.style.transform = "translate(-50%, -50%)";
+      }
+    };
 
-      const measure = () => {
-        const width = stage.clientWidth;
-        const isMobile = width < 768;
-        const cardWidth = isMobile ? 250 : 300;
-        rx = Math.min(Math.max(width * 0.5 - cardWidth * 0.58, 150), 440);
-        ry = isMobile ? 70 : 106;
-        if (orbit) {
-          gsap.set(orbit, { width: rx * 2, height: ry * 2 });
-        }
-      };
+    const render = () => {
+      cards.forEach((card, index) => {
+        const angle = progress + index * ANGLE_STEP;
+        const depth = (Math.sin(angle) + 1) / 2;
+        const x = Math.cos(angle) * rx;
+        const y = Math.sin(angle) * ry;
+        const scale = 0.74 + 0.46 * depth;
+        const tilt = (depth - 0.5) * 26;
+        card.style.zIndex = String(Math.round(depth * 10));
+        card.style.opacity = String(0.42 + 0.58 * depth);
+        card.style.filter = `blur(${(1 - depth) * 2.2}px)`;
+        card.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotateX(${tilt}deg) scale(${scale})`;
+      });
+    };
 
-      gsap.set(cards, { xPercent: -50, yPercent: -50 });
-      gsap.set(orbit, { xPercent: -50, yPercent: -50 });
+    measure();
+    render();
+
+    const resizeObserver = new ResizeObserver(() => {
       measure();
-
-      const render = () => {
-        cards.forEach((card, index) => {
-          const angle = state.progress + index * ANGLE_STEP;
-          const depth = (Math.sin(angle) + 1) / 2;
-          const x = Math.cos(angle) * rx;
-          const y = Math.sin(angle) * ry;
-
-          setters[index].x(x);
-          setters[index].y(y);
-          setters[index].scaleX(0.74 + 0.46 * depth);
-          setters[index].scaleY(0.74 + 0.46 * depth);
-          setters[index].opacity(reducedMotion ? 1 : 0.42 + 0.58 * depth);
-          setters[index].zIndex(Math.round(depth * 10));
-          setters[index].rotationX((depth - 0.5) * 26);
-          setters[index].filter(
-            reducedMotion ? "blur(0px)" : `blur(${(1 - depth) * 2.2}px)`,
-          );
-        });
-      };
-
       render();
+    });
+    resizeObserver.observe(stage);
 
-      const resizeObserver = new ResizeObserver(() => {
-        measure();
-        render();
-      });
-      resizeObserver.observe(stage);
-
-      let autoTween: gsap.core.Tween | null = null;
-      let resumeTimer: number | undefined;
-      let isInView = false;
-      const activeInteractions = new Set<string>();
-
-      const stopAuto = () => {
-        autoTween?.kill();
-        autoTween = null;
-      };
-
-      const startAuto = () => {
-        if (reducedMotion || !isInView || activeInteractions.size > 0) return;
-        stopAuto();
-        autoTween = gsap.to(state, {
-          progress: `+=${Math.PI * 2}`,
-          duration: 30,
-          ease: "none",
-          repeat: -1,
-          onUpdate: render,
-        });
-      };
-
-      const pauseAndCenter = (source: string) => {
-        if (reducedMotion) return;
-        const wasIdle = activeInteractions.size === 0;
+    const activeInteractions = new Set<string>();
+    handlersRef.current = {
+      pause: (source) => {
         activeInteractions.add(source);
-        window.clearTimeout(resumeTimer);
-        stopAuto();
-        if (!wasIdle) return;
+        pausedRef.current = true;
+      },
+      resume: (source) => {
+        activeInteractions.delete(source);
+        if (activeInteractions.size === 0) pausedRef.current = false;
+      },
+    };
 
-        const remainder = ((state.progress % ANGLE_STEP) + ANGLE_STEP) % ANGLE_STEP;
-        const target = ((Math.PI / 2) % ANGLE_STEP + ANGLE_STEP) % ANGLE_STEP;
-        let delta = target - remainder;
-        if (delta > ANGLE_STEP / 2) delta -= ANGLE_STEP;
-        if (delta < -ANGLE_STEP / 2) delta += ANGLE_STEP;
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(64, now - last);
+      last = now;
+      if (!pausedRef.current) {
+        progress += ((Math.PI * 2) / ORBIT_SECONDS) * (dt / 1000);
+      }
+      render();
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
 
-        gsap.to(state, {
-          progress: state.progress + delta,
-          duration: 0.8,
-          ease: "power2.inOut",
-          overwrite: true,
-          onUpdate: render,
-        });
-      };
-
-      handlersRef.current = {
-        pause: pauseAndCenter,
-        resume: (source) => {
-          activeInteractions.delete(source);
-          if (activeInteractions.size > 0) return;
-          window.clearTimeout(resumeTimer);
-          resumeTimer = window.setTimeout(startAuto, 700);
-        },
-      };
-
-      const visibilityTrigger = ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) => {
-          isInView = self.isActive;
-          if (isInView) startAuto();
-          else stopAuto();
-        },
-      });
-
-      isInView = visibilityTrigger.isActive;
-      if (isInView) startAuto();
-
-      gsap.fromTo(
-        stage,
-        { opacity: 0, y: 36 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 78%",
-            once: true,
-          },
-        },
-      );
-
-      return () => {
-        resizeObserver.disconnect();
-        window.clearTimeout(resumeTimer);
-        visibilityTrigger.kill();
-        stopAuto();
-      };
-    },
-    { scope: sectionRef, dependencies: [reducedMotion] },
-  );
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+    };
+  }, [locale, localizedProducts]);
 
   return (
     <section
@@ -270,20 +184,15 @@ export default function ProductsDock() {
     >
       <div className="mx-auto max-w-[1180px]">
         <div className="relative h-[470px] w-full [perspective:1200px] md:h-[520px]">
-          <div
-            ref={stageRef}
-            className="orbit-stage absolute inset-0"
-          >
-            {/* 轨道 */}
+          <div ref={stageRef} className="orbit-stage absolute inset-0">
             <div
               ref={orbitRef}
               className="absolute left-1/2 top-1/2 rounded-full border border-dashed border-gold/35"
               aria-hidden
             />
 
-            {/* 中心星球 */}
             <span
-              className="absolute left-1/2 top-1/2 z-[1] -translate-x-1/2 -translate-y-1/2"
+              className="absolute left-1/2 top-1/2 z-[20] -translate-x-1/2 -translate-y-1/2"
               aria-hidden
             >
               <span className="absolute -inset-5 animate-breathe rounded-full bg-cinnabar/12 blur-2xl" />
@@ -292,7 +201,7 @@ export default function ProductsDock() {
 
             {localizedProducts.map((product, index) => (
               <OrbitCard
-                key={product.title}
+                key={`${index}-${product.icon}`}
                 product={product}
                 index={index}
                 handlers={handlersRef}
@@ -300,7 +209,6 @@ export default function ProductsDock() {
             ))}
           </div>
         </div>
-
       </div>
     </section>
   );

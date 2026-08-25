@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   getMessages,
@@ -26,22 +34,29 @@ export default function I18nProvider({
 }) {
   const messages = useMemo(() => getMessages(locale), [locale]);
   const router = useRouter();
+  const localeRef = useRef(locale);
+  const routerRef = useRef(router);
+  localeRef.current = locale;
+  routerRef.current = router;
 
   useEffect(() => {
-    document.documentElement.lang = locale === "en" ? "en" : locale === "zh-Hant" ? "zh-TW" : "zh-CN";
+    document.documentElement.lang =
+      locale === "en" ? "en" : locale === "zh-Hant" ? "zh-TW" : "zh-CN";
   }, [locale]);
+
+  const switchLocale = useCallback((nextLocale: Locale) => {
+    if (nextLocale === localeRef.current) return;
+    const hash = window.location.hash;
+    routerRef.current.push(`${localizedPath(nextLocale)}${hash}`);
+  }, []);
 
   const value = useMemo<I18nContextValue>(
     () => ({
       locale,
       messages,
-      switchLocale: (nextLocale) => {
-        if (nextLocale === locale) return;
-        const hash = window.location.hash;
-        router.push(`${localizedPath(nextLocale)}${hash}`);
-      },
+      switchLocale,
     }),
-    [locale, messages, router],
+    [locale, messages, switchLocale],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

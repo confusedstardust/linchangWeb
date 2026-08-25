@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { WORKBENCH_URL } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -11,8 +9,6 @@ import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import BrandLogo from "@/components/brand-logo";
 import { InkBlob, SectionLabel } from "@/components/decorations";
-
-gsap.registerPlugin(useGSAP);
 
 function Typewriter({ text, speed = 16 }: { text: string; speed?: number }) {
   const [count, setCount] = useState(0);
@@ -52,134 +48,86 @@ export default function Experience() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = usePrefersReducedMotion();
   const { messages } = useI18n();
   const copy = messages.ui.experience;
   const localizedModes = messages.content.narrativeModes;
   const mode = localizedModes[activeIndex];
 
-  useGSAP(
-    () => {
-      if (reducedMotion) return;
-      const panels = gsap.utils.toArray<HTMLElement>(
-        ".experience-panel",
-        stageRef.current,
-      );
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
 
-      const applyHidden = () => {
-        panels.forEach((panel, index) => {
-        gsap.set(panel, {
-          opacity: 0,
-          y: 70,
-          scaleX: 0.92,
-          scaleY: 0.92,
-          rotationX: index === 1 ? -84 : 0,
-          rotationY: index === 0 ? -82 : index === 2 ? 82 : 0,
-          transformOrigin:
-            index === 0
-              ? "left center"
-              : index === 2
-                ? "right center"
-                : "top center",
-          filter: "blur(12px)",
-        });
-        });
-      };
+    const bells = Array.from(stage.querySelectorAll<HTMLElement>(".chime-swing"));
+    if (!bells.length) return;
 
-      applyHidden();
+    const AMPLITUDE = 12;
+    const PERIOD = 1.45;
+    const CYCLES = 2;
+    const DURATION = PERIOD * CYCLES;
+    const STAGGER = 0.2;
 
-      const timeline = gsap.timeline({ paused: true });
-      timeline
-        .to(
-          panels,
-          {
-            opacity: 1,
-            y: 0,
-            scaleX: 1,
-            scaleY: 1,
-            rotationX: 0,
-            rotationY: 0,
-            filter: "blur(0px)",
-            duration: 1.05,
-            ease: "back.out(1.25)",
-            stagger: 0.2,
-          },
-          0,
-        )
-        .to(
-          panels,
-          {
-            rotationZ: 5.5,
-            transformOrigin: "top center",
-            duration: 0.38,
-            ease: "power1.inOut",
-            stagger: 0.14,
-          },
-          1.5,
-        )
-        .to(
-          panels,
-          {
-            rotationZ: -3.5,
-            duration: 0.38,
-            ease: "power1.inOut",
-            stagger: 0.14,
-          },
-          1.9,
-        )
-        .to(
-          panels,
-          {
-            rotationZ: 2,
-            duration: 0.32,
-            ease: "power1.inOut",
-            stagger: 0.14,
-          },
-          2.3,
-        )
-        .to(
-          panels,
-          {
-            rotationZ: 0,
-            duration: 0.3,
-            ease: "power1.out",
-            stagger: 0.12,
-          },
-          2.65,
-        );
+    let inView = false;
+    let playing = false;
+    let startedAt = 0;
+    let frame = 0;
 
-      let inView = false;
-      let rafId = 0;
+    const rest = () => {
+      bells.forEach((bell) => {
+        bell.style.transform = "rotate(0deg)";
+      });
+    };
 
-      const tick = () => {
-        const rect = stageRef.current?.getBoundingClientRect();
-        if (rect) {
-          const isVisible =
-            rect.bottom > 0 && rect.top < window.innerHeight * 0.7;
+    const play = () => {
+      playing = true;
+      startedAt = performance.now();
+    };
 
-          if (isVisible && !inView) {
-            inView = true;
-            applyHidden();
-            timeline.restart();
-          } else if (!isVisible && inView) {
-            const fullyOffScreen =
-              rect.bottom <= 0 || rect.top >= window.innerHeight;
-            if (fullyOffScreen) {
-              inView = false;
-              applyHidden();
+    const tick = (now: number) => {
+      const rect = stage.getBoundingClientRect();
+      const visible =
+        rect.top < window.innerHeight * 0.88 && rect.bottom > window.innerHeight * 0.12;
+      const gone = rect.bottom <= 0 || rect.top >= window.innerHeight;
+
+      if (visible && !inView) {
+        inView = true;
+        play();
+      } else if (gone && inView) {
+        inView = false;
+        playing = false;
+        rest();
+      }
+
+      if (playing) {
+        const elapsed = (now - startedAt) / 1000;
+        const lastDelay = (bells.length - 1) * STAGGER;
+        if (elapsed >= DURATION + lastDelay) {
+          playing = false;
+          rest();
+        } else {
+          bells.forEach((bell, index) => {
+            const local = elapsed - index * STAGGER;
+            if (local <= 0 || local >= DURATION) {
+              bell.style.transform = "rotate(0deg)";
+              return;
             }
-          }
+            const restRatio = Math.min(1, local / DURATION);
+            const decay = 1 - restRatio * 0.22;
+            const settle = restRatio > 0.86 ? 1 - (restRatio - 0.86) / 0.14 : 1;
+            const phase = (local / PERIOD) * Math.PI * 2;
+            const swing = Math.sin(phase) * AMPLITUDE * decay * settle;
+            bell.style.transform = `rotate(${swing}deg)`;
+          });
         }
-        rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
+      }
 
-      return () => {
-        cancelAnimationFrame(rafId);
-      };
-    },
-    { scope: stageRef, dependencies: [reducedMotion] },
-  );
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    rest();
+    frame = window.requestAnimationFrame(tick);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     if (paused) return;
@@ -220,7 +168,7 @@ export default function Experience() {
         >
           {/* 模式选择 */}
           <div
-            className="experience-panel rounded-xl border border-line bg-paper-soft p-6"
+            className="experience-panel chime-swing rounded-xl border border-line bg-paper-soft p-6"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
@@ -269,7 +217,7 @@ export default function Experience() {
 
           {/* 对话演示 */}
           <div
-            className="experience-panel rounded-xl border border-line bg-paper-soft p-6 md:p-7"
+            className="experience-panel chime-swing rounded-xl border border-line bg-paper-soft p-6 md:p-7"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
@@ -330,7 +278,7 @@ export default function Experience() {
 
           {/* 预览 */}
           <aside
-            className="experience-panel rounded-xl bg-night text-paper-soft"
+            className="experience-panel chime-swing rounded-xl bg-night text-paper-soft"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >

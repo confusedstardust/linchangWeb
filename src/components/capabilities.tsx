@@ -1,205 +1,71 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { CustomEase } from "gsap/CustomEase";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef } from "react";
 import { WORKBENCH_URL } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
-import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import { InkBlob, SectionLabel } from "@/components/decorations";
 
-gsap.registerPlugin(useGSAP, CustomEase);
-
-const FRONT = {
-  z: 60,
-  scaleX: 1.06,
-  scaleY: 1.06,
-  y: -12,
-  rotationX: 0,
-  rotationY: 0,
-  opacity: 1,
-  filter: "blur(0px)",
-  boxShadow:
-    "0 30px 60px rgba(56,44,31,0.22), 0 6px 14px rgba(56,44,31,0.10)",
-};
-
-const BACK = {
-  z: -36,
-  scaleX: 0.95,
-  scaleY: 0.95,
-  y: 10,
-  rotationX: 4,
-  rotationY: 8,
-  opacity: 0.8,
-  filter: "blur(1.2px)",
-  boxShadow: "0 10px 22px rgba(56,44,31,0.10)",
-};
-
-type CardHandlers = {
-  pause: (index: number) => void;
-  resume: () => void;
-};
-
 export default function Capabilities() {
   const gridRef = useRef<HTMLDivElement>(null);
-  const handlersRef = useRef<CardHandlers>({ pause: () => {}, resume: () => {} });
-  const reducedMotion = usePrefersReducedMotion();
+  const hoverRef = useRef<number | null>(null);
   const { messages } = useI18n();
   const copy = messages.ui.capabilities;
   const localizedFeatures = messages.content.features;
 
-  useGSAP(
-    () => {
-      const cards = gsap.utils.toArray<HTMLElement>(
-        ".capability-card",
-        gridRef.current,
-      );
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
 
-      if (reducedMotion) {
-        gsap.set(cards, {
-          opacity: 1,
-          filter: "blur(0px)",
-          z: 0,
-          y: 0,
-          scaleX: 1,
-          scaleY: 1,
-          rotationX: 0,
-          rotationY: 0,
-          boxShadow: "0 14px 34px rgba(56,44,31,0.12)",
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".capability-card"));
+    if (!cards.length) return;
+
+    const CYCLE = 2400;
+    let elapsed = 0;
+    let last = performance.now();
+    let frame = 0;
+
+    const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.min(1, Math.max(0, t)) * Math.PI);
+
+    const liftOf = (phase: number) => {
+      if (phase < 0.28) return ease(phase / 0.28);
+      if (phase < 0.62) return 1;
+      return 1 - ease((phase - 0.62) / 0.38);
+    };
+
+    const paint = (index: number, lift: number) => {
+      const card = cards[index];
+      const y = -16 * lift;
+      const scale = 1 + 0.045 * lift;
+      card.style.transform = `translateY(${y}px) scale(${scale})`;
+      card.style.zIndex = String(1 + Math.round(lift * 8));
+      card.style.boxShadow = `0 ${14 + lift * 22}px ${34 + lift * 28}px rgba(56,44,31,${0.1 + lift * 0.12})`;
+    };
+
+    const tick = (now: number) => {
+      elapsed += Math.min(64, now - last);
+      last = now;
+
+      const hover = hoverRef.current;
+      if (hover === null) {
+        const active = Math.floor(elapsed / CYCLE) % cards.length;
+        const phase = (elapsed % CYCLE) / CYCLE;
+        cards.forEach((_, index) => {
+          paint(index, index === active ? liftOf(phase) : 0);
         });
-        return;
+      } else {
+        cards.forEach((_, index) => {
+          paint(index, index === hover ? 1 : 0);
+        });
       }
 
-      // 按键：带回弹的贝塞尔；回程：缓出的贝塞尔；呼吸：正弦
-      const press = CustomEase.create(
-        "capability-press",
-        "0.34, 1.56, 0.64, 1",
-      );
-      const release = CustomEase.create(
-        "capability-release",
-        "0.22, 1, 0.36, 1",
-      );
+      frame = window.requestAnimationFrame(tick);
+    };
 
-      gsap.set(cards, { ...BACK });
-
-      const cycle = 5.6;
-      const offset = cycle / cards.length;
-      const timelines = cards.map((card, index) => {
-        const timeline = gsap.timeline({
-          repeat: -1,
-          delay: index * offset,
-        });
-
-        // 后景呼吸（低幅度正弦起伏）
-        timeline.to(
-          card,
-          {
-            y: 6,
-            scaleX: 0.945,
-            scaleY: 0.945,
-            duration: 0.55,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: 1,
-          },
-          0,
-        );
-        // 琴键按下浮现
-        timeline.to(
-          card,
-          {
-            ...FRONT,
-            duration: 0.7,
-            ease: press,
-          },
-          1.1,
-        );
-        // 前景停留呼吸
-        timeline.to(
-          card,
-          {
-            y: FRONT.y - 5,
-            scaleX: FRONT.scaleX * 1.02,
-            scaleY: FRONT.scaleY * 1.02,
-            duration: 1.2,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: 1,
-          },
-          1.8,
-        );
-        // 缓缓沉回后景
-        timeline.to(
-          card,
-          {
-            ...BACK,
-            duration: 0.9,
-            ease: release,
-          },
-          4.2,
-        );
-        // 后景停一拍
-        timeline.to(card, { duration: 0.5 }, 5.1);
-
-        return timeline;
-      });
-
-      let resumeTimer: number | undefined;
-      let raiseTween: gsap.core.Tween | null = null;
-      let raisedIndex = -1;
-
-      handlersRef.current = {
-        pause: (hoveredIndex) => {
-          timelines.forEach((timeline) => timeline.pause());
-          window.clearTimeout(resumeTimer);
-          raisedIndex = hoveredIndex;
-          raiseTween = gsap.to(cards[hoveredIndex], {
-            z: 96,
-            scaleX: 1.09,
-            scaleY: 1.09,
-            y: -16,
-            rotationX: 0,
-            rotationY: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            boxShadow: "0 36px 72px rgba(56,44,31,0.26)",
-            duration: 0.5,
-            ease: press,
-            overwrite: true,
-          });
-        },
-        resume: () => {
-          window.clearTimeout(resumeTimer);
-          if (raiseTween && raisedIndex >= 0) {
-            const timeline = timelines[raisedIndex];
-            const time = timeline.time() % cycle;
-            const target = time >= 1.1 && time < 4.2 ? FRONT : BACK;
-            raiseTween.kill();
-            raiseTween = null;
-            gsap.to(cards[raisedIndex], {
-              ...target,
-              duration: 0.5,
-              ease: release,
-              overwrite: true,
-            });
-          }
-          resumeTimer = window.setTimeout(() => {
-            timelines.forEach((timeline) => timeline.resume());
-          }, 520);
-        },
-      };
-
-      return () => {
-        window.clearTimeout(resumeTimer);
-        raiseTween?.kill();
-        timelines.forEach((timeline) => timeline.kill());
-      };
-    },
-    { scope: gridRef, dependencies: [reducedMotion] },
-  );
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [localizedFeatures]);
 
   return (
     <section id="capabilities" className="relative overflow-hidden py-10 md:py-32">
@@ -221,14 +87,18 @@ export default function Capabilities() {
 
         <div
           ref={gridRef}
-          className="grid grid-cols-1 gap-4 [perspective:1600px] sm:grid-cols-2 xl:grid-cols-4"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
           {localizedFeatures.map((feature, index) => (
             <Reveal key={feature.num} delay={index * 90}>
               <article
                 className="capability-card group relative flex min-h-[350px] flex-col rounded-xl border border-line bg-paper-soft p-6 will-change-transform md:p-7"
-                onPointerEnter={() => handlersRef.current.pause(index)}
-                onPointerLeave={() => handlersRef.current.resume()}
+                onPointerEnter={() => {
+                  hoverRef.current = index;
+                }}
+                onPointerLeave={() => {
+                  hoverRef.current = null;
+                }}
               >
                 <span className="font-serif text-[10px] tracking-wider text-cinnabar">
                   {feature.num}

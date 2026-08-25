@@ -17,6 +17,38 @@ import BrandLogo from "@/components/brand-logo";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+function HeroChars({ text, id }: { text: string; id: string }) {
+  return text.split(/(\s+)/).map((token, tokenIndex) => {
+    if (!token) return null;
+    if (/^\s+$/.test(token)) {
+      return (
+        <span
+          key={`${id}-space-${tokenIndex}`}
+          className="hero-line-char inline-block will-change-transform"
+        >
+          {"\u00A0"}
+        </span>
+      );
+    }
+
+    return (
+      <span
+        key={`${id}-word-${tokenIndex}`}
+        className="inline-block whitespace-nowrap"
+      >
+        {Array.from(token).map((char, charIndex) => (
+          <span
+            key={`${id}-${tokenIndex}-${charIndex}`}
+            className="hero-line-char inline-block will-change-transform"
+          >
+            {char}
+          </span>
+        ))}
+      </span>
+    );
+  });
+}
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -49,12 +81,12 @@ export default function Hero() {
     if (startedRef.current || !curtainGone) return;
     startedRef.current = true;
 
-    const line1 = gsap.utils.toArray<HTMLElement>(
-      ".hero-line-1",
+    const charsLine1 = gsap.utils.toArray<HTMLElement>(
+      ".hero-line-1 .hero-line-char",
       sectionRef.current,
     );
-    const line2 = gsap.utils.toArray<HTMLElement>(
-      ".hero-line-2",
+    const charsLine2 = gsap.utils.toArray<HTMLElement>(
+      ".hero-line-2 .hero-line-char",
       sectionRef.current,
     );
     const fades = gsap.utils.toArray<HTMLElement>(
@@ -67,22 +99,24 @@ export default function Hero() {
     playbackTimelineRef.current = timeline;
     timeline
       .to(
-        line1,
+        charsLine1,
         {
-          xPercent: -18,
+          xPercent: -160,
           opacity: 0,
           duration: 0.85,
           ease: "power2.in",
+          stagger: 0.035,
         },
         0,
       )
       .to(
-        line2,
+        charsLine2,
         {
-          xPercent: 18,
+          xPercent: 160,
           opacity: 0,
           duration: 0.85,
           ease: "power2.in",
+          stagger: 0.035,
         },
         0,
       )
@@ -122,24 +156,15 @@ export default function Hero() {
       ".hero-line-char",
       sectionRef.current,
     );
-    const lines = gsap.utils.toArray<HTMLElement>(
-      ".hero-title-line",
-      sectionRef.current,
-    );
     const fades = gsap.utils.toArray<HTMLElement>(
       ".hero-fade",
       sectionRef.current,
     );
 
-    gsap.killTweensOf([...lines, ...chars, ...fades]);
+    gsap.killTweensOf([...chars, ...fades]);
     gsap.killTweensOf(".hero-brush-path");
-    gsap.to(lines, {
-      xPercent: 0,
-      opacity: 1,
-      duration: 0.65,
-      ease: "power3.out",
-    });
     gsap.to(chars, {
+      xPercent: 0,
       yPercent: 0,
       opacity: 1,
       duration: 0.65,
@@ -345,33 +370,12 @@ export default function Hero() {
             className="mt-4 font-serif text-[2.75rem] font-semibold leading-[1.18] tracking-tight text-shadow-ink sm:text-6xl md:text-7xl lg:text-[5.3rem]"
           >
             <span className="hero-title-line hero-line-1 block will-change-transform">
-              {Array.from(copy.line1).map((char, index) => (
-                <span
-                  key={`line1-${index}`}
-                  className="hero-line-char inline-block will-change-transform"
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
+              <HeroChars text={copy.line1} id="line1" />
             </span>
             <span className="hero-title-line hero-line-2 block will-change-transform">
-              {Array.from(copy.line2Prefix).map((char, index) => (
-                <span
-                  key={`line2-${index}`}
-                  className="hero-line-char inline-block will-change-transform"
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
+              <HeroChars text={copy.line2Prefix} id="line2" />
               <em className="relative mx-1 inline-block font-brush font-normal not-italic text-gold-soft">
-                {Array.from(copy.emphasis).map((char, index) => (
-                  <span
-                    key={`em-${index}`}
-                    className="hero-line-char inline-block will-change-transform"
-                  >
-                    {char}
-                  </span>
-                ))}
+                <HeroChars text={copy.emphasis} id="em" />
                 <BrushUnderline className="hero-brush-path" />
               </em>
               <span className="hero-line-char inline-block will-change-transform">

@@ -15,6 +15,7 @@ function ScrollSync() {
     if (!lenis) return;
 
     lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.lagSmoothing(0);
     const onLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", onLoad);
     document.fonts?.ready?.then(() => ScrollTrigger.refresh()).catch(() => {});

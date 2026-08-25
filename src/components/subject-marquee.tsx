@@ -1,10 +1,48 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 
-function MarqueeRow({ subjects, reverse = false }: { subjects: string[]; reverse?: boolean }) {
+function MarqueeRow({
+  subjects,
+  reverse = false,
+}: {
+  subjects: string[];
+  reverse?: boolean;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
   const items = reverse ? [...subjects].reverse() : subjects;
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const first = track.firstElementChild as HTMLElement | null;
+    if (!first) return;
+
+    const speed = reverse ? 0.38 : 0.32;
+    let x = reverse ? -first.offsetWidth : 0;
+    let frame = 0;
+
+    const tick = () => {
+      const width = first.offsetWidth;
+      if (width > 0) {
+        if (reverse) {
+          x += speed;
+          if (x >= 0) x -= width;
+        } else {
+          x -= speed;
+          if (x <= -width) x += width;
+        }
+        track.style.transform = `translate3d(${x}px, 0, 0)`;
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [subjects, reverse]);
+
   const row = (
     <div className="flex shrink-0 items-center">
       {items.map((subject) => (
@@ -24,12 +62,7 @@ function MarqueeRow({ subjects, reverse = false }: { subjects: string[]; reverse
   );
 
   return (
-    <div
-      className={cn(
-        "flex w-max",
-        reverse ? "animate-marquee-rev" : "animate-marquee",
-      )}
-    >
+    <div ref={trackRef} className="flex w-max will-change-transform">
       {row}
       <div aria-hidden>{row}</div>
     </div>

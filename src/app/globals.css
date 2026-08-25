@@ -499,3 +499,9 @@
     stroke-dashoffset: 0 !important;
   }
 }
+
+.chime-swing {
+  height: 100%;
+  transform-origin: 50% 0%;
+  will-change: transform;
+}

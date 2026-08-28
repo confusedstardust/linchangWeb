@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   creator: "NarrativeOS",
   publisher: "NarrativeOS",
   category: "education",
+  other: {
+    "baidu-site-verification": "codeva-i0MhbwJ9Hq",
+  },
   robots: {
     index: true,
     follow: true,

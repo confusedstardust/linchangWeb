@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   category: "education",
   other: {
     "baidu-site-verification": "codeva-i0MhbwJ9Hq",
+    "sogou_site_verification": "exRNHo8XIk"
   },
   robots: {
     index: true,

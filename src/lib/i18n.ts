@@ -159,6 +159,8 @@ export type UiMessages = {
     description: string;
     qrAlt: string;
     instruction: string;
+    qrUnavailable: string;
+    qrRetry: string;
   };
 };
 
@@ -298,6 +300,8 @@ const zhUi: UiMessages = {
     description: "与老师们一起共创叙事课堂，第一时间获取新课例与玩法。",
     qrAlt: "NarrativeOS 用户内测微信群二维码",
     instruction: "打开微信「扫一扫」加入",
+    qrUnavailable: "二维码暂时无法加载，请稍后再试。",
+    qrRetry: "重新加载",
   },
 };
 
@@ -409,6 +413,8 @@ const enUi: UiMessages = {
     description: "Co-create narrative classrooms with teachers and get new cases and ideas first.",
     qrAlt: "NarrativeOS internal beta WeChat group QR code",
     instruction: "Open WeChat and scan to join",
+    qrUnavailable: "The QR code is temporarily unavailable. Please try again later.",
+    qrRetry: "Reload",
   },
 };
 
@@ -520,6 +526,8 @@ const hantUi: UiMessages = {
     description: "與老師們一起共創敘事課堂，第一時間獲取新課例與玩法。",
     qrAlt: "NarrativeOS 用戶內測微信群二維碼",
     instruction: "打開微信「掃一掃」加入",
+    qrUnavailable: "二維碼暫時無法載入，請稍後再試。",
+    qrRetry: "重新載入",
   },
 };
 

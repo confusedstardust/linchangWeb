@@ -1,9 +1,37 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Component, useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/i18n-provider";
+
+const WECHAT_GROUP_QR_URL =
+  "https://linchangweb.oss-cn-beijing.aliyuncs.com/WeChatGroupPic/index.jpg";
+const LOCAL_QR_URL = "/community-qr.jpg";
+
+type QrStatus = "loading" | "ready" | "error";
+
+class QrErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode; resetKey: string },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps: { resetKey: string }) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
 
 export function WeChatIcon({ className }: { className?: string }) {
   return (
@@ -19,11 +47,60 @@ export function WeChatIcon({ className }: { className?: string }) {
   );
 }
 
+function freshOssQrUrl() {
+  return `${WECHAT_GROUP_QR_URL}?t=${Date.now()}`;
+}
+
 export default function WeChatCommunity({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [qrSrc, setQrSrc] = useState(WECHAT_GROUP_QR_URL);
+  const [qrStatus, setQrStatus] = useState<QrStatus>("loading");
+  const usedFallbackRef = useRef(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const { messages } = useI18n();
   const copy = messages.ui.wechat;
+
+  const resetQr = () => {
+    usedFallbackRef.current = false;
+    setQrStatus("loading");
+    setQrSrc(freshOssQrUrl());
+  };
+
+  const openDialog = () => {
+    resetQr();
+    setOpen(true);
+  };
+
+  const handleQrError = () => {
+    if (!usedFallbackRef.current) {
+      usedFallbackRef.current = true;
+      setQrStatus("loading");
+      setQrSrc(LOCAL_QR_URL);
+      return;
+    }
+    setQrStatus("error");
+  };
+
+  const handleQrLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+    if (event.currentTarget.naturalWidth === 0) {
+      handleQrError();
+      return;
+    }
+    setQrStatus("ready");
+  };
+
+  const qrUnavailable = (
+    <div className="flex min-h-[280px] w-[280px] max-w-full flex-col items-center justify-center gap-3 px-4 py-10">
+      <p className="text-[12px] leading-[1.8] text-ink-muted">{copy.qrUnavailable}</p>
+      <button
+        type="button"
+        onClick={resetQr}
+        className="rounded-full border border-line px-4 py-1.5 text-[11px] text-ink-soft transition-colors hover:border-cinnabar/50 hover:text-cinnabar"
+      >
+        {copy.qrRetry}
+      </button>
+    </div>
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +124,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openDialog}
         aria-haspopup="dialog"
         aria-label={copy.ariaLabel}
         className={cn(
@@ -94,19 +171,41 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
               {copy.description}
             </p>
 
-            <div className="mx-auto mt-6 w-fit max-w-full rounded-xl border border-line bg-white p-3">
-              <Image
-                src="/community-qr.jpg"
-                alt={copy.qrAlt}
-                width={280}
-                height={392}
-                className="block h-auto w-[280px] max-w-full rounded-lg"
-              />
+            <div className="relative mx-auto mt-6 w-fit max-w-full overflow-hidden rounded-xl border border-line bg-white p-3">
+              {qrStatus === "error" ? (
+                qrUnavailable
+              ) : (
+                <QrErrorBoundary resetKey={qrSrc} fallback={qrUnavailable}>
+                  {qrStatus === "loading" && (
+                    <div
+                      className="absolute inset-3 animate-pulse rounded-lg bg-paper-soft"
+                      aria-hidden
+                    />
+                  )}
+                  <Image
+                    key={qrSrc}
+                    src={qrSrc}
+                    alt={copy.qrAlt}
+                    width={280}
+                    height={392}
+                    unoptimized
+                    onLoad={handleQrLoad}
+                    onError={handleQrError}
+                    className={cn(
+                      "block h-auto w-[280px] max-w-full rounded-lg",
+                      qrStatus === "loading" && "opacity-0",
+                    )}
+                    style={{ height: "auto" }}
+                  />
+                </QrErrorBoundary>
+              )}
             </div>
 
-            <p className="mt-5 text-[10px] tracking-wider text-gold">
-              {copy.instruction}
-            </p>
+            {qrStatus !== "error" && (
+              <p className="mt-5 text-[10px] tracking-wider text-gold">
+                {copy.instruction}
+              </p>
+            )}
           </div>
         </div>
       )}

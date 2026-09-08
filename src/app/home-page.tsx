@@ -6,6 +6,7 @@ import FeaturedCases from "@/components/featured-cases";
 import FinalCta from "@/components/final-cta";
 import Hero from "@/components/hero";
 import I18nProvider from "@/components/i18n-provider";
+import { AuthSessionProvider } from "@/components/auth-session";
 import InkRipple from "@/components/ink-ripple";
 import ProductsDock from "@/components/products-dock";
 import ScrollProgress from "@/components/scroll-progress";
@@ -34,6 +35,7 @@ export default function HomePage({ locale }: { locale: Locale }) {
 
   return (
     <I18nProvider locale={locale}>
+      <AuthSessionProvider>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -57,6 +59,7 @@ export default function HomePage({ locale }: { locale: Locale }) {
         <FinalCta />
       </main>
       <SiteFooter />
+      </AuthSessionProvider>
     </I18nProvider>
   );
 }

@@ -12,7 +12,9 @@ import {
 import { useRouter } from "next/navigation";
 import {
   getMessages,
+  isLoginPath,
   localizedPath,
+  loginPath,
   type Locale,
   type LocaleMessages,
 } from "@/lib/i18n";
@@ -47,6 +49,11 @@ export default function I18nProvider({
   const switchLocale = useCallback((nextLocale: Locale) => {
     if (nextLocale === localeRef.current) return;
     const hash = window.location.hash;
+    const search = window.location.search;
+    if (isLoginPath(window.location.pathname)) {
+      routerRef.current.push(`${loginPath(nextLocale)}${search}`);
+      return;
+    }
     routerRef.current.push(`${localizedPath(nextLocale)}${hash}`);
   }, []);
 

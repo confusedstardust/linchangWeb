@@ -45,6 +45,16 @@ export function localizedPath(locale: Locale) {
   return localePaths[locale];
 }
 
+export function loginPath(locale: Locale) {
+  if (locale === "en") return "/en/login/";
+  if (locale === "zh-Hant") return "/zh-hant/login/";
+  return "/login/";
+}
+
+export function isLoginPath(pathname: string) {
+  return /(?:^|\/)login\/?$/.test(pathname);
+}
+
 export type UiMessages = {
   header: {
     brand: string;
@@ -57,6 +67,9 @@ export type UiMessages = {
     enterWorkbench: string;
     language: string;
     community: string;
+    login: string;
+    logout: string;
+    register: string;
   };
   hero: {
     engine: string;
@@ -162,6 +175,40 @@ export type UiMessages = {
     qrUnavailable: string;
     qrRetry: string;
   };
+  auth: {
+    title: string;
+    description: string;
+    registerTitle: string;
+    registerDescription: string;
+    tabLogin: string;
+    tabRegister: string;
+    email: string;
+    emailPlaceholder: string;
+    password: string;
+    passwordPlaceholder: string;
+    confirmPassword: string;
+    sendCode: string;
+    sending: string;
+    sent: string;
+    code: string;
+    codePlaceholder: string;
+    passwordLogin: string;
+    codeLogin: string;
+    verify: string;
+    verifying: string;
+    register: string;
+    registering: string;
+    wechat: string;
+    wechatSoon: string;
+    backHome: string;
+    resendIn: string;
+    errorInvalidEmail: string;
+    errorSend: string;
+    errorVerify: string;
+    errorPassword: string;
+    errorPasswordMismatch: string;
+    errorCredentials: string;
+  };
 };
 
 export type LocaleContent = {
@@ -204,6 +251,9 @@ const zhUi: UiMessages = {
     enterWorkbench: "进入工作台",
     language: "选择语言",
     community: "官方社群",
+    login: "登录",
+    logout: "退出",
+    register: "注册",
   },
   hero: {
     engine: "已接入 AI 叙事课堂生成引擎",
@@ -303,6 +353,40 @@ const zhUi: UiMessages = {
     qrUnavailable: "二维码暂时无法加载，请稍后再试。",
     qrRetry: "重新加载",
   },
+  auth: {
+    title: "登录账号",
+    description: "使用邮箱和密码登录。也可以用邮箱验证码登录。",
+    registerTitle: "注册账号",
+    registerDescription: "设置密码，并用邮箱验证码完成注册。",
+    tabLogin: "登录",
+    tabRegister: "注册",
+    email: "邮箱",
+    emailPlaceholder: "name@example.com",
+    password: "密码",
+    passwordPlaceholder: "至少 8 位",
+    confirmPassword: "确认密码",
+    sendCode: "发送验证码",
+    sending: "发送中…",
+    sent: "验证码已发送",
+    code: "验证码",
+    codePlaceholder: "6 位数字",
+    passwordLogin: "密码登录",
+    codeLogin: "验证码登录",
+    verify: "登录",
+    verifying: "登录中…",
+    register: "注册并登录",
+    registering: "注册中…",
+    wechat: "微信登录",
+    wechatSoon: "即将开放",
+    backHome: "返回首页",
+    resendIn: "秒后可重新发送",
+    errorInvalidEmail: "请输入有效邮箱",
+    errorSend: "验证码发送失败，请稍后再试",
+    errorVerify: "验证码无效或已过期",
+    errorPassword: "密码至少 8 位",
+    errorPasswordMismatch: "两次输入的密码不一致",
+    errorCredentials: "邮箱或密码错误",
+  },
 };
 
 const enUi: UiMessages = {
@@ -317,6 +401,9 @@ const enUi: UiMessages = {
     enterWorkbench: "Open workbench",
     language: "Choose language",
     community: "Community",
+    login: "Sign in",
+    logout: "Sign out",
+    register: "Sign up",
   },
   hero: {
     engine: "Connected to the AI narrative classroom engine",
@@ -416,6 +503,40 @@ const enUi: UiMessages = {
     qrUnavailable: "The QR code is temporarily unavailable. Please try again later.",
     qrRetry: "Reload",
   },
+  auth: {
+    title: "Sign in",
+    description: "Sign in with email and password, or with an email code.",
+    registerTitle: "Create an account",
+    registerDescription: "Set a password and verify your email to register.",
+    tabLogin: "Sign in",
+    tabRegister: "Sign up",
+    email: "Email",
+    emailPlaceholder: "name@example.com",
+    password: "Password",
+    passwordPlaceholder: "At least 8 characters",
+    confirmPassword: "Confirm password",
+    sendCode: "Send code",
+    sending: "Sending…",
+    sent: "Code sent",
+    code: "Verification code",
+    codePlaceholder: "6-digit code",
+    passwordLogin: "Password",
+    codeLogin: "Email code",
+    verify: "Sign in",
+    verifying: "Signing in…",
+    register: "Create account",
+    registering: "Creating…",
+    wechat: "WeChat",
+    wechatSoon: "Coming soon",
+    backHome: "Back to home",
+    resendIn: "s before resend",
+    errorInvalidEmail: "Please enter a valid email",
+    errorSend: "Could not send the code. Please try again later.",
+    errorVerify: "The code is invalid or has expired",
+    errorPassword: "Password must be at least 8 characters",
+    errorPasswordMismatch: "Passwords do not match",
+    errorCredentials: "Incorrect email or password",
+  },
 };
 
 const hantUi: UiMessages = {
@@ -430,6 +551,9 @@ const hantUi: UiMessages = {
     enterWorkbench: "進入工作臺",
     language: "選擇語言",
     community: "官方社群",
+    login: "登錄",
+    logout: "退出",
+    register: "註冊",
   },
   hero: {
     engine: "已接入 AI 敘事課堂生成引擎",
@@ -528,6 +652,40 @@ const hantUi: UiMessages = {
     instruction: "打開微信「掃一掃」加入",
     qrUnavailable: "二維碼暫時無法載入，請稍後再試。",
     qrRetry: "重新載入",
+  },
+  auth: {
+    title: "登錄賬號",
+    description: "使用郵箱和密碼登錄，也可以用郵箱驗證碼登錄。",
+    registerTitle: "註冊賬號",
+    registerDescription: "設置密碼，並用郵箱驗證碼完成註冊。",
+    tabLogin: "登錄",
+    tabRegister: "註冊",
+    email: "郵箱",
+    emailPlaceholder: "name@example.com",
+    password: "密碼",
+    passwordPlaceholder: "至少 8 位",
+    confirmPassword: "確認密碼",
+    sendCode: "發送驗證碼",
+    sending: "發送中…",
+    sent: "驗證碼已發送",
+    code: "驗證碼",
+    codePlaceholder: "6 位數字",
+    passwordLogin: "密碼登錄",
+    codeLogin: "驗證碼登錄",
+    verify: "登錄",
+    verifying: "登錄中…",
+    register: "註冊並登錄",
+    registering: "註冊中…",
+    wechat: "微信登錄",
+    wechatSoon: "即將開放",
+    backHome: "返回首頁",
+    resendIn: "秒後可重新發送",
+    errorInvalidEmail: "請輸入有效郵箱",
+    errorSend: "驗證碼發送失敗，請稍後再試",
+    errorVerify: "驗證碼無效或已過期",
+    errorPassword: "密碼至少 8 位",
+    errorPasswordMismatch: "兩次輸入的密碼不一致",
+    errorCredentials: "郵箱或密碼錯誤",
   },
 };
 

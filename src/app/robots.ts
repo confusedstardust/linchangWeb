@@ -7,6 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/login/", "/en/login/", "/zh-hant/login/"],
     },
     sitemap: "https://www.narrativeos.cn/sitemap.xml",
     host: "https://www.narrativeos.cn",

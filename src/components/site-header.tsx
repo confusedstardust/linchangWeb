@@ -2,9 +2,11 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
 import { navLinks, WORKBENCH_URL } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
-import type { Locale } from "@/lib/i18n";
+import { useAuthSession } from "@/components/auth-session";
+import { localizedPath, loginPath, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/brand-logo";
 import WeChatCommunity from "@/components/wechat-community";
@@ -13,7 +15,17 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const lenis = useLenis();
+  const pathname = usePathname();
   const { locale, messages, switchLocale } = useI18n();
+  const { user, loading, logout } = useAuthSession();
+  const onHome =
+    pathname === "/" ||
+    pathname === "/en" ||
+    pathname === "/en/" ||
+    pathname === "/zh-hant" ||
+    pathname === "/zh-hant/";
+  const homeHref = localizedPath(locale);
+  const signInHref = loginPath(locale);
   const languageOptions: Array<{ locale: Locale; label: string; title: string }> = [
     { locale: "zh-CN", label: "简", title: "简体中文" },
     { locale: "en", label: "EN", title: "English" },
@@ -38,6 +50,11 @@ export default function SiteHeader() {
     event: MouseEvent<HTMLAnchorElement>,
     href: string,
   ) => {
+    if (!onHome) {
+      setOpen(false);
+      return;
+    }
+
     event.preventDefault();
     setOpen(false);
 
@@ -69,7 +86,7 @@ export default function SiteHeader() {
     >
       <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-5 md:px-[4.5vw]">
         <a
-          href="#top"
+          href={onHome ? "#top" : homeHref}
           onClick={(event) => goToSection(event, "#top")}
           className="group flex items-center gap-3"
           aria-label={messages.ui.header.backToTop}
@@ -89,7 +106,7 @@ export default function SiteHeader() {
           {navLinks.map((link, index) => (
             <a
               key={link.href}
-              href={link.href}
+              href={onHome ? link.href : `${homeHref}${link.href}`}
               onClick={(event) => goToSection(event, link.href)}
               className="group relative py-2 text-xs text-ink-soft transition-colors hover:text-cinnabar"
             >
@@ -119,6 +136,36 @@ export default function SiteHeader() {
               </button>
             ))}
           </div>
+          {!loading &&
+            (user ? (
+              <div className="flex items-center gap-3">
+                <span className="max-w-[9rem] truncate text-[11px] text-ink-muted">
+                  {user.nickname || user.email}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void logout()}
+                  className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
+                >
+                  {messages.ui.header.logout}
+                </button>
+              </div>
+            ) : (
+              <>
+                <a
+                  href={signInHref}
+                  className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
+                >
+                  {messages.ui.header.login}
+                </a>
+                <a
+                  href={`${signInHref}?mode=register`}
+                  className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
+                >
+                  {messages.ui.header.register}
+                </a>
+              </>
+            ))}
           <a
             href={WORKBENCH_URL}
             target="_blank"
@@ -168,7 +215,7 @@ export default function SiteHeader() {
           {navLinks.map((link, index) => (
             <a
               key={link.href}
-              href={link.href}
+              href={onHome ? link.href : `${homeHref}${link.href}`}
               onClick={(event) => goToSection(event, link.href)}
               className="flex items-center justify-between border-b border-line/70 py-3.5 font-serif text-[15px] text-ink"
             >
@@ -178,6 +225,43 @@ export default function SiteHeader() {
               </span>
             </a>
           ))}
+          {!loading &&
+            (user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  void logout();
+                }}
+                className="flex items-center justify-between border-b border-line/70 py-3.5 text-[15px] text-ink"
+              >
+                {user.nickname || user.email}
+                <span className="text-[11px] text-ink-muted">{messages.ui.header.logout}</span>
+              </button>
+            ) : (
+              <>
+              <a
+                href={signInHref}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between border-b border-line/70 py-3.5 font-serif text-[15px] text-ink"
+              >
+                {messages.ui.header.login}
+                <span className="text-[10px] text-gold" aria-hidden>
+                  →
+                </span>
+              </a>
+              <a
+                href={`${signInHref}?mode=register`}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between border-b border-line/70 py-3.5 font-serif text-[15px] text-ink"
+              >
+                {messages.ui.header.register}
+                <span className="text-[10px] text-gold" aria-hidden>
+                  →
+                </span>
+              </a>
+              </>
+            ))}
           <a
             href={WORKBENCH_URL}
             target="_blank"

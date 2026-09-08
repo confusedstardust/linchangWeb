@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 import { navLinks, WORKBENCH_URL } from "@/lib/content";
@@ -14,6 +14,8 @@ import WeChatCommunity from "@/components/wechat-community";
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const authMenuRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
   const pathname = usePathname();
   const { locale, messages, switchLocale } = useI18n();
@@ -26,6 +28,8 @@ export default function SiteHeader() {
     pathname === "/zh-hant/";
   const homeHref = localizedPath(locale);
   const signInHref = loginPath(locale);
+  const onAuthPage = /(^|\/)login\/?$/.test(pathname);
+  const accountLabel = (user?.email || user?.nickname || "").trim().charAt(0);
   const languageOptions: Array<{ locale: Locale; label: string; title: string }> = [
     { locale: "zh-CN", label: "简", title: "简体中文" },
     { locale: "en", label: "EN", title: "English" },
@@ -45,6 +49,28 @@ export default function SiteHeader() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  useEffect(() => {
+    setAuthOpen(false);
+  }, [pathname, locale]);
+
+  useEffect(() => {
+    if (!authOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!authMenuRef.current?.contains(event.target as Node)) {
+        setAuthOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAuthOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [authOpen]);
 
   const goToSection = (
     event: MouseEvent<HTMLAnchorElement>,
@@ -102,7 +128,7 @@ export default function SiteHeader() {
           </span>
         </a>
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label={messages.ui.header.mainNav}>
+        <nav className="hidden items-center gap-4 xl:gap-7 lg:flex" aria-label={messages.ui.header.mainNav}>
           {navLinks.map((link, index) => (
             <a
               key={link.href}
@@ -139,8 +165,8 @@ export default function SiteHeader() {
           {!loading &&
             (user ? (
               <div className="flex items-center gap-3">
-                <span className="max-w-[9rem] truncate text-[11px] text-ink-muted">
-                  {user.nickname || user.email}
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-line text-[12px] text-ink">
+                  {accountLabel}
                 </span>
                 <button
                   type="button"
@@ -151,30 +177,70 @@ export default function SiteHeader() {
                 </button>
               </div>
             ) : (
-              <>
-                <a
-                  href={signInHref}
-                  className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
+              <div className="relative shrink-0" ref={authMenuRef}>
+                <button
+                  type="button"
+                  aria-expanded={authOpen}
+                  aria-haspopup="menu"
+                  onClick={() => setAuthOpen((value) => !value)}
+                  className="inline-flex items-center gap-1 text-xs text-ink-soft transition-colors hover:text-cinnabar"
                 >
                   {messages.ui.header.login}
-                </a>
-                <a
-                  href={`${signInHref}?mode=register`}
-                  className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
+                  <svg
+                    viewBox="0 0 12 12"
+                    className={cn(
+                      "h-2.5 w-2.5 transition-transform duration-200",
+                      authOpen && "rotate-180",
+                    )}
+                    aria-hidden
+                  >
+                    <path
+                      d="M2.5 4.25 6 7.75l3.5-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                <div
+                  role="menu"
+                  className={cn(
+                    "absolute right-0 top-[calc(100%+10px)] z-[70] min-w-[8.5rem] rounded-md border border-line bg-paper py-1 shadow-[0_12px_32px_rgba(53,42,30,0.14)] transition-all duration-150",
+                    authOpen
+                      ? "visible translate-y-0 opacity-100"
+                      : "invisible -translate-y-1 opacity-0",
+                  )}
                 >
-                  {messages.ui.header.register}
-                </a>
-              </>
+                  <a
+                    role="menuitem"
+                    href={signInHref}
+                    className="block px-3 py-2 text-xs text-ink-soft transition-colors hover:bg-paper-soft hover:text-cinnabar"
+                  >
+                    {messages.ui.header.login}
+                  </a>
+                  <a
+                    role="menuitem"
+                    href={`${signInHref}?mode=register`}
+                    className="block px-3 py-2 text-xs text-ink-soft transition-colors hover:bg-paper-soft hover:text-cinnabar"
+                  >
+                    {messages.ui.header.register}
+                  </a>
+                </div>
+              </div>
             ))}
-          <a
-            href={WORKBENCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md border border-line px-4 py-2.5 text-xs text-ink transition-all hover:-translate-y-0.5 hover:border-cinnabar/50 hover:text-cinnabar"
-          >
-            {messages.ui.header.enterWorkbench}
-            <span aria-hidden className="text-cinnabar">→</span>
-          </a>
+          {!onAuthPage && (
+            <a
+              href={WORKBENCH_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md border border-line px-4 py-2.5 text-xs text-ink transition-all hover:-translate-y-0.5 hover:border-cinnabar/50 hover:text-cinnabar"
+            >
+              {messages.ui.header.enterWorkbench}
+              <span aria-hidden className="text-cinnabar">→</span>
+            </a>
+          )}
         </nav>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -235,7 +301,9 @@ export default function SiteHeader() {
                 }}
                 className="flex items-center justify-between border-b border-line/70 py-3.5 text-[15px] text-ink"
               >
-                {user.nickname || user.email}
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-sm">
+                  {accountLabel}
+                </span>
                 <span className="text-[11px] text-ink-muted">{messages.ui.header.logout}</span>
               </button>
             ) : (
@@ -262,16 +330,18 @@ export default function SiteHeader() {
               </a>
               </>
             ))}
-          <a
-            href={WORKBENCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => setOpen(false)}
-            className="mt-6 inline-flex items-center justify-between rounded-md bg-cinnabar px-5 py-3.5 text-sm text-paper-soft shadow-[0_12px_28px_rgba(112,34,46,0.25)]"
-          >
-            {messages.ui.header.enterWorkbench}
-            <span aria-hidden>→</span>
-          </a>
+          {!onAuthPage && (
+            <a
+              href={WORKBENCH_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="mt-6 inline-flex items-center justify-between rounded-md bg-cinnabar px-5 py-3.5 text-sm text-paper-soft shadow-[0_12px_28px_rgba(112,34,46,0.25)]"
+            >
+              {messages.ui.header.enterWorkbench}
+              <span aria-hidden>→</span>
+            </a>
+          )}
           <div className="mt-4 flex items-center justify-between border-t border-line/70 pt-4" role="group" aria-label={messages.ui.header.language}>
             <span className="text-[10px] tracking-[0.16em] text-ink-muted">{messages.ui.header.language}</span>
             <div className="flex items-center gap-1">

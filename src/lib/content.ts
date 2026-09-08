@@ -1,6 +1,7 @@
 export const WORKBENCH_URL = "https://www.narrativeos.cn/narrativeos/";
 
 export const navLinks = [
+  { label: "优质案例", href: "#cases" },
   { label: "产品", href: "#products" },
   { label: "能力", href: "#capabilities" },
   { label: "灵感", href: "#stories" },
@@ -209,6 +210,9 @@ export const stories: Story[] = [
 export type FeaturedCase = {
   image: string;
   video?: string;
+  imageFit?: "cover" | "contain";
+  imageTone?: "light" | "dark";
+  imagePosition?: string;
   shortTitle: string;
   author?: string;
   category: string;
@@ -239,13 +243,25 @@ export const featuredCases: FeaturedCase[] = [
     href: "https://www.narrativeos.cn/narrativeos/play/7011eaf8a8354409bca771236ab4097e/",
   },
   {
-    image: "/cases/bg-case3.svg",
-    shortTitle: "新课例",
-    category: "叙事课堂 · 新课例",
-    title: "《第三课例 · 敬请期待》",
+    image: "/cases/bg-b612.png",
+    imagePosition: "object-[18%_center]",
+    shortTitle: "小王子",
+    author: "何老师",
+    category: "文学 · 人物分析",
+    title: "《归途与驯服》",
     description:
-      "第三个优质案例正在筹备中，视频与完整文案即将上线，敬请期待。",
-    href: WORKBENCH_URL,
+      "有些相遇，终会回到最初的星光。在金色麦田里与狐狸告别，读懂驯服、责任与那朵独一无二的玫瑰。",
+    href: "https://www.narrativeos.cn/narrativeos/play/b7b89dcf7c1141308dacd245aeaf7f32/",
+  },
+  {
+    image: "/cases/bg-yueyang.webp",
+    shortTitle: "岳阳楼记",
+    author: "张老师",
+    category: "语文 · 经典研读",
+    title: "《岳阳楼记·忧乐之间》",
+    description:
+      "登岳阳楼，临洞庭湖。随范仲淹与滕子京在阴晴之间，体会「先天下之忧而忧，后天下之乐而乐」。",
+    href: "https://www.narrativeos.cn/narrativeos/play/a5a323e2990c4e96a7167046bc5f5a95/",
   },
 ];
 

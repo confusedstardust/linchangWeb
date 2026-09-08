@@ -7,6 +7,41 @@ import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
 import SplitHeading from "@/components/split-heading";
 import { SectionLabel } from "@/components/decorations";
+import type { FeaturedCase } from "@/lib/content";
+
+function CaseImage({
+  item,
+  className,
+  fit,
+}: {
+  item: FeaturedCase;
+  className?: string;
+  fit?: "cover" | "contain";
+}) {
+  const contain = (fit ?? item.imageFit) === "contain";
+
+  return (
+    <>
+      {contain && item.imageTone !== "light" && (
+        <Image
+          src={item.image}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 80vw, 60vw"
+          className="scale-110 object-cover blur-2xl"
+          aria-hidden
+        />
+      )}
+      <Image
+        src={item.image}
+        alt={item.title}
+        fill
+        sizes="(max-width: 768px) 80vw, 60vw"
+        className={cn(contain ? "object-contain" : "object-cover", className)}
+      />
+    </>
+  );
+}
 
 export default function FeaturedCases() {
   const [hovered, setHovered] = useState<number | null>(null);
@@ -34,7 +69,7 @@ export default function FeaturedCases() {
 
         <Reveal delay={100}>
           <div
-            className="grid grid-cols-1 gap-4 md:flex md:aspect-[3.08/1] md:h-auto [--case-grow:2.8]"
+            className="grid grid-cols-1 gap-4 md:flex md:aspect-[3.08/1] md:h-auto [--case-grow:4]"
             onPointerLeave={() => setHovered(null)}
           >
             {localizedCases.map((item, index) => {
@@ -45,7 +80,8 @@ export default function FeaturedCases() {
                   onPointerEnter={() => setHovered(index)}
                   onClick={() => setPinned(pinned === index ? null : index)}
                   className={cn(
-                    "relative min-w-0 w-full cursor-pointer overflow-hidden rounded-xl border bg-night transition-[height,flex-grow,border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] md:h-full",
+                    "relative min-w-0 w-full cursor-pointer overflow-hidden rounded-xl border transition-[height,flex-grow,border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] md:h-full",
+                    item.imageTone === "light" ? "bg-paper-soft" : "bg-night",
                     isActive ? "h-[540px] md:h-full" : "h-[220px]",
                     isActive
                       ? "border-gold/40 shadow-[0_30px_70px_rgba(56,44,31,0.24)]"
@@ -53,15 +89,14 @@ export default function FeaturedCases() {
                   )}
                   style={{ flexGrow: isActive ? "var(--case-grow)" : 1, flexBasis: 0 }}
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    sizes="(max-width: 768px) 80vw, 60vw"
-                    className="object-cover"
-                  />
+                  <CaseImage item={item} className={item.imagePosition} />
                   <div
-                    className="absolute inset-0 bg-gradient-to-t from-night/65 via-transparent to-night/30"
+                    className={cn(
+                      "absolute inset-0 bg-gradient-to-t",
+                      item.imageTone === "light"
+                        ? "from-ink/10 via-transparent to-ink/5"
+                        : "from-night/65 via-transparent to-night/30",
+                    )}
                     aria-hidden
                   />
 
@@ -77,7 +112,8 @@ export default function FeaturedCases() {
                     </span>
                     <span
                       className={cn(
-                        "text-base text-paper-soft md:text-lg",
+                        "text-base md:text-lg",
+                        item.imageTone === "light" ? "text-ink" : "text-paper-soft",
                         locale === "en"
                           ? "max-w-[85%] text-center font-sans font-medium leading-[1.35] tracking-[0.12em]"
                           : "case-title font-brush tracking-[0.3em]",
@@ -88,7 +124,11 @@ export default function FeaturedCases() {
                     <span
                       className={cn(
                         "h-1.5 w-1.5 rounded-full transition-colors",
-                        isActive ? "bg-gold-soft" : "bg-paper-soft/50",
+                        isActive
+                          ? "bg-gold-soft"
+                          : item.imageTone === "light"
+                            ? "bg-ink/35"
+                            : "bg-paper-soft/50",
                       )}
                       aria-hidden
                     />
@@ -98,7 +138,7 @@ export default function FeaturedCases() {
                   <div
                     key={isActive ? "open" : "closed"}
                     className={cn(
-                      "absolute inset-0 grid grid-cols-1 transition-opacity duration-300 md:grid-cols-[300px_1fr]",
+                      "absolute inset-0 grid grid-cols-1 transition-opacity duration-300 md:grid-cols-[minmax(220px,280px)_1fr]",
                       isActive ? "opacity-100" : "pointer-events-none opacity-0",
                     )}
                   >
@@ -142,27 +182,7 @@ export default function FeaturedCases() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          sizes="(max-width: 768px) 80vw, 60vw"
-                          className="object-cover"
-                        />
-                      )}
-                      {!item.video && (
-                        <>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="flex h-16 w-16 animate-breathe items-center justify-center rounded-full border border-paper-soft/55 bg-night/25 text-paper-soft backdrop-blur-sm">
-                              <span className="ml-1 text-lg" aria-hidden>
-                                ▶
-                              </span>
-                            </span>
-                          </div>
-                          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-paper-soft/20 bg-night/35 px-3.5 py-1 text-[9px] tracking-[0.2em] text-paper-soft backdrop-blur-sm">
-                            {copy.comingSoon}
-                          </span>
-                        </>
+                        <CaseImage item={item} fit="cover" />
                       )}
                     </div>
                   </div>

@@ -195,7 +195,7 @@ export type LocaleMessages = {
 const zhUi: UiMessages = {
   header: {
     brand: "临场 · AI 叙事课堂生成平台",
-    nav: ["产品", "能力", "灵感", "团队", "技术", "关于我们"],
+    nav: ["优质案例", "产品", "能力", "灵感", "团队", "技术", "关于我们"],
     backToTop: "返回顶部",
     mainNav: "主导航",
     mobileNav: "移动端导航",
@@ -308,7 +308,7 @@ const zhUi: UiMessages = {
 const enUi: UiMessages = {
   header: {
     brand: "Linchang · AI Narrative Classroom Platform",
-    nav: ["Products", "Capabilities", "Inspiration", "Team", "Technology", "About"],
+    nav: ["Cases", "Products", "Capabilities", "Inspiration", "Team", "Technology", "About"],
     backToTop: "Back to top",
     mainNav: "Main navigation",
     mobileNav: "Mobile navigation",
@@ -421,7 +421,7 @@ const enUi: UiMessages = {
 const hantUi: UiMessages = {
   header: {
     brand: "臨場 · AI 敘事課堂生成平台",
-    nav: ["產品", "能力", "靈感", "團隊", "技術", "關於我們"],
+    nav: ["優質案例", "產品", "能力", "靈感", "團隊", "技術", "關於我們"],
     backToTop: "返回頂部",
     mainNav: "主導航",
     mobileNav: "移動端導航",
@@ -628,14 +628,18 @@ function mapCases(locale: Locale): FeaturedCase[] {
     ? [
         ["Hengyang dream", "Literature · Character analysis", "Dreaming on the Hengyang river, follow Liu Yuxi as he revisits his lifelong friendship with Liu Zongyuan.", "Hengyang Boat Dream: Liu and Liu, a thousand-year friendship"],
         ["Guanju", "Language arts · Classics", "Enter the opening poem of the Book of Songs and read the longing, ritual, and beauty carried by the riverbank.", "Guanju"],
-        ["New case", "Narrative classroom · New case", "The third featured case is in production. Its video and complete copy are coming soon.", "Third case · Coming soon"],
+        ["Little Prince", "Literature · Character analysis", "Some encounters return to the first starlight. In a golden wheat field, say farewell to the fox and learn what it means to tame, to be responsible, and to love one unique rose.", "Return and Taming"],
+        ["Yueyang Tower", "Language arts · Classics", "Climb Yueyang Tower over Dongting Lake. Follow Fan Zhongyan and Teng Zijing through weather and feeling, and live the idea of worrying first and rejoicing last.", "Yueyang Tower: Between Sorrow and Joy"],
       ]
     : [
         ["衡陽舟中夢", "文學 · 人物分析", "夜泊衡陽，隨劉禹錫在夢境中重訪與柳宗元的半生知己之情。", "《衡陽舟中夢：劉柳千年知己》"],
         ["關雎", "語文 · 經典研讀", "走進《詩經》開篇，在雎鳩關關的水岸，讀懂君子之思與禮樂之美。", "《關雎》"],
-        ["新課例", "敘事課堂 · 新課例", "第三個優質案例正在籌備中，視頻與完整文案即將上線，敬請期待。", "《第三課例 · 敬請期待》"],
+        ["小王子", "文學 · 人物分析", "有些相遇，終會回到最初的星光。在金色麥田裏與狐狸告別，讀懂馴服、責任與那朵獨一無二的玫瑰。", "《歸途與馴服》"],
+        ["岳陽樓記", "語文 · 經典研讀", "登岳陽樓，臨洞庭湖。隨范仲淹與滕子京在陰晴之間，體會「先天下之憂而憂，後天下之樂而樂」。", "《岳陽樓記·憂樂之間》"],
       ];
-  const authors = locale === "en" ? ["Teacher Zhao", "Teacher Zhang", ""] : ["趙老師", "張老師", ""];
+  const authors = locale === "en"
+    ? ["Teacher Zhao", "Teacher Zhang", "Teacher He", "Teacher Zhang"]
+    : ["趙老師", "張老師", "何老師", "張老師"];
   return featuredCases.map((item, index) => ({ ...item, shortTitle: translated[index][0], author: authors[index] || item.author, category: translated[index][1], description: translated[index][2], title: translated[index][3] }));
 }
 

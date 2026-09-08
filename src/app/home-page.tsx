@@ -44,12 +44,12 @@ export default function HomePage({ locale }: { locale: Locale }) {
       <SiteHeader />
       <main>
         <Hero />
+        <FeaturedCases />
         <ProductsDock />
         <Experience />
         <Capabilities />
         <SubjectMarquee />
         <Stories />
-        <FeaturedCases />
         <Team />
         <Tech />
         <Workflow />

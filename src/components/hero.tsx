@@ -204,25 +204,22 @@ export default function Hero() {
       mm.add("(min-width: 1024px)", () => {
         if (!sectionRef.current || !mediaRef.current) return;
 
-        const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "+=135%",
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
+        gsap.fromTo(
+          mediaRef.current,
+          { scaleX: 1, scaleY: 1 },
+          {
+            scaleX: 1.16,
+            scaleY: 1.16,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1,
+              invalidateOnRefresh: true,
+            },
           },
-        });
-
-        timeline
-          .fromTo(
-            mediaRef.current,
-            { scaleX: 1, scaleY: 1 },
-            { scaleX: 1.16, scaleY: 1.16, ease: "none" },
-            0,
-          );
+        );
       });
 
       return () => mm.revert();
@@ -305,8 +302,9 @@ export default function Hero() {
       ref={sectionRef}
       id="top"
       onClick={onSectionClick}
-      className="relative min-h-[100svh] cursor-pointer overflow-hidden bg-night text-paper-soft"
+      className="relative h-[200svh] cursor-pointer bg-night text-paper-soft lg:h-[260svh]"
     >
+      <div className="sticky top-0 h-[100svh] overflow-hidden">
       {/* 视频背景 */}
       <div
         ref={mediaRef}
@@ -351,7 +349,7 @@ export default function Hero() {
       />
 
       {/* 主体内容 */}
-      <div className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center px-5 pb-28 pt-28 text-center md:px-10">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 pb-28 pt-28 text-center md:px-10">
         <div className="flex max-w-[880px] flex-col items-center">
           <span className="hero-fade inline-flex items-center gap-2.5 rounded-full border border-paper-soft/25 bg-night/35 px-4 py-1.5 text-[11px] tracking-wide text-paper-soft/90 backdrop-blur-sm">
             <i
@@ -468,6 +466,7 @@ export default function Hero() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

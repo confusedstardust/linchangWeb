@@ -52,7 +52,7 @@ export default function FeaturedCases() {
   const localizedCases = messages.content.featuredCases;
 
   return (
-    <section id="cases" className="border-t border-line py-10 md:py-32">
+    <section id="cases" className="relative z-10 border-t border-line bg-paper py-10 md:py-32">
       <div className="mx-auto max-w-[1292px] px-5 md:px-[6vw]">
         <Reveal className="mb-12 flex flex-col justify-between gap-6 md:mb-14 md:flex-row md:items-end">
           <div>

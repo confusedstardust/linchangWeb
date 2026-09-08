@@ -1,7 +1,9 @@
 "use client";
 
 import { Component, useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
+import { useLenis } from "lenis/react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/i18n-provider";
 
@@ -57,6 +59,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
   const [qrStatus, setQrStatus] = useState<QrStatus>("loading");
   const usedFallbackRef = useRef(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lenis = useLenis();
   const { messages } = useI18n();
   const copy = messages.ui.wechat;
 
@@ -70,6 +73,8 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
     resetQr();
     setOpen(true);
   };
+
+  const closeDialog = () => setOpen(false);
 
   const handleQrError = () => {
     if (!usedFallbackRef.current) {
@@ -90,7 +95,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
   };
 
   const qrUnavailable = (
-    <div className="flex min-h-[280px] w-[280px] max-w-full flex-col items-center justify-center gap-3 px-4 py-10">
+    <div className="flex min-h-[160px] w-full flex-col items-center justify-center gap-3 px-4 py-8">
       <p className="text-[12px] leading-[1.8] text-ink-muted">{copy.qrUnavailable}</p>
       <button
         type="button"
@@ -107,18 +112,101 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    lenis?.stop();
     closeButtonRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") closeDialog();
     };
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      lenis?.start();
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, lenis]);
+
+  const dialog = open
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={copy.ariaLabel}
+          onClick={closeDialog}
+        >
+          <div className="absolute inset-0 bg-night/70 backdrop-blur-[6px]" aria-hidden />
+
+          <div
+            className="relative z-10 flex max-h-[min(88svh,36rem)] w-full max-w-[22rem] animate-fade-up flex-col overflow-hidden rounded-t-[1.75rem] border border-line bg-paper-soft shadow-[0_24px_64px_rgba(22,19,16,0.38)] sm:rounded-[1.75rem]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-line sm:hidden" aria-hidden />
+
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={closeDialog}
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-paper-deep hover:text-cinnabar"
+              aria-label={copy.close}
+            >
+              ✕
+            </button>
+
+            <div className="overflow-y-auto px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 text-center">
+              <div className="flex items-center justify-center gap-2.5">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#07c160] text-white">
+                  <WeChatIcon className="h-4 w-4" />
+                </span>
+                <h3 className="font-serif text-lg font-semibold text-ink">
+                  {copy.title}
+                </h3>
+              </div>
+              <p className="mx-auto mt-2 max-w-[16.5rem] text-[11px] leading-[1.75] text-ink-muted">
+                {copy.description}
+              </p>
+
+              <div className="relative mx-auto mt-4 w-fit max-w-full overflow-hidden rounded-2xl border border-line bg-white p-2.5">
+                {qrStatus === "error" ? (
+                  qrUnavailable
+                ) : (
+                  <QrErrorBoundary resetKey={qrSrc} fallback={qrUnavailable}>
+                    {qrStatus === "loading" && (
+                      <div
+                        className="absolute inset-2.5 animate-pulse rounded-xl bg-paper-soft"
+                        aria-hidden
+                      />
+                    )}
+                    <Image
+                      key={qrSrc}
+                      src={qrSrc}
+                      alt={copy.qrAlt}
+                      width={280}
+                      height={392}
+                      unoptimized
+                      onLoad={handleQrLoad}
+                      onError={handleQrError}
+                      className={cn(
+                        "mx-auto block h-auto max-h-[min(42svh,260px)] w-auto max-w-[200px] rounded-xl object-contain",
+                        qrStatus === "loading" && "opacity-0",
+                      )}
+                    />
+                  </QrErrorBoundary>
+                )}
+              </div>
+
+              {qrStatus !== "error" && (
+                <p className="mt-3 pb-1 text-[10px] tracking-wider text-gold">
+                  {copy.instruction}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )
+    : null;
 
   return (
     <>
@@ -135,80 +223,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
         <WeChatIcon className="h-[17px] w-[17px]" />
         {!compact && <span>{messages.ui.header.community}</span>}
       </button>
-
-      {open && (
-        <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5"
-          role="dialog"
-          aria-modal="true"
-          aria-label={copy.ariaLabel}
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-night/65 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-            aria-label={copy.closeDialog}
-          />
-
-          <div className="relative w-full max-w-sm animate-fade-up rounded-2xl border border-line bg-paper-soft p-8 text-center shadow-[0_30px_80px_rgba(22,19,16,0.4)]">
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-cinnabar/50 hover:text-cinnabar"
-              aria-label={copy.close}
-            >
-              ✕
-            </button>
-
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#07c160] text-white shadow-[0_10px_24px_rgba(7,193,96,0.3)]">
-              <WeChatIcon className="h-6 w-6" />
-            </span>
-            <h3 className="mt-4 font-serif text-xl font-semibold text-ink">
-              {copy.title}
-            </h3>
-            <p className="mx-auto mt-2 max-w-[280px] text-[11px] leading-[1.8] text-ink-muted">
-              {copy.description}
-            </p>
-
-            <div className="relative mx-auto mt-6 w-fit max-w-full overflow-hidden rounded-xl border border-line bg-white p-3">
-              {qrStatus === "error" ? (
-                qrUnavailable
-              ) : (
-                <QrErrorBoundary resetKey={qrSrc} fallback={qrUnavailable}>
-                  {qrStatus === "loading" && (
-                    <div
-                      className="absolute inset-3 animate-pulse rounded-lg bg-paper-soft"
-                      aria-hidden
-                    />
-                  )}
-                  <Image
-                    key={qrSrc}
-                    src={qrSrc}
-                    alt={copy.qrAlt}
-                    width={280}
-                    height={392}
-                    unoptimized
-                    onLoad={handleQrLoad}
-                    onError={handleQrError}
-                    className={cn(
-                      "block h-auto w-[280px] max-w-full rounded-lg",
-                      qrStatus === "loading" && "opacity-0",
-                    )}
-                    style={{ height: "auto" }}
-                  />
-                </QrErrorBoundary>
-              )}
-            </div>
-
-            {qrStatus !== "error" && (
-              <p className="mt-5 text-[10px] tracking-wider text-gold">
-                {copy.instruction}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {dialog}
     </>
   );
 }

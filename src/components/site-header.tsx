@@ -51,10 +51,6 @@ export default function SiteHeader() {
   }, [open]);
 
   useEffect(() => {
-    setAuthOpen(false);
-  }, [pathname, locale]);
-
-  useEffect(() => {
     if (!authOpen) return;
     const onPointerDown = (event: PointerEvent) => {
       if (!authMenuRef.current?.contains(event.target as Node)) {
@@ -152,7 +148,10 @@ export default function SiteHeader() {
                 title={option.title}
                 aria-label={option.title}
                 aria-pressed={locale === option.locale}
-                onClick={() => switchLocale(option.locale)}
+                onClick={() => {
+                  setAuthOpen(false);
+                  switchLocale(option.locale);
+                }}
                 className={cn(
                   "rounded-full px-2 py-1 text-[9px] tracking-wide transition-colors",
                   locale === option.locale ? "bg-ink text-paper-soft" : "text-ink-muted hover:text-ink",
@@ -216,6 +215,7 @@ export default function SiteHeader() {
                   <a
                     role="menuitem"
                     href={signInHref}
+                    onClick={() => setAuthOpen(false)}
                     className="block px-3 py-2 text-xs text-ink-soft transition-colors hover:bg-paper-soft hover:text-cinnabar"
                   >
                     {messages.ui.header.login}
@@ -223,6 +223,7 @@ export default function SiteHeader() {
                   <a
                     role="menuitem"
                     href={`${signInHref}?mode=register`}
+                    onClick={() => setAuthOpen(false)}
                     className="block px-3 py-2 text-xs text-ink-soft transition-colors hover:bg-paper-soft hover:text-cinnabar"
                   >
                     {messages.ui.header.register}

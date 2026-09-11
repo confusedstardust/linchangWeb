@@ -38,8 +38,23 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void refresh().finally(() => setLoading(false));
-  }, [refresh]);
+    let active = true;
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/auth/me", { credentials: "include" });
+        const nextUser = response.ok ? ((await response.json()) as AuthUser) : null;
+        if (active) setUser(nextUser);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void loadSession();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });

@@ -21,14 +21,25 @@
 
 ## 本地运行
 
-需要 Node.js 18.18+（本机可用 `nvm use 20`）：
+需要 Node.js 20.9+（本机可用 `nvm use 20`）：
 
 ```bash
 npm install
+npm run db:migrate
 npm run dev
 ```
 
 默认访问 `http://localhost:3000`。
+
+登录功能还需要从 `.env.example` 创建 `.env`，配置 MySQL `DATABASE_URL`、随机的 `AUTH_SECRET` 和 SMTP。`nos_session` Cookie 的路径为 `/`，因此同一站点下的官网与 `/narrativeos/` 工作台会自动共享登录态。FastAPI 通过官网 `/api/auth/me` 校验该会话，并使用返回的 `user.id` 隔离任务。
+
+本地联调工作台时，在构建或启动官网前设置：
+
+```bash
+NEXT_PUBLIC_WORKBENCH_URL=http://127.0.0.1:3001/ npm run dev
+```
+
+线上未设置 `NEXT_PUBLIC_WORKBENCH_URL` 时默认使用 `https://www.narrativeos.cn/narrativeos/`。
 
 ## 目录结构
 

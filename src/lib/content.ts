@@ -1,4 +1,5 @@
-export const WORKBENCH_URL = "https://www.narrativeos.cn/narrativeos/";
+export const WORKBENCH_URL =
+  process.env.NEXT_PUBLIC_WORKBENCH_URL?.trim() || "https://www.narrativeos.cn/narrativeos/";
 
 export const navLinks = [
   { label: "优质案例", href: "#cases" },

@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -36,10 +35,6 @@ export default function I18nProvider({
 }) {
   const messages = useMemo(() => getMessages(locale), [locale]);
   const router = useRouter();
-  const localeRef = useRef(locale);
-  const routerRef = useRef(router);
-  localeRef.current = locale;
-  routerRef.current = router;
 
   useEffect(() => {
     document.documentElement.lang =
@@ -47,15 +42,15 @@ export default function I18nProvider({
   }, [locale]);
 
   const switchLocale = useCallback((nextLocale: Locale) => {
-    if (nextLocale === localeRef.current) return;
+    if (nextLocale === locale) return;
     const hash = window.location.hash;
     const search = window.location.search;
     if (isLoginPath(window.location.pathname)) {
-      routerRef.current.push(`${loginPath(nextLocale)}${search}`);
+      router.push(`${loginPath(nextLocale)}${search}`);
       return;
     }
-    routerRef.current.push(`${localizedPath(nextLocale)}${hash}`);
-  }, []);
+    router.push(`${localizedPath(nextLocale)}${hash}`);
+  }, [locale, router]);
 
   const value = useMemo<I18nContextValue>(
     () => ({

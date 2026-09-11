@@ -17,7 +17,8 @@ function safeNext(value: string | null) {
   if (value.startsWith("/") && !value.startsWith("//")) return value;
   try {
     const url = new URL(value);
-    if (url.origin === "https://www.narrativeos.cn") return value;
+    const workbench = new URL(WORKBENCH_URL);
+    if (url.origin === workbench.origin) return value;
   } catch {
     return WORKBENCH_URL;
   }

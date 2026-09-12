@@ -62,6 +62,9 @@ jobs:
           context: .
           file: ./docker/frontend.Dockerfile
           push: true
+          # Alibaba Cloud Personal ACR does not accept Buildx attestation manifests.
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=linchang-web

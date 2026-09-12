@@ -5,11 +5,10 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
 COPY . .
 ENV DATABASE_URL="mysql://user:pass@127.0.0.1:3306/narrativeos"
-RUN npx prisma generate
 RUN npm run build
 
 

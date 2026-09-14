@@ -14,11 +14,15 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
-  REGISTRY: ghcr.io
-  WEBSITE_IMAGE_NAME: ${{ github.repository }}-website
+  REGISTRY: crpi-tuqzw1uka36vt7nh.cn-hangzhou.personal.cr.aliyuncs.com
+  WEBSITE_IMAGE_NAME: acr_namespace_narrativeos/linchangweb-website
+
+# Only the newest main-branch deployment is useful; cancel stale builds/deploys.
+concurrency:
+  group: linchang-web-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -36,12 +40,12 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to GHCR
+      - name: Log in to Alibaba Cloud Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Docker metadata
         id: meta
@@ -58,10 +62,13 @@ jobs:
           context: .
           file: ./docker/frontend.Dockerfile
           push: true
+          # Alibaba Cloud Personal ACR does not accept Buildx attestation manifests.
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=linchang-web
+          cache-to: type=gha,mode=max,scope=linchang-web
 
   deploy:
     if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy) }}
@@ -87,23 +94,22 @@ jobs:
         env:
           VERSION_TAG: ${{ needs.build.outputs.version_tag }}
           REGISTRY: ${{ env.REGISTRY }}
-          REPOSITORY: ${{ github.repository }}
-          GHCR_USERNAME: ${{ github.actor }}
-          GHCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          WEBSITE_IMAGE_NAME: ${{ env.WEBSITE_IMAGE_NAME }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
           WEBSITE_PORT: ${{ vars.WEBSITE_PORT }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: VERSION_TAG,REGISTRY,REPOSITORY,GHCR_USERNAME,GHCR_PASSWORD,WEBSITE_PORT
+          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT
           command_timeout: 60m
           script: |
             set -e
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
             cd "${{ secrets.DEPLOY_PATH }}"
-            echo "$GHCR_PASSWORD" | docker login "$REGISTRY" -u "$GHCR_USERNAME" --password-stdin
-            REPOSITORY_LC="$(echo "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
-            export WEBSITE_IMAGE="$REGISTRY/$REPOSITORY_LC-website:$VERSION_TAG"
+            echo "$ACR_PASSWORD" | docker login "$REGISTRY" -u "$ACR_USERNAME" --password-stdin
+            export WEBSITE_IMAGE="$REGISTRY/$WEBSITE_IMAGE_NAME:$VERSION_TAG"
             if docker compose version >/dev/null 2>&1; then
               COMPOSE_CMD="docker compose"
             elif command -v docker-compose >/dev/null 2>&1; then
@@ -131,9 +137,5 @@ jobs:
             echo "[$(date -Is)] Starting docker compose up"
             $COMPOSE_CMD -f docker-compose.prod.yml up -d
             echo "[$(date -Is)] Finished docker compose up"
-            echo "[$(date -Is)] Docker disk usage before image prune"
-            docker system df || true
-            echo "[$(date -Is)] Pruning unused Docker images older than 24h"
-            docker image prune -a -f --filter "until=24h" || true
-            echo "[$(date -Is)] Docker disk usage after image prune"
-            docker system df || true
+            # Keep cleanup out of the deployment critical path; run it separately
+            # during maintenance so a deploy is not delayed by Docker disk scans.

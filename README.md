@@ -57,6 +57,7 @@ NEXT_PUBLIC_WORKBENCH_URL=http://127.0.0.1:3001/ npm run dev
 - `src/lib/content.ts` — 全站文案与数据，可直接修改
 - `src/app/globals.css` — 古风设计令牌、纹理、印章与动效
 - `public/hero.mp4` — Hero 背景视频（`public/hero-poster.jpg` 为首帧占位）
+- 
 
 ## 常用命令
 

@@ -532,6 +532,7 @@
   color: var(--color-ink);
 }
 
+.ecosystem-brand-logo { box-shadow: 0 8px 20px rgba(77, 54, 35, 0.12); }
 .ecosystem-brand > span:last-child { display: grid; gap: 0.15rem; }
 .ecosystem-brand strong { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 600; }
 .ecosystem-brand small { color: var(--color-ink-muted); font-size: 0.58rem; letter-spacing: 0.18em; }

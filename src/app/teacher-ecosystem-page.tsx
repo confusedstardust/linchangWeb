@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLogo from "@/components/brand-logo";
 import { listPublishedTeacherWorks } from "@/lib/teacher-ecosystem";
 import { localizedPath, teacherEcosystemPath, type Locale } from "@/lib/i18n";
 
@@ -90,7 +91,7 @@ export default async function TeacherEcosystemPage({
     <main className="ecosystem-page">
       <header className="ecosystem-nav">
         <Link className="ecosystem-brand" href={localizedPath(locale)}>
-          <span className="seal-mark" aria-hidden="true">临</span>
+          <BrandLogo size={42} className="ecosystem-brand-logo" />
           <span><strong>NarrativeOS</strong><small>{copy.eyebrow}</small></span>
         </Link>
         <Link className="ecosystem-back" href={localizedPath(locale)}>← {copy.back}</Link>

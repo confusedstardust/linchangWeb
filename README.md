@@ -39,16 +39,22 @@ npm run dev
 NEXT_PUBLIC_WORKBENCH_URL=http://127.0.0.1:3001/ npm run dev
 ```
 
-线上未设置 `NEXT_PUBLIC_WORKBENCH_URL` 时默认使用 `https://www.narrativeos.cn/narrativeos/`。
+线上未设置 `NEXT_PUBLIC_WORKBENCH_URL` 时默认使用 `https://www.narrativeos.cn/narrativeos/`。生产 GitHub Actions 工作流会显式将该地址作为 Docker 构建参数传入，并在构建前校验。
+
+`NEXT_PUBLIC_WORKBENCH_URL` 在 `next build` 时写入浏览器代码。修改服务器 `.env` 或重启已有容器不会改变按钮链接，需要重新构建并部署镜像。Docker 构建排除 `.env` 和 `.env.*` 文件；本地构建开发镜像时，需通过 `--build-arg NEXT_PUBLIC_WORKBENCH_URL=http://开发服务器/narrativeos/` 传入地址。
 
 ## Non-Prod IP 开发环境
 
 `feature/*` 分支（同时兼容现有的 `feature-*` 命名）使用 `.github/workflows/docker-publish-deploy-dev.yml` 部署到独立的 Non-Prod 主机；`main` 分支使用生产工作流部署到生产环境。其他分支不会自动部署。GitHub 仓库需要创建名为 `development` 的 Environment，并配置：
 
 - Secrets：`ACR_USERNAME`、`ACR_PASSWORD`、`DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY`、`DEPLOY_PATH`
-- Variable：`WORKBENCH_URL=http://服务器IP:3001/narrativeos/`
+- Variable：`WORKBENCH_URL=http://开发服务器/narrativeos/`（可带端口，例如 `http://服务器IP:3001/narrativeos/`；当前配置为 `http://43.138.207.82/narrativeos/`）
 
-在 Non-Prod 服务器的 `DEPLOY_PATH` 中，根据 `deploy/development.env.example` 创建 `.env`。开发官网地址为 `http://服务器IP:3002/`。由于使用 HTTP，开发环境通过 `AUTH_COOKIE_SECURE=false` 允许浏览器保存登录 Cookie；生产环境不要关闭该选项。`TEACHER_ECOSYSTEM_SERVICE_TOKEN` 必须使用独立的长随机值，并与生成工作台开发部署目录中的同名变量完全一致。
+开发流程从 `development` Environment 读取该变量，校验后传入 Docker 构建。地址必须以 `/narrativeos/` 结尾；localhost、回环地址和生产域名会让构建失败，避免部署出错误链接。开发环境仍运行 Next.js 的 production 构建，工作台地址由上述构建参数区分。
+
+生产 Compose 项目名固定为 `linchang-web`，开发项目名固定为 `linchang-web-development`，避免同一主机上 dev 重建 prod 容器。生产官网默认监听 `127.0.0.1:3002`；开发官网默认使用 `3003`，可通过 `development` Environment 的 Variable `WEBSITE_PORT` 修改，工作流禁止使用生产默认端口 `3002`。若生产自定义了端口，开发端口也必须与其分开。已有部署升级时，先重新部署生产以恢复 `linchang-web` 中的生产镜像，再部署开发。
+
+在 Non-Prod 服务器的独立 `DEPLOY_PATH` 中，根据 `deploy/development.env.example` 创建 `.env`。开发官网地址为 `http://服务器IP:3003/`。工作流会导出开发端口，覆盖服务器旧 `.env` 中的 `WEBSITE_PORT`；已有微信回调地址和反向代理配置也需同步到新端口。由于使用 HTTP，开发环境通过 `AUTH_COOKIE_SECURE=false` 允许浏览器保存登录 Cookie；生产环境不要关闭该选项。`TEACHER_ECOSYSTEM_SERVICE_TOKEN` 必须使用独立的长随机值，并与生成工作台开发部署目录中的同名变量完全一致。
 
 ## 目录结构
 

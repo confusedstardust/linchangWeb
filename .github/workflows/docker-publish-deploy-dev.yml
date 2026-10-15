@@ -52,12 +52,7 @@ jobs:
       - name: Validate development public URL
         env:
           WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
-        run: |
-          test -n "$WORKBENCH_URL" || { echo "development variable WORKBENCH_URL is required"; exit 1; }
-          case "$WORKBENCH_URL" in
-            http://*/narrativeos/) ;;
-            *) echo "WORKBENCH_URL must look like http://SERVER_IP:3001/narrativeos/"; exit 1 ;;
-          esac
+        run: node scripts/validate-workbench-url.cjs development
 
       - name: Build and push development website image
         uses: docker/build-push-action@v6
@@ -110,17 +105,24 @@ jobs:
           WEBSITE_IMAGE_NAME: ${{ env.WEBSITE_IMAGE_NAME }}
           ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD
+          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT
           command_timeout: 60m
           script: |
             set -e
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
             cd "${{ secrets.DEPLOY_PATH }}"
             test -s .env || { echo "Missing development .env in $PWD"; exit 1; }
+            case "$WEBSITE_PORT" in
+              ''|*[!0-9]*) echo "Development WEBSITE_PORT must be numeric"; exit 1 ;;
+            esac
+            test "$WEBSITE_PORT" -ge 1 && test "$WEBSITE_PORT" -le 65535 || { echo "Invalid development WEBSITE_PORT"; exit 1; }
+            test "$WEBSITE_PORT" -ne 3002 || { echo "Development WEBSITE_PORT must not use production port 3002"; exit 1; }
+            export WEBSITE_PORT
             echo "$ACR_PASSWORD" | docker login "$REGISTRY" -u "$ACR_USERNAME" --password-stdin
             export WEBSITE_IMAGE="$REGISTRY/$WEBSITE_IMAGE_NAME:$VERSION_TAG"
             if docker compose version >/dev/null 2>&1; then
@@ -132,5 +134,5 @@ jobs:
               exit 1
             fi
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
-            $COMPOSE_CMD --env-file .env -f docker-compose.dev.yml pull website
-            $COMPOSE_CMD --env-file .env -f docker-compose.dev.yml up -d website
+            $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
+            $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website

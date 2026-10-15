@@ -3,7 +3,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-ARG NEXT_PUBLIC_WORKBENCH_URL=
+ARG NEXT_PUBLIC_WORKBENCH_URL=https://www.narrativeos.cn/narrativeos/
 ENV NEXT_PUBLIC_WORKBENCH_URL=${NEXT_PUBLIC_WORKBENCH_URL}
 
 COPY package.json package-lock.json ./

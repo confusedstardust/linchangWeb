@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${WEBSITE_PORT:-3002}:3000"
+      - "${WEBSITE_PORT:-3003}:3000"
     environment:
       NODE_ENV: production
       AUTH_COOKIE_SECURE: "false"

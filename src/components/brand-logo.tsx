@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "@/app/icon.png";
+import logo from "@/assets/brand-logo.png";
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {

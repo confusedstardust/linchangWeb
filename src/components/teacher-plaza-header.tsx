@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { WorkbenchAccountMenu } from "@/components/workbench-account-menu";
 import { localizedPath, type Locale } from "@/lib/i18n";
 import { WORKBENCH_URL } from "@/lib/content";
+import BrandLogo from "@/components/brand-logo";
 
 function PlazaReturnLink({ locale }: { locale: Locale }) {
   const [target, setTarget] = useState<{ href: string; label: string } | null>(null);
@@ -51,7 +52,7 @@ function PlazaReturnLink({ locale }: { locale: Locale }) {
 export default function TeacherPlazaHeader({ locale }: { locale: Locale }) {
   const title = locale === "en" ? "Teacher Resource Plaza" : locale === "zh-Hant" ? "教師資源廣場" : "教师资源广场";
   return <header className="plaza-workbench-header">
-    <a className="plaza-workbench-brand" href={localizedPath(locale)}><span className="plaza-workbench-seal"><img src="/icon.png" alt="" /></span><span><strong>{locale === "en" ? title : `临场 · ${title}`}</strong><small>TEACHER RESOURCE PLAZA</small></span></a>
+    <a className="plaza-workbench-brand" href={localizedPath(locale)}><span className="plaza-workbench-seal"><BrandLogo size={36} className="h-full w-full rounded-none" /></span><span><strong>{locale === "en" ? title : `临场 · ${title}`}</strong><small>TEACHER RESOURCE PLAZA</small></span></a>
     <nav className="plaza-workbench-actions" aria-label="广场导航"><PlazaReturnLink locale={locale} /><WorkbenchAccountMenu /></nav>
   </header>;
 }

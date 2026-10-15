@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLenis } from "lenis/react";
 import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import { teacherEcosystemPath, type Locale } from "@/lib/i18n";
 type Copy = { works: string; clear: string; empty: string; emptyHint: string; description: string; author: string; enter: string; practice: string };
 type Batch = { works: PublicTeacherWork[]; total: number; nextOffset: number; hasMore: boolean };
 export default function TeacherWorkFeed({ query, locale, copy }: { query: string; locale: Locale; copy: Copy }) {
+  const lenis = useLenis();
   const [works, setWorks] = useState<PublicTeacherWork[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -53,6 +55,11 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
     void load();
     return () => { controller.current?.abort(); busy.current = false; };
   }, [load]);
+  useEffect(() => {
+    // The root element has a fixed height, so appended cards do not trigger
+    // Lenis's ResizeObserver. Refresh its scroll range after the DOM changes.
+    lenis?.resize();
+  }, [lenis, works.length, loading, error, hasMore]);
   useEffect(() => {
     if (loading || error || !hasMore || !sentinel.current || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(entries => {

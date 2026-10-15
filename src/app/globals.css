@@ -735,3 +735,90 @@
   .ecosystem-gallery { grid-template-columns: 1fr; width: min(100% - 28px, 1240px); }
   .ecosystem-card h2, .ecosystem-card-copy > p { min-height: 0; }
 }
+
+.ecosystem-feed-meta { justify-content: center; margin: -2rem auto 3rem; }
+.ecosystem-cover img.ecosystem-cover-image { width: 100%; height: 100%; object-fit: cover; }
+.ecosystem-feed-status { display: flex; justify-content: center; align-items: center; gap: 1rem; min-height: 5rem; margin: 1rem auto; color: var(--color-ink-muted); font-size: .85rem; }
+.ecosystem-feed-status button { border: 1px solid var(--color-line); border-radius: 999px; padding: .65rem 1.3rem; cursor: pointer; }
+
+.ecosystem-with-site-header { padding-top: 0; }
+.plaza-return-link { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 5px; padding: 8px 10px; border: 1px solid var(--color-line); border-radius: 7px; color: var(--color-ink-muted); font-size: 12px; white-space: nowrap; }
+.plaza-return-link svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.plaza-return-link:hover { color: var(--color-cinnabar); border-color: var(--color-cinnabar); }
+@media (max-width: 620px) { .ecosystem-with-site-header header .plaza-return-link { padding: 7px; font-size: 11px; } }
+
+/* Match Forge's workbench header and floating account card. */
+.plaza-workbench-header { --ink: #1a1a1a; --ink-light: #3d3533; --ink-muted: #6b6460; --cinnabar: #9b2335; --cinnabar-deep: #7a1a28; --cinnabar-glow: rgba(155,35,53,.12); --gold: #c9a84c; --rice-dark: #ede7da; --paper: #faf7f2; --border: rgba(201,168,76,.35); --border-light: rgba(201,168,76,.18); --shadow: rgba(26,26,26,.08); position: sticky; top: 0; z-index: 60; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 64px; padding: 0 40px; background: rgba(247,243,236,.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); }
+.plaza-workbench-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.plaza-workbench-seal { flex: 0 0 36px; width: 36px; height: 36px; overflow: hidden; border: 1px solid rgba(155,35,53,.18); border-radius: 8px; box-shadow: 0 2px 8px rgba(155,35,53,.16); }
+.plaza-workbench-seal img { width: 100%; height: 100%; object-fit: cover; }
+.plaza-workbench-brand > span:last-child { display: grid; gap: 3px; min-width: 0; }
+.plaza-workbench-brand strong { color: var(--ink); font-family: STSong, SimSun, serif; font-size: 17px; font-weight: 600; letter-spacing: .05em; }
+.plaza-workbench-brand small { color: var(--ink-muted); font-size: 10px; letter-spacing: .15em; }
+.plaza-workbench-actions { display: flex; align-items: center; flex-shrink: 0; gap: 6px; }
+.plaza-workbench-header .plaza-return-link { border-color: transparent; font-weight: 600; }
+@media (max-width: 768px) { .plaza-workbench-header { flex-wrap: wrap; padding: 10px 20px; gap: 8px; } .plaza-workbench-actions { margin-left: auto; } .plaza-workbench-brand strong { font-size: 15px; } }
+.plaza-account-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink-muted);font:inherit;font-size:12px;font-weight:600;white-space:nowrap}
+.plaza-account-trigger:hover,.plaza-account-trigger[data-state=open]{background:var(--cinnabar-glow);color:var(--cinnabar);border-color:var(--cinnabar)}
+.plaza-account-trigger:disabled{cursor:wait;opacity:.65}
+.plaza-account-trigger-avatar{display:grid;place-items:center;width:22px;height:22px;overflow:hidden;border-radius:50%;color:var(--cinnabar);background:var(--rice-dark);font-size:11px}
+.plaza-account-trigger-avatar img,.plaza-account-avatar img{width:100%;height:100%;object-fit:cover}
+.plaza-account-trigger-avatar svg{width:16px;height:16px}
+.plaza-account-chevron{width:12px;height:12px;transition:transform .18s}
+.plaza-account-trigger[data-state=open] .plaza-account-chevron{transform:rotate(180deg)}
+.router-nav .plaza-account-trigger{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.25)}
+.plaza-account-popover{z-index:1200;width:344px;max-width:calc(100vw - 32px);max-height:var(--radix-popover-content-available-height);overflow-y:auto;padding:10px;border:1px solid var(--border);border-radius:20px;color:var(--ink);background:var(--paper);box-shadow:0 24px 64px rgba(46,33,24,.18),0 4px 12px rgba(46,33,24,.06);transform-origin:var(--radix-popover-content-transform-origin);animation:account-reveal .18s ease-out}
+.plaza-account-popover :is(a,button):focus-visible,.plaza-account-trigger:focus-visible{outline:2px solid var(--cinnabar);outline-offset:3px}
+.plaza-account-profile{padding:12px 14px 18px;border-radius:12px;background:linear-gradient(120deg,#eee5d6,#f6f0e5 75%)}
+.plaza-account-profile-top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:4px}
+.plaza-account-close{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink-muted);font-size:22px;line-height:1}
+.plaza-account-close:hover{background:#e7ddcd}
+.plaza-account-identity{display:flex;align-items:center;gap:13px}
+.plaza-account-avatar{position:relative;display:grid;place-items:center;flex:0 0 52px;height:52px;border:3px solid var(--paper);border-radius:50%;background:var(--cinnabar);color:var(--paper);font-family:"NarrativeOS Solution Serif",serif;font-size:24px;box-shadow:0 3px 8px var(--shadow)}
+.plaza-account-identity>div{min-width:0}
+.plaza-account-identity h2{margin:0 0 5px;font-size:18px;font-weight:600;overflow-wrap:anywhere}
+.plaza-account-identity p{margin:0;color:var(--ink-muted);font-size:12px;overflow-wrap:anywhere}
+.plaza-account-avatar img{border-radius:50%}
+.plaza-account-status-dot{position:absolute;right:-3px;bottom:-2px;width:12px;height:12px;border:2px solid var(--paper);border-radius:50%;background:#2ea66a}
+.plaza-account-credits{position:relative;margin:14px 6px 5px;padding:15px 16px;border:1px solid var(--border-light);border-radius:12px;background:#fffdf9}
+.plaza-account-credits>div{display:flex;align-items:baseline;justify-content:space-between;padding-right:35px}
+.plaza-account-credits div>span{color:var(--ink-muted);font-size:12px}
+.plaza-account-credits strong{color:var(--cinnabar);font-size:27px;font-weight:600;font-variant-numeric:tabular-nums}
+.plaza-account-credit-mark{position:absolute;top:20px;right:16px;color:var(--gold);font-size:25px}
+.plaza-account-credits p{margin:8px 0 0;color:var(--ink-muted);font-size:11px}
+.plaza-account-actions{display:grid;gap:3px;padding:10px 0}
+.plaza-account-actions :is(a,button){display:flex;align-items:center;gap:12px;padding:12px 15px;border:0;border-radius:10px;background:transparent;color:var(--ink-light);text-decoration:none;font:inherit;font-size:13px;text-align:left;transition:background .15s,color .15s}
+.plaza-account-actions button:disabled{color:var(--ink-muted);cursor:not-allowed}
+.plaza-account-actions small{margin-left:auto;font-size:11px;white-space:nowrap}
+.plaza-account-actions a:hover{color:var(--cinnabar);background:var(--cinnabar-glow)}
+.plaza-account-actions svg,.plaza-account-footer svg{flex-shrink:0;width:20px;height:20px}
+.plaza-account-actions b{margin-left:auto;font-size:20px;font-weight:400;color:var(--ink-muted)}
+.plaza-account-footer{display:flex;align-items:center;gap:10px;margin:0 6px;padding:13px 8px 5px;border-top:1px solid var(--border-light)}
+.plaza-account-footer>div{flex:1;min-width:0}
+.plaza-account-footer span{display:block;margin-bottom:4px;color:var(--ink-muted);font-size:10px}
+.plaza-account-footer code{display:block;color:var(--ink-muted);font-size:10px;overflow-wrap:anywhere;user-select:all}
+.plaza-account-footer button{display:grid;place-items:center;flex-shrink:0;width:34px;height:34px;padding:0;border:0;border-radius:7px;color:var(--ink-muted);background:transparent}
+.plaza-account-footer button:hover{color:var(--cinnabar);background:var(--cinnabar-glow)}
+.plaza-account-footer .plaza-account-logout{display:inline-flex;align-items:center;gap:5px;width:auto;padding:0 8px;white-space:nowrap}
+.plaza-account-footer .plaza-account-logout span{margin:0;color:inherit;font-size:12px}
+.plaza-account-footer .plaza-account-logout svg{width:17px;height:17px}
+.plaza-account-footer .plaza-account-logout:disabled{opacity:.6;cursor:wait}
+.plaza-account-copy-status{display:block;padding:2px 14px;color:var(--cinnabar);font-size:11px}
+.plaza-account-copy-status:empty{padding:0}
+@keyframes account-reveal{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.plaza-account-popover{animation:none}.plaza-account-chevron{transition:none}}
+.plaza-account-trigger.mobile-login { background: var(--cinnabar); padding: 11px 14px; font-size: 14px; }
+.plaza-account-trigger.mobile-login:hover, .plaza-account-trigger.mobile-login[data-state=open] { background: var(--cinnabar-deep); }
+@media (max-width: 520px) {
+  .router-nav nav { align-items: center; gap: 10px; }
+  .router-nav nav > a { white-space: nowrap; }
+  .router-nav nav > .credit-balance { display: none; }
+}
+
+/* Recharge follows the account card's paper and cinnabar palette. */
+.plaza-account-credits>div{padding-right:62px}
+.plaza-account-recharge{position:absolute;right:14px;top:19px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;color:var(--cinnabar);background:var(--paper);font-size:12px;text-decoration:none}
+.plaza-account-recharge:hover{background:var(--cinnabar);color:var(--paper)}
+
+.plaza-account-popover { position: fixed; top: 72px; right: 20px; bottom: auto; left: auto; margin: 0; max-height: calc(100dvh - 90px); }
+.plaza-account-actions a[aria-current="page"] { color: var(--cinnabar); background: var(--cinnabar-glow); }

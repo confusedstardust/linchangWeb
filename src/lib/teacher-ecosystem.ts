@@ -78,10 +78,12 @@ export function serializeTeacherWork(work: {
   };
 }
 
-export async function listPublishedTeacherWorks(query: string, page: number, pageSize = TEACHER_WORK_PAGE_SIZE) {
+export async function listPublishedTeacherWorks(query: string, page: number, pageSize = TEACHER_WORK_PAGE_SIZE, offset?: number) {
   const prisma = getPrisma();
   const normalizedQuery = query.trim().slice(0, 80);
-  const safePage = Math.max(1, page);
+  const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+  pageSize = Number.isFinite(pageSize) ? Math.min(30, Math.max(1, Math.floor(pageSize))) : TEACHER_WORK_PAGE_SIZE;
+  const skip = offset === undefined ? (safePage - 1) * pageSize : Math.max(0, Math.floor(offset));
   const where = {
     status: "PUBLISHED" as const,
     ...(normalizedQuery
@@ -102,8 +104,8 @@ export async function listPublishedTeacherWorks(query: string, page: number, pag
           select: { nickname: true, email: true, avatarUrl: true },
         },
       },
-      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-      skip: (safePage - 1) * pageSize,
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }, { id: "desc" }],
+      skip,
       take: pageSize,
     }),
   ]);
@@ -115,5 +117,7 @@ export async function listPublishedTeacherWorks(query: string, page: number, pag
     total,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
     works: works.map(serializeTeacherWork),
+    nextOffset: skip + works.length,
+    hasMore: skip + works.length < total,
   };
 }

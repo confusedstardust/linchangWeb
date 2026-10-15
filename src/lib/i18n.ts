@@ -249,7 +249,7 @@ export type LocaleMessages = {
 const zhUi: UiMessages = {
   header: {
     brand: "临场 · AI 叙事课堂生成平台",
-    nav: ["优质案例", "产品", "能力", "灵感", "团队", "技术", "关于我们"],
+    nav: ["优质案例", "产品", "能力", "灵感", "团队", "技术", "定价", "关于我们"],
     backToTop: "返回顶部",
     mainNav: "主导航",
     mobileNav: "移动端导航",
@@ -400,7 +400,7 @@ const zhUi: UiMessages = {
 const enUi: UiMessages = {
   header: {
     brand: "Linchang · AI Narrative Classroom Platform",
-    nav: ["Cases", "Products", "Capabilities", "Inspiration", "Team", "Technology", "About"],
+    nav: ["Cases", "Products", "Capabilities", "Inspiration", "Team", "Technology", "Pricing", "About"],
     backToTop: "Back to top",
     mainNav: "Main navigation",
     mobileNav: "Mobile navigation",
@@ -551,7 +551,7 @@ const enUi: UiMessages = {
 const hantUi: UiMessages = {
   header: {
     brand: "臨場 · AI 敘事課堂生成平台",
-    nav: ["優質案例", "產品", "能力", "靈感", "團隊", "技術", "關於我們"],
+    nav: ["優質案例", "產品", "能力", "靈感", "團隊", "技術", "定價", "關於我們"],
     backToTop: "返回頂部",
     mainNav: "主導航",
     mobileNav: "移動端導航",

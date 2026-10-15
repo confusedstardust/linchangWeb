@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/teacher-
   const { locale } = await params;
   if (!isLocalePath(locale)) return {};
   return locale === "en"
-    ? { title: "Teacher creations | NarrativeOS", description: "Explore narrative classroom works made by NarrativeOS teachers." }
-    : { title: "教師創作生態 | NarrativeOS", description: "瀏覽 NarrativeOS 種子教師創作的敘事課堂作品與講評練內容。" };
+    ? { title: "Teacher Resource Plaza | NarrativeOS", description: "Explore narrative classroom works made by NarrativeOS teachers." }
+    : { title: "教師資源廣場 | NarrativeOS", description: "瀏覽 NarrativeOS 種子教師創作的敘事課堂作品與講評練內容。" };
 }
 
 export default async function Page({ params, searchParams }: PageProps<"/[locale]/teacher-ecosystem">) {

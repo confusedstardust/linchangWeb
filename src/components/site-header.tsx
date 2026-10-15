@@ -98,6 +98,11 @@ export default function SiteHeader() {
     event: MouseEvent<HTMLAnchorElement>,
     href: string,
   ) => {
+    if (!href.startsWith("#")) {
+      setOpen(false);
+      return;
+    }
+
     if (!onHome) {
       setOpen(false);
       return;
@@ -154,7 +159,7 @@ export default function SiteHeader() {
           {navLinks.map((link, index) => (
             <a
               key={link.href}
-              href={onHome ? link.href : `${homeHref}${link.href}`}
+              href={!link.href.startsWith("#") || onHome ? link.href : `${homeHref}${link.href}`}
               onClick={(event) => goToSection(event, link.href)}
               className="group relative py-2 text-xs text-ink-soft transition-colors hover:text-cinnabar"
             >
@@ -308,7 +313,7 @@ export default function SiteHeader() {
           {navLinks.map((link, index) => (
             <a
               key={link.href}
-              href={onHome ? link.href : `${homeHref}${link.href}`}
+              href={!link.href.startsWith("#") || onHome ? link.href : `${homeHref}${link.href}`}
               onClick={(event) => goToSection(event, link.href)}
               className="flex items-center justify-between border-b border-line/70 py-3.5 font-serif text-[15px] text-ink"
             >

@@ -58,6 +58,12 @@ NEXT_PUBLIC_WORKBENCH_URL=http://127.0.0.1:3001/ npm run dev
 
 ## 目录结构
 
+账户菜单、管理员入口、账户请求、会话生命周期、图标、样式和小尺寸 Logo 统一由 `packages/narrativeos-ui` 中的 `@narrativeos/ui` 提供。官网和工作台组件只负责各自的接口及导航地址。修改共享行为时直接修改该包，勿在页面中再复制实现。
+
+工作台通过提交到仓库的 npm 版本包使用同一份实现，因此两个仓库均可独立构建 Docker 镜像。共享包的打包、升级步骤见 [维护说明](packages/narrativeos-ui/README.md)。广场正文、返回导航和加载状态文案统一在 `src/lib/messages/teacher-plaza.ts`，由现有 `getMessages(locale).ui.plaza` 提供；账户文案使用 `getMessages(locale).ui.account`。
+
+运行 `npm run test:shared-ui` 检查账户协议与失败分支。`tests/shared-account-menu.browser.cjs` 使用 Playwright 验证两个运行中的应用，支持 `UI_TEST_PORTAL_URL` 和 `UI_TEST_WORKBENCH_URL`（可带 `/narrativeos/`）；可通过 `PLAYWRIGHT_MODULE` 指定已有 Playwright 模块。浏览器用例拦截 API 请求，不会写入实际账户或留言数据。
+
 - `src/app` — 根布局、页面与 favicon
 - `src/components` — 各区块组件（Hero、产品、体验、能力、灵感、团队、技术、流程等）
 - `src/lib/content.ts` — 全站文案与数据，可直接修改

@@ -17,6 +17,7 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const [workbenchAuthMode, setWorkbenchAuthMode] = useState<WorkbenchAuthMode | null>(null);
   const authMenuRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
@@ -34,6 +35,10 @@ export default function SiteHeader() {
   const onAuthPage = /(^|\/)login\/?$/.test(pathname);
   const accountLabel = (user?.email || user?.nickname || "").trim().charAt(0);
   const showPortalAuth = workbenchAuthMode === "sso" || workbenchAuthMode === "sso_or_invite";
+  async function signOut() {
+    setLogoutError("");
+    try { await logout(); } catch { setLogoutError(messages.ui.account.logoutError); }
+  }
   const languageOptions: Array<{ locale: Locale; label: string; title: string }> = [
     { locale: "zh-CN", label: "简", title: "简体中文" },
     { locale: "en", label: "EN", title: "English" },
@@ -200,7 +205,7 @@ export default function SiteHeader() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => void logout()}
+                  onClick={() => void signOut()}
                   className="text-xs text-ink-soft transition-colors hover:text-cinnabar"
                 >
                   {messages.ui.header.logout}
@@ -329,7 +334,7 @@ export default function SiteHeader() {
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  void logout();
+                  void signOut();
                 }}
                 className="flex items-center justify-between border-b border-line/70 py-3.5 text-[15px] text-ink"
               >
@@ -397,6 +402,7 @@ export default function SiteHeader() {
           </div>
         </nav>
       </div>
+      {logoutError ? <span role="alert" className="absolute right-5 top-full rounded-md border border-line bg-paper px-3 py-2 text-xs text-cinnabar">{logoutError}</span> : null}
     </header>
   );
 }

@@ -1,3 +1,5 @@
+import { accountMessages, type AccountMessages, type UiLocale } from '@narrativeos/ui/i18n';
+import { teacherPlazaMessages, type TeacherPlazaMessages } from './messages/teacher-plaza';
 import type { Metadata } from "next";
 import {
   featuredCases,
@@ -21,7 +23,7 @@ import {
   type TechLayer,
 } from "@/lib/content";
 
-export type Locale = "zh-CN" | "en" | "zh-Hant";
+export type Locale = UiLocale;
 
 export const localePaths = {
   "zh-CN": "/",
@@ -62,6 +64,8 @@ export function isLoginPath(pathname: string) {
 }
 
 export type UiMessages = {
+  account: AccountMessages;
+  plaza: TeacherPlazaMessages;
   header: {
     brand: string;
     nav: string[];
@@ -247,6 +251,8 @@ export type LocaleMessages = {
 };
 
 const zhUi: UiMessages = {
+  account: accountMessages['zh-CN'],
+  plaza: teacherPlazaMessages['zh-CN'],
   header: {
     brand: "临场 · AI 叙事课堂生成平台",
     nav: ["优质案例", "产品", "能力", "灵感", "团队", "技术", "定价", "关于我们"],
@@ -398,6 +404,8 @@ const zhUi: UiMessages = {
 };
 
 const enUi: UiMessages = {
+  account: accountMessages['en'],
+  plaza: teacherPlazaMessages['en'],
   header: {
     brand: "Linchang · AI Narrative Classroom Platform",
     nav: ["Cases", "Products", "Capabilities", "Inspiration", "Team", "Technology", "Pricing", "About"],
@@ -549,6 +557,8 @@ const enUi: UiMessages = {
 };
 
 const hantUi: UiMessages = {
+  account: accountMessages['zh-Hant'],
+  plaza: teacherPlazaMessages['zh-Hant'],
   header: {
     brand: "臨場 · AI 敘事課堂生成平台",
     nav: ["優質案例", "產品", "能力", "靈感", "團隊", "技術", "定價", "關於我們"],

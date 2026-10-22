@@ -1,10 +1,12 @@
 "use client";
+import { CollectionCard } from "@narrativeos/ui/collection-card";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import { teacherEcosystemPath, type Locale } from "@/lib/i18n";
-type Copy = { works: string; clear: string; empty: string; emptyHint: string; description: string; author: string; enter: string; practice: string };
+import type { TeacherPlazaMessages } from '@/lib/messages/teacher-plaza';
+type Copy = Pick<TeacherPlazaMessages, 'works' | 'clear' | 'empty' | 'emptyHint' | 'description' | 'author' | 'enter' | 'practice' | 'feed'>;
 type Batch = { works: PublicTeacherWork[]; total: number; nextOffset: number; hasMore: boolean };
 export default function TeacherWorkFeed({ query, locale, copy }: { query: string; locale: Locale; copy: Copy }) {
   const lenis = useLenis();
@@ -18,11 +20,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
   const offset = useRef(0);
   const busy = useRef(false);
   const controller = useRef<AbortController | null>(null);
-  const text = locale === "en"
-    ? { loading: "Loading works…", error: "Unable to load works. Please retry.", retry: "Retry", more: "Load more", end: "All works loaded" }
-    : locale === "zh-Hant"
-    ? { loading: "正在載入作品…", error: "作品載入失敗，請重試。", retry: "重試", more: "載入更多", end: "已載入全部作品" }
-    : { loading: "正在加载作品…", error: "作品加载失败，请重试。", retry: "重试", more: "加载更多", end: "已加载全部作品" };
+  const text = copy.feed;
   const load = useCallback(async () => {
     if (busy.current) return;
     busy.current = true;
@@ -75,7 +73,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
     </div>
       <section ref={gallery} className="ecosystem-gallery" aria-busy={loading}>
         {works.map((work, index) => (
-          <article className="ecosystem-card" key={work.id}>
+          <CollectionCard className="ecosystem-card" key={work.id}>
             <a className="ecosystem-cover" href={work.playUrl} target="_blank" rel="noreferrer">
               {work.coverUrl ? <img className="ecosystem-cover-image" src={work.coverUrl} alt="" loading="lazy" decoding="async" /> : <span className="ecosystem-cover-image" aria-hidden="true" />}
               <span className="ecosystem-card-index">{String(index + 1).padStart(2, "0")}</span>
@@ -98,7 +96,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
                 {work.quizUrl ? <a className="secondary" href={work.quizUrl} target="_blank" rel="noreferrer">{copy.practice}</a> : null}
               </div>
             </div>
-          </article>
+          </CollectionCard>
         ))}
       </section>
 

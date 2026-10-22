@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@narrativeos/ui"],
   allowedDevOrigins: ["127.0.0.1"],
   async rewrites() {
     const workbench = (process.env.NEXT_PUBLIC_WORKBENCH_URL || "https://www.narrativeos.cn/narrativeos/").replace(/\/$/, "");

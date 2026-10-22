@@ -23,7 +23,7 @@ model User {
   email           String?       @unique
   emailVerifiedAt DateTime?     @map("email_verified_at")
   nickname        String?
-  avatarUrl       String?       @map("avatar_url")
+  avatarUrl       String?       @map("avatar_url") @db.Text
   passwordHash    String?       @map("password_hash")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
@@ -91,6 +91,8 @@ model Account {
 model VerificationCode {
   id         String    @id @default(cuid())
   email      String
+  purpose    String    @default("auth") @db.VarChar(32)
+  userId     String?   @map("user_id")
   codeHash   String    @map("code_hash")
   expiresAt  DateTime  @map("expires_at")
   consumedAt DateTime? @map("consumed_at")
@@ -101,6 +103,18 @@ model VerificationCode {
   @@index([email, createdAt])
   @@index([ip, createdAt])
   @@map("verification_codes")
+}
+
+model OAuthAttempt {
+  id         String    @id
+  browserHash String   @map("browser_hash")
+  userId     String?   @map("user_id")
+  nextUrl    String    @map("next_url") @db.Text
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+
+  @@index([expiresAt])
+  @@map("oauth_attempts")
 }
 
 model AuthSession {

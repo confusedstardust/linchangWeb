@@ -22,11 +22,12 @@ export function AdminLink({ client, href, children, LinkComponent = "a", ...prop
   return allowed ? <LinkComponent href={href} {...props}>{children}</LinkComponent> : null;
 }
 
-export function AccountMenu({ client, href, loginHref, plazaHref, onLogout, LinkComponent = "a", className = "", tour, includeAdmin = false, activePlaza = false, locale = "zh-CN", messages = accountMessages[locale] }: {
+export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, onLogout, LinkComponent = "a", className = "", tour, includeAdmin = false, activePlaza = false, locale = "zh-CN", messages = accountMessages[locale] }: {
   client: AccountClient;
   href: (path: string) => string;
   loginHref: () => string;
   plazaHref: () => string;
+  settingsHref?: string;
   onLogout: () => void;
   LinkComponent?: AccountLinkComponent | "a";
   className?: string; tour?: string; includeAdmin?: boolean; activePlaza?: boolean;
@@ -122,6 +123,7 @@ export function AccountMenu({ client, href, loginHref, plazaHref, onLogout, Link
         {!balance || balance.reserved > 0 ? <p>{!balance && balanceLoading ? messages.creditsLoading : balance ? formatMessage(messages.creditsReserved, { count: balance.reserved.toLocaleString(locale) }) : messages.creditsError}</p> : null}
       </section> : null}
       <nav className="account-actions" aria-label={messages.space}>
+        {settingsHref && user?.auth_type === "sso" ? <LinkComponent href={settingsHref} onClick={() => setOpen(false)}><Icon kind="person" /><span>{locale === "en" ? "Account settings" : locale === "zh-Hant" ? "帳號設定" : "账号设置"}</span><b aria-hidden="true">›</b></LinkComponent> : null}
         <LinkComponent href={href("/history")} onClick={() => setOpen(false)}><Icon kind="works" /><span>{messages.works}</span><b aria-hidden="true">›</b></LinkComponent>
         <LinkComponent href={href("/my-assets")} onClick={() => setOpen(false)}><Icon kind="assets" /><span>{messages.myAssets}</span><b aria-hidden="true">›</b></LinkComponent>
         <div className="account-actions-divider" role="separator" />

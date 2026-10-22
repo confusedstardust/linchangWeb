@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useLenis } from "lenis/react";
@@ -200,6 +201,7 @@ export default function SiteHeader() {
           {showPortalAuth && !loading &&
             (user ? (
               <div className="flex items-center gap-3">
+                <Link href="/account" className="text-xs text-ink-soft hover:text-cinnabar">{locale === "en" ? "Account settings" : "账号设置"}</Link>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full border border-line text-[12px] text-ink">
                   {accountLabel}
                 </span>
@@ -328,6 +330,7 @@ export default function SiteHeader() {
               </span>
             </a>
           ))}
+          {showPortalAuth && user && <Link href="/account" className="border-b border-line/70 py-3.5 text-[15px] text-ink">{locale === "en" ? "Account settings" : "账号设置"}</Link>}
           {showPortalAuth && !loading &&
             (user ? (
               <button

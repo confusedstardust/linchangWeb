@@ -8,7 +8,7 @@ export function WorkbenchAccountMenu({ locale = "zh-CN", className, tour, includ
   locale?: Locale; className?: string; tour?: string; includeAdmin?: boolean;
 }) {
   return <AccountMenu client={accountClient} href={workbenchHref}
-    loginHref={() => ssoLoginUrl(locale)} plazaHref={() => teacherResourcePlazaUrl(locale)}
+    loginHref={() => ssoLoginUrl(locale)} plazaHref={() => teacherResourcePlazaUrl(locale)} settingsHref="/account"
     onLogout={() => window.location.reload()} activePlaza includeAdmin={includeAdmin}
     locale={locale} messages={getMessages(locale).ui.account} className={className} tour={tour} />;
 }

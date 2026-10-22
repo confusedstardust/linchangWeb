@@ -1,4 +1,5 @@
 "use client";
+import { CollectionCard } from "@narrativeos/ui/collection-card";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
@@ -72,7 +73,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
     </div>
       <section ref={gallery} className="ecosystem-gallery" aria-busy={loading}>
         {works.map((work, index) => (
-          <article className="ecosystem-card" key={work.id}>
+          <CollectionCard className="ecosystem-card" key={work.id}>
             <a className="ecosystem-cover" href={work.playUrl} target="_blank" rel="noreferrer">
               {work.coverUrl ? <img className="ecosystem-cover-image" src={work.coverUrl} alt="" loading="lazy" decoding="async" /> : <span className="ecosystem-cover-image" aria-hidden="true" />}
               <span className="ecosystem-card-index">{String(index + 1).padStart(2, "0")}</span>
@@ -95,7 +96,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
                 {work.quizUrl ? <a className="secondary" href={work.quizUrl} target="_blank" rel="noreferrer">{copy.practice}</a> : null}
               </div>
             </div>
-          </article>
+          </CollectionCard>
         ))}
       </section>
 

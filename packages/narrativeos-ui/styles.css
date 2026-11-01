@@ -25,8 +25,6 @@
 .account-popover :is(a,button):focus-visible,.account-trigger:focus-visible{outline:2px solid var(--account-cinnabar);outline-offset:3px}
 .account-profile{padding:12px 14px 18px;border-radius:12px;background:linear-gradient(120deg,#eee5d6,#f6f0e5 75%)}
 .account-profile-top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:4px}
-.account-close{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--account-ink-muted);font-size:22px;line-height:1}
-.account-close:hover{background:#e7ddcd}
 .account-identity{display:flex;align-items:center;gap:13px}
 .account-avatar{position:relative;display:grid;place-items:center;flex:0 0 52px;height:52px;border:3px solid var(--account-paper);border-radius:50%;background:var(--account-cinnabar);color:var(--account-paper);font-family:"NarrativeOS Solution Serif",serif;font-size:24px;box-shadow:0 3px 8px var(--account-shadow)}
 .account-identity>div{min-width:0}

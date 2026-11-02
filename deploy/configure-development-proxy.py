@@ -68,14 +68,15 @@ server {{
     previous = target.read_bytes() if target.exists() else None
     def restore():
         if previous is None:
-            target.unlink(missing_ok=True)
+            if target.exists():
+                target.unlink()
         else:
             target.write_bytes(previous)
         subprocess.run(['nginx', '-t'], check=True)
         subprocess.run(['systemctl', 'reload', 'nginx'], check=True)
     try:
         target.write_text(content)
-        checked = subprocess.run(['nginx', '-T'], check=True, capture_output=True, text=True)
+        checked = subprocess.run(['nginx', '-T'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         if f'configuration file {target}:' not in checked.stdout + checked.stderr:
             raise RuntimeError('Development vhost directory is not included by nginx')
         if 'conflicting server name' in checked.stderr:

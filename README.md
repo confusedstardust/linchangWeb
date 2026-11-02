@@ -77,3 +77,13 @@ npm run dev    # 本地开发
 npm run build  # 生产构建
 npm run lint   # 代码检查
 ```
+
+## 开发 IP 反向代理与验收
+
+2026-11-02 排查确认：开发镜像位于 3003，IP 入口此前落到生产域名默认站点并转发至旧版 3002。构建和容器部署成功不能证明公开入口已经更新。
+
+开发工作流在容器启动后运行 `deploy/configure-development-proxy.py`：仅接受 IPv4 开发地址，创建 `/etc/nginx/conf.d/narrativeos-development-ip.conf` 独立站点，官网转发到开发端口；从已有 `/etc/nginx/sites-enabled/narrativeos` 保留 `/narrativeos/` 与 `/play/` 路由块，不修改生产域名站点。语法校验、配置冲突和新版页面检查失败时恢复原配置。现有 Nginx 路径不匹配时会失败，需要核对服务器结构。
+
+手动运行开发工作流，设置 `diagnose_only=true` 只读检查容器及代理；同时设置 `repair_proxy=true` 可独立修复 IP 入口，无需重新构建镜像。修复后应从外部验证 `/teacher-ecosystem/` 页面及静态资源，并单独检查工作台和播放入口。
+
+实施状态：代理修复脚本及工作流已实现；服务器执行及外部验收以对应 Actions 与访问结果为准。

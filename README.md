@@ -2,6 +2,10 @@
 
 官网首页，Next.js 16 + Tailwind CSS v4 实现，古风水墨视觉 + 视频沉浸式 Hero。
 
+## 教师资源广场
+
+- [封面优先卡片、折叠筛选与学科栏](deploy/teacher-plaza-layout.md)
+
 ## 技术栈
 
 - Next.js 16（App Router / TypeScript / Turbopack）

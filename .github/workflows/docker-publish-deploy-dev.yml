@@ -12,6 +12,11 @@ on:
         required: true
         default: true
         type: boolean
+      diagnose_only:
+        description: "Inspect development containers and public routing without rebuilding"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -26,7 +31,7 @@ concurrency:
 
 jobs:
   build:
-    if: ${{ startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-') }}
+    if: ${{ !inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
     environment: development
     runs-on: ubuntu-latest
     outputs:
@@ -141,3 +146,23 @@ jobs:
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website
+
+  diagnose:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
+    environment: development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect development routing
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            docker ps --format '{{.Names}} {{.Image}} {{.Ports}}'
+            sudo nginx -T 2>&1 | awk '/configuration file|listen |server_name |location |proxy_pass / { print }'
+            for port in 3002 3003; do
+              echo "Portal on port $port"
+              curl --max-time 20 -fsS "http://127.0.0.1:$port/teacher-ecosystem/" | python3 -c 'import sys; s=sys.stdin.read(); print({"new_layout": "plaza-paper" in s, "old_layout": "ecosystem-hero" in s, "length": len(s)})' || true
+            done

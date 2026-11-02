@@ -24,9 +24,9 @@ export function filterParams(filters:TeacherWorkFilters,query:string,page=1){
 export function teacherWorkWhere(query:string,filters:TeacherWorkFilters):Prisma.TeacherWorkWhereInput{
  const AND:Prisma.TeacherWorkWhereInput[]=[];
  if(query.trim())AND.push({OR:[{title:{contains:query.trim().slice(0,80)}},{summary:{contains:query.trim().slice(0,80)}},{author:{nickname:{contains:query.trim().slice(0,80)}}}]});
- if(filters.subject?.length)AND.push({subject:{in:filters.subject}});
- if(filters.grade?.length)AND.push({OR:filters.grade.map(g=>({grade:{startsWith:g}}))});
- if(filters.stage?.length)AND.push({OR:filters.stage.flatMap(stage=>(stageGradeTerms[stage]||[stage]).map(term=>({grade:term.endsWith('年级')?{startsWith:term}:{contains:term}})))});
+ if(filters.subject?.length)AND.push({OR:[{subject:{in:filters.subject}},...filters.subject.map(value=>({tags:{array_contains:[value]}}))]});
+ if(filters.grade?.length)AND.push({OR:filters.grade.flatMap(g=>[{grade:{startsWith:g}},{tags:{array_contains:[g]}}])});
+ if(filters.stage?.length)AND.push({OR:filters.stage.flatMap(stage=>[{tags:{array_contains:[stage]}},...(stageGradeTerms[stage]||[stage]).flatMap(term=>[{grade:term.endsWith('年级')?{startsWith:term}:{contains:term}},{tags:{array_contains:[term]}}])])});
  if(filters.curriculum?.length)AND.push({OR:filters.curriculum.map(value=>value==='未标注'?{NOT:{OR:curricula.map(c=>({tags:{array_contains:[c]}}))}}:{tags:{array_contains:[value]}})});
  if(filters.tag?.length){const clauses=filters.tag.map(tag=>({tags:{array_contains:[tag]}}));AND.push(filters.tagMode==='all'?{AND:clauses}:{OR:clauses});}
  if(filters.resource==='quiz')AND.push({quizUrl:{not:null},NOT:{quizUrl:''}});

@@ -54,6 +54,10 @@ function httpUrl(value: unknown, label: string, required: boolean) {
 function normalizePayload(payload: PublicationPayload) {
   const jobId = requiredText(payload.jobId, "任务 ID", 32);
   if (!/^[a-f0-9]{32}$/.test(jobId)) throw new Error("任务 ID 格式无效");
+  const tags = Array.isArray(payload.tags)
+    ? [...new Set(payload.tags.filter((tag): tag is string => typeof tag === "string").map(tag => tag.trim()).filter(Boolean))]
+    : [];
+  if (tags.length > 64) throw new Error("标签不能超过 64 个");
   return {
     ownerUserId: requiredText(payload.ownerUserId, "用户 ID", 191),
     authorName: optionalText(payload.authorName, 80),
@@ -65,9 +69,7 @@ function normalizePayload(payload: PublicationPayload) {
     quizUrl: httpUrl(payload.quizUrl, "讲评练地址", false),
     subject: optionalText(payload.subject, 80),
     grade: optionalText(payload.grade, 80),
-    tags: Array.isArray(payload.tags)
-      ? payload.tags.filter((tag): tag is string => typeof tag === "string").map((tag) => tag.trim()).filter(Boolean).slice(0, 8)
-      : [],
+    tags,
   };
 }
 

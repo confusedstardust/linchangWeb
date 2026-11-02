@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import PlazaSubjectIcon from "./plaza-subject-icon";
+import PlazaLearningIllustration from "./plaza-learning-illustration";
 import { useRouter } from "next/navigation";
 import { filterParams, multiFilterKeys, type MultiFilterKey } from "@/lib/teacher-plaza-filters";
 import { CloseButton } from "@narrativeos/ui/close-button";
@@ -15,13 +16,17 @@ import { curricula, stages, gradeOptions, subjectsForStage, taxonomyLabel } from
 type Result = { query: string; page: number; pageSize: number; total: number; totalPages: number; works: PublicTeacherWork[] };
 type Props = { locale: Locale; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean };
 
-function Cover({ work, label }: { work: PublicTeacherWork; label: string }) {
+function workTags(work: PublicTeacherWork) {
+  return [...new Set([work.subject, work.grade, ...work.tags].filter((tag): tag is string => Boolean(tag)))];
+}
+
+function Cover({ work, label, priority = false }: { work: PublicTeacherWork; label: string; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
   return <div className="plaza-cover">{work.coverUrl && !failed ?
     // Published covers are served by the game host, not the portal image optimizer.
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={work.coverUrl} alt="" onError={() => setFailed(true)} loading="lazy" /> :
-    <div className="plaza-cover-empty"><span aria-hidden="true">叙</span><small>{label}</small></div>}</div>;
+    <img src={work.coverUrl} alt="" onError={() => setFailed(true)} loading={priority ? "eager" : "lazy"} decoding="async" /> :
+    <div className="plaza-cover-empty"><PlazaSubjectIcon subject={work.subject || undefined} /><strong>{work.title}</strong><small>{work.subject || label}</small></div>}</div>;
 }
 
 function Author({ work }: { work: PublicTeacherWork }) {
@@ -47,6 +52,11 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
   const router = useRouter();
   const [shareStatus, setShareStatus] = useState("");
   const [tagSearch, setTagSearch] = useState("");
+  const sortOptions = [
+    ["featured", labels.featured], ["latest", labels.latest],
+    ["oldest", locale === "en" ? "Oldest" : locale === "zh-Hant" ? "最早發布" : "最早发布"],
+    ["title", locale === "en" ? "Title" : locale === "zh-Hant" ? "標題排序" : "标题排序"],
+  ] as const;
   const stageValues = stages;
   const subjects = [...new Set([...(filters.stage?.length ? filters.stage.flatMap(subjectsForStage) : subjectsForStage()), ...facets.subjects])];
   const grades = [...new Set(filters.stage?.length ? filters.stage.flatMap(stage => gradeOptions[stage] || []) : Object.values(gradeOptions).flat())];
@@ -84,7 +94,7 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
     {subjects.map(subject => <Link key={subject} href={toggle("subject",subject)} title={taxonomyLabel(subject, locale)} aria-current={filters.subject?.includes(subject) ? "true" : undefined}><PlazaSubjectIcon subject={subject} /><span>{taxonomyLabel(subject, locale)}</span><span className="plaza-subject-check" aria-hidden="true">{filters.subject?.includes(subject) ? '✓' : ''}</span></Link>)}</nav>
   </aside>;
   return <div className="plaza-content">{sidebar}
-    <section className="plaza-intro"><div><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p></div>
+    <section className="plaza-intro"><div className="plaza-hero-copy"><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p><span className="plaza-hero-note">{labels.formats}</span></div><PlazaLearningIllustration />
       <form className="plaza-search" action={base} method="get" role="search">
         {[...filterParams(filters, "").entries()].map(([key,value],index) => <input key={index} type="hidden" name={key} value={value} />)}
         <label className="plaza-sr-only" htmlFor="plaza-query">{locale === "en" ? "Search title, description or creator" : "搜索标题、作品简介或作者"}</label>
@@ -92,7 +102,7 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
       </form>
     </section>
     {pick && !loadFailed && <section className="plaza-spotlight"><div><p className="plaza-kicker">01 / {labels.pick}</p><h2>{pick.title}</h2>{pick.summary && <p className="plaza-spot-summary">{pick.summary}</p>}<button className="plaza-primary" onClick={() => open(pick)}>{labels.preview} ↗</button><span className="plaza-spot-meta">{[pick.subject, pick.grade].filter(Boolean).join(" · ")}</span></div><Cover key={pick.id} work={pick} label={labels.noCover} /></section>}
-    <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading"><div><p className="plaza-kicker">{labels.collection}</p><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></div>
+    <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading"><div><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></div>
       {!loadFailed && <details className="plaza-filters"><summary className="plaza-filter-toggle"><span>{locale === "en" ? "Filter resources" : locale === "zh-Hant" ? "篩選資源" : "筛选资源"}</span><small>{locale === "en" ? "Curriculum · Stage · Grade · Tags" : locale === "zh-Hant" ? "課程體系 · 學段 · 年級 · 標籤" : "课程体系 · 学段 · 年级 · 标签"}</small><span className="plaza-filter-chevron" aria-hidden="true">⌄</span></summary><div className="plaza-filter-options">{filterRow("curriculum", [...curricula,"未标注"])}{filterRow("stage", stageValues)}{filterRow("subject", subjects)}{(grades.length > 0 || filters.grade?.length) && filterRow("grade", grades)}<details className="plaza-advanced"><summary>{advancedLabel}<span>{locale === "en" ? "Type · Tags · Author · Date" : "资源类型 · 标签 · 作者 · 发布时间"}</span></summary>
         <div className="plaza-filter-row"><span>{locale === "en" ? "Resource" : "资源类型"}</span><div>{[["",labels.all],["quiz",locale === "en" ? "With practice" : "附讲评练"],["story-only",locale === "en" ? "Story only" : "仅叙事作品"]].map(([value,label])=><Link key={value} href={href({resource:value,page:1})} aria-current={(filters.resource||"")===value?"true":undefined}>{label}</Link>)}<Link href={href({featuredOnly:filters.featuredOnly?"":"1",page:1})} aria-current={filters.featuredOnly?"true":undefined}>{locale === "en" ? "Featured only" : "只看精选"}</Link></div></div>
         <label className="plaza-tag-search">{locale === "en" ? "Find tags" : "查找标签"}<input value={tagSearch} onChange={e=>setTagSearch(e.target.value)} placeholder={locale === "en" ? "Filter tag options" : "输入关键词，缩小标签选项"}/></label>
@@ -108,12 +118,12 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
 
       <div className="plaza-workspace">
 
-        <div className="plaza-results"><div className="plaza-result-bar"><span>{result.total} {copy.works}</span>{hasFilters && <Link href={base}>{taxonomyCopy.clear}</Link>}<div className="plaza-sort"><Link href={href({ sort: "featured", page: 1 })} aria-current={(!filters.sort || filters.sort === "featured") ? "true" : undefined}>{labels.featured}</Link><Link href={href({ sort: "latest", page: 1 })} aria-current={filters.sort === "latest" ? "true" : undefined}>{labels.latest}</Link><Link href={href({sort:"oldest",page:1})} aria-current={filters.sort==="oldest"?"true":undefined}>{locale==="en"?"Oldest":"最早发布"}</Link><Link href={href({sort:"title",page:1})} aria-current={filters.sort==="title"?"true":undefined}>{locale==="en"?"Title":"标题排序"}</Link></div></div>
+        <div className="plaza-results"><div className="plaza-result-bar"><span role="status" aria-live="polite"><strong>{result.total}</strong> {copy.works}</span>{hasFilters && <Link href={base}>{taxonomyCopy.clear}</Link>}<div className="plaza-sort">{sortOptions.map(([value,label]) => <Link key={value} href={href({sort:value,page:1})} aria-current={(filters.sort || "featured") === value ? "true" : undefined}>{label}</Link>)}</div><select className="plaza-sort-mobile" aria-label={locale === "en" ? "Sort resources" : "资源排序"} value={filters.sort || "featured"} onChange={event => router.push(href({sort:event.target.value,page:1}))}>{sortOptions.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></div>
           <div className="plaza-grid">{result.works.map(work => {
-            const tags = [...new Set([work.subject, work.grade, ...work.tags].filter((tag): tag is string => Boolean(tag)))].slice(0, work.quizUrl ? 4 : 5);
+            const tags = workTags(work).slice(0, work.quizUrl ? 4 : 5);
             return <article className="plaza-card" key={work.id}>
               <div className="plaza-paper">
-                <div className="plaza-card-visual"><button className="plaza-cover-button" aria-label={`${labels.preview}: ${work.title}`} onClick={() => open(work)}><Cover work={work} label={labels.noCover} /></button>
+                <div className="plaza-card-visual"><button className="plaza-cover-button" aria-label={`${labels.preview}: ${work.title}`} onClick={() => open(work)}><Cover work={work} label={labels.noCover} /><span className="plaza-cover-preview" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>{labels.preview}</span></button>
                   <div className="plaza-cover-tags">{tags.map(tag => <span key={tag} title={tag}>{taxonomyLabel(tag,locale)}</span>)}{work.quizUrl && <span>{copy.practice}</span>}</div>
                 </div>
                 <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3>{work.featured && <span className="plaza-featured">{labels.pick}</span>}</div>
@@ -127,7 +137,18 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
       </div>
     </section><footer className="plaza-footer"><p>{labels.footer}</p><small>NarrativeOS</small></footer>
     <dialog ref={dialog} className="plaza-dialog" aria-labelledby="plaza-detail-title" onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }}>
-      {selected && <section className="plaza-drawer" data-lenis-prevent><CloseButton className="plaza-close" aria-label={labels.close} onClick={close} autoFocus /><p className="plaza-kicker">{labels.note}</p><h2 id="plaza-detail-title">{selected.title}</h2><div className="plaza-tags">{[selected.subject, selected.grade, ...selected.tags].filter(Boolean).map((tag, i) => <span key={i}>{tag}</span>)}</div><Cover key={selected.id} work={selected} label={labels.noCover} />{selected.summary && <><h3>{labels.about}</h3><p className="plaza-detail-summary">{selected.summary}</p></>}<dl><div><dt>{copy.author}</dt><dd>{selected.author.name}</dd></div><div><dt>{labels.published}</dt><dd>{new Date(selected.publishedAt).toLocaleDateString(locale, { timeZone: "Asia/Shanghai" })}</dd></div></dl><div className="plaza-detail-actions"><a className="plaza-primary" href={selected.playUrl} target="_blank" rel="noreferrer">{copy.enter} ↗</a>{selected.quizUrl && <a href={selected.quizUrl} target="_blank" rel="noreferrer">{copy.practice} ↗</a>}</div></section>}
+      {selected && <section className="plaza-drawer" data-lenis-prevent>
+        <CloseButton className="plaza-close" aria-label={labels.close} onClick={close} autoFocus />
+        <div className="plaza-detail-art"><Cover key={selected.id} work={selected} label={labels.noCover} priority /></div>
+        <div className="plaza-detail-body"><p className="plaza-kicker">{labels.collection}</p><h2 id="plaza-detail-title">{selected.title}</h2>
+          <Author key={selected.id} work={selected} />
+          <div className="plaza-tags">{workTags(selected).map(tag => <span key={tag}>{taxonomyLabel(tag,locale)}</span>)}</div>
+          {selected.summary && <><h3>{labels.about}</h3><p className="plaza-detail-summary">{selected.summary}</p></>}
+          <p className="plaza-detail-date">{labels.published} <time dateTime={selected.publishedAt}>{new Date(selected.publishedAt).toLocaleDateString(locale, { timeZone: "Asia/Shanghai" })}</time></p>
+          <div className="plaza-detail-actions"><a className="plaza-primary" href={selected.playUrl} target="_blank" rel="noreferrer">{copy.enter} <span aria-hidden="true">↗</span></a>{selected.quizUrl && <a href={selected.quizUrl} target="_blank" rel="noreferrer">{copy.practice} <span aria-hidden="true">↗</span></a>}</div>
+        </div>
+      </section>}
+
     </dialog>
   </div>;
 }

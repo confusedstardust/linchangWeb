@@ -28,6 +28,10 @@ with sync_playwright() as p:
  assert max(heights)-min(heights) < 2
  assert page.locator(".plaza-card .plaza-author").count() == page.locator(".plaza-card").count()
  for card in page.locator(".plaza-card").all():
+  image=card.locator(".plaza-card-visual").bounding_box()
+  title=card.locator(".plaza-card-heading").bounding_box()
+  assert 0 <= title["y"]-(image["y"]+image["height"]) <= 8
+  assert image["width"] >= card.bounding_box()["width"]-3
   assert 1 <= card.locator(".plaza-cover-tags span").count() <= 5
  page.screenshot(path=str(out/"desktop.png"),full_page=True)
  page.locator(".plaza-filter-toggle").click()

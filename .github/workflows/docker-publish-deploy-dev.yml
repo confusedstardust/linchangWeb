@@ -193,6 +193,11 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
+            hostname
+            ip -4 -o addr show scope global | awk '{print $2, $4}'
+            printf 'Deployment host public IP: '
+            curl --max-time 10 -fsS https://api.ipify.org || true
+            echo
             docker ps --format '{{.Names}} {{.Image}} {{.Ports}}'
             sudo nginx -T 2>&1 | awk '/configuration file|listen |server_name |location |proxy_pass / { print }'
             for port in 3002 3003; do

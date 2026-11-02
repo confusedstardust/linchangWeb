@@ -12,6 +12,11 @@ on:
         required: true
         default: true
         type: boolean
+      cleanup_proxy:
+        description: "Disable only the IP vhost created by this investigation"
+        required: false
+        default: false
+        type: boolean
       repair_proxy:
         description: "Repair and verify the development IP proxy without rebuilding"
         required: false
@@ -202,6 +207,19 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
+            if [ '${{ inputs.cleanup_proxy }}' = true ]; then
+              target=/etc/nginx/conf.d/narrativeos-development-ip.conf
+              if sudo test -f "$target" && sudo grep -q '^# Managed by linchangWeb development deployment; domain vhosts remain separate.' "$target" && sudo grep -q 'server_name 43.138.207.82;' "$target"; then
+                sudo mv "$target" /etc/nginx/narrativeos-development-ip.conf.investigation-disabled
+                if sudo nginx -t; then
+                  sudo systemctl reload nginx
+                  echo 'Disabled the investigation IP vhost; original domain routing retained'
+                else
+                  sudo mv /etc/nginx/narrativeos-development-ip.conf.investigation-disabled "$target"
+                  exit 1
+                fi
+              fi
+            fi
             hostname
             ip -4 -o addr show scope global | awk '{print $2, $4}'
             printf 'Deployment host public IP: '

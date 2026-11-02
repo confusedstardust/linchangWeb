@@ -185,6 +185,15 @@ jobs:
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"
             sudo python3 deploy/configure-development-proxy.py "$WORKBENCH_URL" "$WEBSITE_PORT"
+      - name: Check expected development host
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          python3 - <<'PY'
+          import os, socket
+          host = os.environ['DEPLOY_HOST']
+          print('Development DEPLOY_HOST resolves to 43.138.207.82:', '43.138.207.82' in socket.gethostbyname_ex(host)[2])
+          PY
       - name: Inspect development routing
         uses: appleboy/ssh-action@v1.0.3
         with:

@@ -12,6 +12,11 @@ on:
         required: true
         default: true
         type: boolean
+      repair_proxy:
+        description: "Repair and verify the development IP proxy without rebuilding"
+        required: false
+        default: false
+        type: boolean
       diagnose_only:
         description: "Inspect development containers and public routing without rebuilding"
         required: false
@@ -104,7 +109,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "docker-compose.dev.yml"
+          source: "docker-compose.dev.yml,deploy/configure-development-proxy.py"
           target: ${{ secrets.DEPLOY_PATH }}
 
       - name: Deploy on Non-Prod host
@@ -115,12 +120,13 @@ jobs:
           WEBSITE_IMAGE_NAME: ${{ env.WEBSITE_IMAGE_NAME }}
           ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
           WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT
+          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT,WORKBENCH_URL
           command_timeout: 60m
           script: |
             set -e
@@ -146,12 +152,39 @@ jobs:
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website
+            sudo python3 deploy/configure-development-proxy.py "$WORKBENCH_URL" "$WEBSITE_PORT"
 
   diagnose:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
     environment: development
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        if: ${{ inputs.repair_proxy }}
+      - name: Upload development proxy helper
+        if: ${{ inputs.repair_proxy }}
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "deploy/configure-development-proxy.py"
+          target: ${{ secrets.DEPLOY_PATH }}
+      - name: Repair development IP routing
+        if: ${{ inputs.repair_proxy }}
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
+          WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: WORKBENCH_URL,WEBSITE_PORT
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            sudo python3 deploy/configure-development-proxy.py "$WORKBENCH_URL" "$WEBSITE_PORT"
       - name: Inspect development routing
         uses: appleboy/ssh-action@v1.0.3
         with:

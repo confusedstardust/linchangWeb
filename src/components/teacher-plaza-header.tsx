@@ -5,6 +5,7 @@ import { WorkbenchAccountMenu } from "@/components/workbench-account-menu";
 import { getMessages, localizedPath, type Locale } from "@/lib/i18n";
 import { WORKBENCH_URL } from "@/lib/content";
 import BrandLogo from "@/components/brand-logo";
+import type { ReactNode } from "react";
 
 function PlazaReturnLink({ locale }: { locale: Locale }) {
   const copy = getMessages(locale).ui.plaza;
@@ -42,10 +43,15 @@ function PlazaReturnLink({ locale }: { locale: Locale }) {
   return <a className="plaza-return-link" href={target?.href || localizedPath(locale)} aria-label={label}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg><span>{label}</span></a>;
 }
 
-export default function TeacherPlazaHeader({ locale }: { locale: Locale }) {
-  const copy = getMessages(locale).ui.plaza;
+export function WorkbenchPageHeader({ locale = "zh-CN", title, subtitle, returnLink }: {
+  locale?: Locale; title: string; subtitle: string; returnLink: ReactNode;
+}) {
   return <header className="plaza-workbench-header">
-    <a className="plaza-workbench-brand" href={localizedPath(locale)}><span className="plaza-workbench-seal"><BrandLogo size={36} className="h-full w-full" rounded={false} /></span><span><strong>{copy.brandTitle}</strong><small>TEACHER RESOURCE PLAZA</small></span></a>
-    <nav className="plaza-workbench-actions" aria-label="广场导航"><PlazaReturnLink locale={locale} /><WorkbenchAccountMenu locale={locale} /></nav>
+    <a className="plaza-workbench-brand" href={localizedPath(locale)}><span className="plaza-workbench-seal"><BrandLogo size={36} className="h-full w-full" rounded={false} /></span><span><strong>{title}</strong><small>{subtitle}</small></span></a>
+    <nav className="plaza-workbench-actions" aria-label="页面导航">{returnLink}<WorkbenchAccountMenu locale={locale} /></nav>
   </header>;
+}
+
+export default function TeacherPlazaHeader({ locale }: { locale: Locale }) {
+  return <WorkbenchPageHeader locale={locale} title={getMessages(locale).ui.plaza.brandTitle} subtitle="TEACHER RESOURCE PLAZA" returnLink={<PlazaReturnLink locale={locale} />} />;
 }

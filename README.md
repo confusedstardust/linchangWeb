@@ -77,3 +77,13 @@ npm run dev    # 本地开发
 npm run build  # 生产构建
 npm run lint   # 代码检查
 ```
+
+## 开发部署目标校验
+
+2026-11-02 排查确认：`linchangWeb` 的 GitHub `development` Environment 未设置 SSH secrets，开发工作流继承了仓库级部署凭据，实际主机与 `WORKBENCH_URL` 中的 `43.138.207.82` 不符。因此容器更新成功没有更新用户访问的开发服务器。错误目标上临时添加的调查用 IP 站点已停用，并已通过 Nginx 配置校验和重载；生产域名配置未修改。
+
+开发工作流现于构建及部署前校验 `DEPLOY_HOST` 与 `WORKBENCH_URL` 的 DNS 地址是否一致，不匹配则失败，防止再次误部署。手动运行时设置 `diagnose_only=true` 可仅执行目标校验。
+
+后续部署前须在官网仓库的 `development` Environment 配置正确的 `DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY`、`DEPLOY_PATH`。不要将凭据写入仓库。服务器修正后，再检查既有官网容器及代理端口，复用其实际路由；不能根据另一台服务器的结构推断需要改 Nginx。公开广场 HTML、静态资源和工作台路由均需单独验收。
+
+状态：目标配置错误已确认，调查用代理变更已撤回；目标校验已实现。指定公网开发页面仍为旧版，正确服务器部署待完成。

@@ -13,6 +13,7 @@ export function ssoLoginUrl(locale: Locale = "zh-CN") {
 export function teacherResourcePlazaUrl(locale: Locale = "zh-CN") { return teacherEcosystemPath(locale); }
 
 export const accountClient = createAccountClient({
+  sessionUrl: "/api/auth/me",
   apiUrl: path => `/api/workbench-account${path}`,
   portalSessionUrl: "/api/auth/me",
   logoutUrl: () => "/api/auth/logout",

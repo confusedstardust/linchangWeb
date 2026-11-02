@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "npm run check:shared-ui",
+    "check:shared-ui": "node packages/narrativeos-ui/verify-release.cjs",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

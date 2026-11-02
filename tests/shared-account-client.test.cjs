@@ -9,11 +9,13 @@ function setup(handler) {
   const calls = [];
   const storage = new Map();
   const events = [];
+  const listeners = new Map();
   const context = {
     exports: {}, Headers, Event,
     window: {
       localStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
-      dispatchEvent: event => events.push(event.type),
+      addEventListener: (name, handler) => listeners.set(name, [...(listeners.get(name) || []), handler]),
+      dispatchEvent: event => { events.push(event.type); for (const handler of listeners.get(event.type) || []) handler(event); },
     },
     fetch: async (url, init) => { calls.push({ url, init }); return handler(url, init); },
   };
@@ -21,7 +23,7 @@ function setup(handler) {
   vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, context);
   const api = context.exports;
   const client = api.createAccountClient({ apiUrl: route => `/narrativeos/api/forge${route}`, logoutUrl: () => "/api/auth/logout" });
-  return { api, client, calls, storage, events };
+  return { api, client, calls, storage, events, context };
 }
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -114,4 +116,53 @@ test("network failures produce a signed-out session instead of unhandled rejecti
   assert.equal(await api.getPortalSession(), null);
   assert.equal(await client.getCurrentUser(), null);
   assert.equal(await client.isAdmin(), false);
+});
+
+test('components and page transitions share one identity request until authentication changes', async () => {
+  const { api, client, calls, context } = setup(() => json(ssoUser));
+  await Promise.all([client.getCurrentUser(), client.getCurrentUser(), client.getCurrentUser()]);
+  await client.getCurrentUser();
+  assert.equal(calls.length, 1);
+  context.window.dispatchEvent(new Event(api.authChangedEvent));
+  await Promise.all([client.getCurrentUser(), client.getCurrentUser()]);
+  assert.equal(calls.length, 2);
+});
+
+test('portal menu and portal provider use the same direct identity source without proxying Forge', async () => {
+  const { api, calls } = setup(() => json({ ...ssoUser, avatarUrl: '/avatar.png' }));
+  const client = api.createAccountClient({ apiUrl: p => `/proxy${p}`, logoutUrl: () => '/logout', sessionUrl: '/api/auth/me' });
+  const [raw, normalized] = await Promise.all([api.getPortalSession(), client.getCurrentUser()]);
+  assert.equal(raw.id, normalized.id);
+  assert.equal(normalized.avatar_url, '/avatar.png');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, '/api/auth/me');
+});
+
+test('old in-flight identity cannot restore the previous account after a session change', async () => {
+  let finish;
+  const { api, client, context } = setup(() => new Promise(resolve => { finish = resolve; }));
+  const old = client.getCurrentUser();
+  const finishOld = finish;
+  context.window.dispatchEvent(new Event(api.authChangedEvent));
+  const current = client.getCurrentUser();
+  finish(json({ ...ssoUser, id: 'new-user' }));
+  assert.equal((await current).id, 'new-user');
+  finishOld(json(ssoUser));
+  assert.equal((await old).id, 'new-user');
+});
+
+test('SSR requests never share browser identity state', async () => {
+  const { client, calls, context } = setup(() => json(ssoUser));
+  delete context.window;
+  await client.getCurrentUser(); await client.getCurrentUser();
+  assert.equal(calls.length, 2);
+});
+
+test('an explicit invitation still resolves through Forge when the portal is signed out', async () => {
+  const { api, calls } = setup(url => url === '/api/auth/me' ? json({}, 401) : json({ ...ssoUser, auth_type: 'invite' }));
+  api.setStoredInviteCode('invite');
+  const client = api.createAccountClient({ apiUrl: p => `/proxy${p}`, sessionUrl: '/api/auth/me', logoutUrl: () => '/logout' });
+  assert.equal((await client.getCurrentUser()).auth_type, 'invite');
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].url, '/proxy/auth/me');
 });

@@ -1,13 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authChangedEvent } from "@narrativeos/ui/client";
 import type { AuthUser } from "@/lib/auth/config";
+import { WorkbenchPageHeader } from "@/components/teacher-plaza-header";
+import { WORKBENCH_URL } from "@/lib/content";
+import { safeAccountReturn } from "@/lib/account-return";
 
 const inputClass = "mt-2 w-full rounded-md border border-line bg-white p-3 text-ink";
-const buttonClass = "rounded-md bg-ink px-5 py-3 text-paper disabled:opacity-50";
+const buttonClass = "rounded-md bg-cinnabar px-5 py-3 text-paper disabled:opacity-50";
 export default function AccountSettings({initialMessage, initialAccount}: {initialMessage:string; initialAccount:{user:AuthUser; hasPassword:boolean}}) {
   const router = useRouter();
   const [account, setAccount] = useState(initialAccount);
@@ -18,9 +20,20 @@ export default function AccountSettings({initialMessage, initialAccount}: {initi
   const [message, setMessage] = useState(initialMessage);
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [returnHref, setReturnHref] = useState(WORKBENCH_URL);
+  const [returnLabel, setReturnLabel] = useState('返回创作工作台');
+  useEffect(() => {
+    const valid = (value: string | null) => safeAccountReturn(value, location.origin, WORKBENCH_URL);
+    let stored: string | null = null;
+    try { stored = sessionStorage.getItem('account-settings-return'); } catch { /* Storage is optional. */ }
+    const source = valid(new URLSearchParams(location.search).get('returnTo')) || valid(document.referrer) || valid(stored);
+    const target = source || WORKBENCH_URL;
+    setReturnHref(target); setReturnLabel(source ? '返回上一页面' : '返回创作工作台');
+    try { sessionStorage.setItem('account-settings-return', target); } catch { /* Storage is optional. */ }
+  }, []);
   const load = useCallback(async () => {
     const response = await fetch("/api/auth/account", {cache:"no-store"});
-    if (response.status === 401) { router.replace("/login?next=%2Faccount"); return; }
+    if (response.status === 401) { router.replace(`/login?next=${encodeURIComponent(location.pathname + location.search)}`); return; }
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "无法读取账号信息");
     setAccount(data);
@@ -53,9 +66,9 @@ export default function AccountSettings({initialMessage, initialAccount}: {initi
     } catch (error) { setMessage(error instanceof Error ? error.message : "操作失败"); }
     finally { setBusy(false); }
   }
-  return <main className="mx-auto min-h-screen max-w-2xl px-6 py-16 text-ink">
-    <Link href="/" className="text-sm text-ink-muted">← 返回首页</Link>
-    <h1 className="mt-8 font-display text-3xl">账号设置</h1>
+  return <><WorkbenchPageHeader title="临场 · 账号设置" subtitle="ACCOUNT SETTINGS" returnLink={<a className="plaza-return-link" href={returnHref}><span aria-hidden="true">←</span><span>{returnLabel}</span></a>} />
+    <main className="mx-auto min-h-screen max-w-2xl px-6 py-10 text-ink">
+    <h1 className="font-display text-3xl">账号设置</h1>
     <p className="mt-3 text-ink-muted">管理登录方式。绑定后，作品和账户权益继续属于同一个账号。</p>
     <p role="status" className="my-6 text-cinnabar">{message}</p>
     {!account ? <p>正在读取账号信息…</p> : <>
@@ -82,5 +95,5 @@ export default function AccountSettings({initialMessage, initialAccount}: {initi
         </form>}
       </section>
     </>}
-  </main>;
+  </main></>;
 }

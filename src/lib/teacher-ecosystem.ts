@@ -1,3 +1,5 @@
+import { teacherWorkWhere, type TeacherWorkFilters } from "./teacher-plaza-filters";
+export type { TeacherWorkFilters } from "./teacher-plaza-filters";
 import { timingSafeEqual } from "node:crypto";
 import { getPrisma } from "@/lib/db";
 
@@ -120,4 +122,32 @@ export async function listPublishedTeacherWorks(query: string, page: number, pag
     nextOffset: skip + works.length,
     hasMore: skip + works.length < total,
   };
+}
+
+export async function listFilteredTeacherWorks(query: string, page: number, pageSize = TEACHER_WORK_PAGE_SIZE, filters: TeacherWorkFilters = {}) {
+  const prisma = getPrisma();
+  const normalizedQuery = query.trim().slice(0, 80);
+  const where = teacherWorkWhere(normalizedQuery, filters);
+  pageSize = Math.max(1, Math.min(30, Math.floor(pageSize) || 12));
+  const total = await prisma.teacherWork.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(totalPages, Math.max(1, Number.isFinite(page) ? Math.floor(page) : 1));
+  const works = await prisma.teacherWork.findMany({
+    where,
+    include: { author: { select: { nickname: true, email: true, avatarUrl: true } } },
+    orderBy: filters.sort === "oldest" ? [{ publishedAt: "asc" }, { id: "asc" }] : filters.sort === "title" ? [{ title: "asc" }, { id: "asc" }] : filters.sort === "latest" ? [{ publishedAt: "desc" }, { id: "desc" }] : [{ featured: "desc" }, { publishedAt: "desc" }, { id: "desc" }],
+    skip: (safePage - 1) * pageSize,
+    take: pageSize,
+  });
+  return { query: normalizedQuery, page: safePage, pageSize, total, totalPages, works: works.map(serializeTeacherWork) };
+}
+
+export async function teacherWorkFacets() {
+  const prisma = getPrisma();
+  const [subjects, grades, metadata] = await Promise.all([
+    prisma.teacherWork.findMany({ where: { status: "PUBLISHED", subject: { not: null } }, distinct: ["subject"], select: { subject: true }, orderBy: { subject: "asc" } }),
+    prisma.teacherWork.findMany({ where: { status: "PUBLISHED", grade: { not: null } }, distinct: ["grade"], select: { grade: true }, orderBy: { grade: "asc" } }),
+    prisma.teacherWork.findMany({ where: { status: "PUBLISHED" }, select: { tags: true } }),
+  ]);
+  return { tags: [...new Set(metadata.flatMap(w => Array.isArray(w.tags) ? w.tags.filter((t): t is string => typeof t === "string") : []))].sort(), subjects: subjects.flatMap(w => w.subject?.trim() ? [w.subject] : []), grades: grades.flatMap(w => w.grade?.trim() ? [w.grade] : []) };
 }

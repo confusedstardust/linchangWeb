@@ -1,6 +1,7 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
+import { CloseButton } from "./close-button";
 import { useCallback, useEffect, useId, useRef, useState, type AnchorHTMLAttributes, type ComponentType, type ReactNode } from "react";
 import { creditBalanceChangedEvent, type AccountClient, type CreditBalance } from "./client";
 import { useSession } from "./session";
@@ -114,7 +115,7 @@ export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, 
     </Popover.Trigger>
     <Popover.Portal><Popover.Content className="account-popover" data-lenis-prevent align="end" sideOffset={12} collisionPadding={16} aria-labelledby={titleId}>
       <div className="account-profile">
-        <div className="account-profile-top"><Popover.Close className="account-close" aria-label={messages.close}>×</Popover.Close></div>
+        <div className="account-profile-top"><Popover.Close asChild><CloseButton size="sm" aria-label={messages.close} /></Popover.Close></div>
         <div className="account-identity"><span className="account-avatar">{avatar}<span className="account-status-dot" role="img" aria-label={status} title={status} /></span><div><h2 id={titleId}>{name}</h2><p>{user?.email || (user?.auth_type === "invite" ? messages.inviteIdentity : messages.creatorIdentity)}</p></div></div>
         {user?.auth_type === "sso" ? <span className="account-plan-label" aria-label={messages.currentPlan}>{subscription || "…"}</span> : null}
       </div>

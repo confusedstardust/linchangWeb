@@ -113,12 +113,12 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
             const tags = [...new Set([work.subject, work.grade, ...work.tags].filter((tag): tag is string => Boolean(tag)))].slice(0, work.quizUrl ? 4 : 5);
             return <article className="plaza-card" key={work.id}>
               <div className="plaza-paper">
-                <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3>{work.featured && <span className="plaza-featured">{labels.pick}</span>}</div>
                 <div className="plaza-card-visual"><button className="plaza-cover-button" aria-label={`${labels.preview}: ${work.title}`} onClick={() => open(work)}><Cover work={work} label={labels.noCover} /></button>
                   <div className="plaza-cover-tags">{tags.map(tag => <span key={tag} title={tag}>{taxonomyLabel(tag,locale)}</span>)}{work.quizUrl && <span>{copy.practice}</span>}</div>
                 </div>
+                <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3>{work.featured && <span className="plaza-featured">{labels.pick}</span>}</div>
                 <div className="plaza-card-caption"><Author work={work} /><a href={work.playUrl} target="_blank" rel="noopener noreferrer">{copy.enter} <span aria-hidden="true">↗</span></a></div>
-              </div><div className="plaza-sleeve" aria-hidden="true" />
+              </div>
             </article>;
           })}</div>
           {!result.works.length && <div className="plaza-empty" role={loadFailed ? "alert" : "status"}><span aria-hidden="true">◇</span><h3>{loadFailed ? labels.error : hasFilters ? taxonomyCopy.empty : copy.empty}</h3><p>{loadFailed ? labels.errorHint : hasFilters ? taxonomyCopy.hint : copy.emptyHint}</p>{loadFailed ? <a href={href()}>{labels.retry}</a> : hasFilters ? <Link href={base}>{taxonomyCopy.clear}</Link> : null}</div>}

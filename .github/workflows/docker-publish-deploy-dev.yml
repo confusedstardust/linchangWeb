@@ -12,18 +12,8 @@ on:
         required: true
         default: true
         type: boolean
-      cleanup_proxy:
-        description: "Disable only the IP vhost created by this investigation"
-        required: false
-        default: false
-        type: boolean
-      repair_proxy:
-        description: "Repair and verify the development IP proxy without rebuilding"
-        required: false
-        default: false
-        type: boolean
       diagnose_only:
-        description: "Inspect development containers and public routing without rebuilding"
+        description: "Check deployment target and inspect current routing without rebuilding"
         required: false
         default: false
         type: boolean
@@ -47,6 +37,22 @@ jobs:
     outputs:
       version_tag: ${{ steps.vars.outputs.version_tag }}
     steps:
+      - name: Validate deployment target matches public development address
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
+        run: |
+          python3 - <<'PY'
+          import os, socket
+          from urllib.parse import urlsplit
+          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
+          actual = os.environ['DEPLOY_HOST']
+          if not expected or not actual:
+              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
+          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
+              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
+          print('Verified development deployment target matches public address')
+          PY
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -95,6 +101,22 @@ jobs:
     timeout-minutes: 60
     needs: build
     steps:
+      - name: Validate deployment target matches public development address
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
+        run: |
+          python3 - <<'PY'
+          import os, socket
+          from urllib.parse import urlsplit
+          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
+          actual = os.environ['DEPLOY_HOST']
+          if not expected or not actual:
+              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
+          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
+              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
+          print('Verified development deployment target matches public address')
+          PY
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -114,7 +136,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "docker-compose.dev.yml,deploy/configure-development-proxy.py"
+          source: "docker-compose.dev.yml"
           target: ${{ secrets.DEPLOY_PATH }}
 
       - name: Deploy on Non-Prod host
@@ -125,13 +147,12 @@ jobs:
           WEBSITE_IMAGE_NAME: ${{ env.WEBSITE_IMAGE_NAME }}
           ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
           WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT,WORKBENCH_URL
+          envs: VERSION_TAG,REGISTRY,WEBSITE_IMAGE_NAME,ACR_USERNAME,ACR_PASSWORD,WEBSITE_PORT
           command_timeout: 60m
           script: |
             set -e
@@ -157,77 +178,25 @@ jobs:
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website
-            sudo python3 deploy/configure-development-proxy.py "$WORKBENCH_URL" "$WEBSITE_PORT"
 
   diagnose:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
     environment: development
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        if: ${{ inputs.repair_proxy }}
-      - name: Upload development proxy helper
-        if: ${{ inputs.repair_proxy }}
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "deploy/configure-development-proxy.py"
-          target: ${{ secrets.DEPLOY_PATH }}
-      - name: Repair development IP routing
-        if: ${{ inputs.repair_proxy }}
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
-          WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: WORKBENCH_URL,WEBSITE_PORT
-          script: |
-            set -e
-            cd "${{ secrets.DEPLOY_PATH }}"
-            sudo python3 deploy/configure-development-proxy.py "$WORKBENCH_URL" "$WEBSITE_PORT"
-      - name: Check expected development host
+      - name: Validate deployment target matches public development address
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
         run: |
           python3 - <<'PY'
           import os, socket
-          host = os.environ['DEPLOY_HOST']
-          print('Development DEPLOY_HOST resolves to 43.138.207.82:', '43.138.207.82' in socket.gethostbyname_ex(host)[2])
+          from urllib.parse import urlsplit
+          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
+          actual = os.environ['DEPLOY_HOST']
+          if not expected or not actual:
+              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
+          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
+              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
+          print('Verified development deployment target matches public address')
           PY
-      - name: Inspect development routing
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            set -e
-            if [ '${{ inputs.cleanup_proxy }}' = true ]; then
-              target=/etc/nginx/conf.d/narrativeos-development-ip.conf
-              if sudo test -f "$target" && sudo grep -q '^# Managed by linchangWeb development deployment; domain vhosts remain separate.' "$target" && sudo grep -q 'server_name 43.138.207.82;' "$target"; then
-                sudo mv "$target" /etc/nginx/narrativeos-development-ip.conf.investigation-disabled
-                if sudo nginx -t; then
-                  sudo systemctl reload nginx
-                  echo 'Disabled the investigation IP vhost; original domain routing retained'
-                else
-                  sudo mv /etc/nginx/narrativeos-development-ip.conf.investigation-disabled "$target"
-                  exit 1
-                fi
-              fi
-            fi
-            hostname
-            ip -4 -o addr show scope global | awk '{print $2, $4}'
-            printf 'Deployment host public IP: '
-            curl --max-time 10 -fsS https://api.ipify.org || true
-            echo
-            docker ps --format '{{.Names}} {{.Image}} {{.Ports}}'
-            sudo nginx -T 2>&1 | awk '/configuration file|listen |server_name |location |proxy_pass / { print }'
-            for port in 3002 3003; do
-              echo "Portal on port $port"
-              curl --max-time 20 -fsS "http://127.0.0.1:$port/teacher-ecosystem/" | python3 -c 'import sys; s=sys.stdin.read(); print({"new_layout": "plaza-paper" in s, "old_layout": "ecosystem-hero" in s, "length": len(s)})' || true
-            done

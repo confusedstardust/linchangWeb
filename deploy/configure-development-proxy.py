@@ -30,9 +30,13 @@ def main():
     port = int(port)
     if port == 3002 or not 1 <= port <= 65535:
         raise RuntimeError("Invalid development portal port")
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     def read(url, host_header=None):
         req = urllib.request.Request(url, headers={"Host": host_header} if host_header else {})
-        with urllib.request.urlopen(req, timeout=30) as response:
+        with opener.open(req, timeout=8) as response:
             return response.read().decode()
     for attempt in range(30):
         try:
@@ -83,9 +87,12 @@ server {{
             raise RuntimeError('Conflicting nginx server name; refusing to reload')
         subprocess.run(['systemctl', 'reload', 'nginx'], check=True)
         for attempt in range(10):
-            page = read('http://127.0.0.1/teacher-ecosystem/', host)
-            if 'plaza-resources' in page and 'ecosystem-hero' not in page:
-                break
+            try:
+                page = read('http://127.0.0.1/teacher-ecosystem/', host)
+                if 'plaza-resources' in page and 'ecosystem-hero' not in page:
+                    break
+            except OSError as error:
+                print('Waiting for reloaded IP vhost:', error)
             time.sleep(1)
         else:
             raise RuntimeError('Public IP vhost still does not serve the new layout')

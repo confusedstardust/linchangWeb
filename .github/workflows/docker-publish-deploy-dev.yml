@@ -142,7 +142,7 @@ jobs:
           WEBSITE_IMAGE_NAME: ${{ env.WEBSITE_IMAGE_NAME }}
           ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-          WEBSITE_PORT: ${{ vars.WEBSITE_PORT || '3003' }}
+          WEBSITE_PORT: "3002"
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -158,7 +158,6 @@ jobs:
               ''|*[!0-9]*) echo "Development WEBSITE_PORT must be numeric"; exit 1 ;;
             esac
             test "$WEBSITE_PORT" -ge 1 && test "$WEBSITE_PORT" -le 65535 || { echo "Invalid development WEBSITE_PORT"; exit 1; }
-            test "$WEBSITE_PORT" -ne 3002 || { echo "Development WEBSITE_PORT must not use production port 3002"; exit 1; }
             export WEBSITE_PORT
             echo "$ACR_PASSWORD" | docker login "$REGISTRY" -u "$ACR_USERNAME" --password-stdin
             export WEBSITE_IMAGE="$REGISTRY/$WEBSITE_IMAGE_NAME:$VERSION_TAG"
@@ -171,5 +170,5 @@ jobs:
               exit 1
             fi
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
-            $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
-            $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website
+            $COMPOSE_CMD -p linchang-web --env-file .env -f docker-compose.dev.yml pull website
+            $COMPOSE_CMD -p linchang-web --env-file .env -f docker-compose.dev.yml up -d website

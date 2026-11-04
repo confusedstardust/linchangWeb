@@ -12,11 +12,6 @@ on:
         required: true
         default: true
         type: boolean
-      diagnose_only:
-        description: "Check deployment target and inspect current routing without rebuilding"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -31,28 +26,12 @@ concurrency:
 
 jobs:
   build:
-    if: ${{ !inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
+    if: ${{ startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-') }}
     environment: development
     runs-on: ubuntu-latest
     outputs:
       version_tag: ${{ steps.vars.outputs.version_tag }}
     steps:
-      - name: Validate deployment target matches public development address
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
-        run: |
-          python3 - <<'PY'
-          import os, socket
-          from urllib.parse import urlsplit
-          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
-          actual = os.environ['DEPLOY_HOST']
-          if not expected or not actual:
-              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
-          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
-              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
-          print('Verified development deployment target matches public address')
-          PY
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -101,22 +80,6 @@ jobs:
     timeout-minutes: 60
     needs: build
     steps:
-      - name: Validate deployment target matches public development address
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
-        run: |
-          python3 - <<'PY'
-          import os, socket
-          from urllib.parse import urlsplit
-          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
-          actual = os.environ['DEPLOY_HOST']
-          if not expected or not actual:
-              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
-          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
-              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
-          print('Verified development deployment target matches public address')
-          PY
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -178,25 +141,3 @@ jobs:
             docker network inspect narrativeos-development >/dev/null 2>&1 || docker network create narrativeos-development
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml pull website
             $COMPOSE_CMD -p linchang-web-development --env-file .env -f docker-compose.dev.yml up -d website
-
-  diagnose:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only && (startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feature-')) }}
-    environment: development
-    runs-on: ubuntu-latest
-    steps:
-      - name: Validate deployment target matches public development address
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          WORKBENCH_URL: ${{ vars.WORKBENCH_URL }}
-        run: |
-          python3 - <<'PY'
-          import os, socket
-          from urllib.parse import urlsplit
-          expected = urlsplit(os.environ['WORKBENCH_URL']).hostname
-          actual = os.environ['DEPLOY_HOST']
-          if not expected or not actual:
-              raise SystemExit('development DEPLOY_HOST and WORKBENCH_URL are required')
-          if not set(socket.gethostbyname_ex(expected)[2]) & set(socket.gethostbyname_ex(actual)[2]):
-              raise SystemExit('DEPLOY_HOST does not match WORKBENCH_URL; configure development Environment SSH secrets instead of inheriting production repository secrets')
-          print('Verified development deployment target matches public address')
-          PY

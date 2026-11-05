@@ -12,7 +12,8 @@
     "test:shared-ui": "node --test tests/shared-account-client.test.cjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "build:teaching-resources": "node scripts/build-teaching-resources.mjs"
   },
   "dependencies": {
     "@fontsource/ma-shan-zheng": "^5.3.0",
@@ -39,9 +40,11 @@
     "@types/nodemailer": "^6.4.19",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "prisma": "^6.16.2",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

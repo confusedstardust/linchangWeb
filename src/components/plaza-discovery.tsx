@@ -9,13 +9,14 @@ import type { Locale } from "@/lib/i18n";
 
 const tools = ["语文", "数学", "科学", "信息科技", "美术", "跨学科"];
 
-export default function PlazaDiscovery({ works, locale, onOpen }: {
-  works: PublicTeacherWork[]; locale: Locale; onOpen: (work: PublicTeacherWork) => void;
+export default function PlazaDiscovery({ works, locale }: {
+  works: PublicTeacherWork[]; locale: Locale;
 }) {
   const count = works.length;
   const [index, setIndex] = useState(0);
   const [turn, setTurn] = useState<{ from: number; to: number; direction: number } | null>(null);
   const [interactionVersion, setInteractionVersion] = useState(0);
+  const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const position = useRef(0);
@@ -72,27 +73,26 @@ export default function PlazaDiscovery({ works, locale, onOpen }: {
 
   useEffect(() => () => { if (nextFrame.current !== null) window.cancelAnimationFrame(nextFrame.current); }, []);
   useEffect(() => {
-    if (count < 2 || focused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (count < 2 || hovered || focused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) advance.current(position.current + 1);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [count, focused, interactionVersion]);
+  }, [count, hovered, focused, interactionVersion]);
   function step(direction: number) { setInteractionVersion(value => value + 1); goTo(requested.current + direction, direction); }
 
   return <section className="plaza-discovery">
     <div className="plaza-carousel" role="region" aria-roledescription={en ? "carousel" : "轮播"} aria-label={en ? "Featured cases" : "精选案例"}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onFocusCapture={event => setFocused(event.target.matches(":focus-visible"))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
       {current ? <div className="plaza-stack-stage" ref={stage} data-moving={!!turn}>
         {count > 2 && <div className="plaza-stack-card plaza-stack-far plaza-slide" aria-hidden="true"><SlideContents key={works[(active+2)%count].id} work={works[(active+2)%count]} /></div>}
         {count > 1 && <div className="plaza-stack-card plaza-stack-near plaza-slide" aria-hidden="true"><SlideContents key={works[(active+1)%count].id} work={works[(active+1)%count]} /></div>}
-        <div className="plaza-stack-card plaza-stack-front plaza-slide">
+        <a className="plaza-stack-card plaza-stack-front plaza-slide" href={current.playUrl} target="_blank" rel="noopener noreferrer" aria-label={`${current.title}${en ? ' (opens in a new tab)' : '（在新标签页打开）'}`}>
           <SlideContents key={current.id} work={current} />
-          {count > 1 && <button className="plaza-card-flip" onClick={() => step(1)} aria-label={en ? 'Flip to next featured case' : '翻看下一个精选案例'} />}
-          <div className="plaza-slide-caption"><span>{en ? "FEATURED CLASSROOM" : "课堂精选"}<i />{String(active+1).padStart(2,"0")} / {String(count).padStart(2,"0")}</span><h2>{current.title}</h2>{current.summary && <p>{current.summary}</p>}<button className="plaza-slide-open" onClick={() => onOpen(current)}>{en ? "Explore this classroom" : "走进这堂课"}<span aria-hidden="true">↗</span></button></div>
-
-        </div>
-        {turn && works[turn.from] && <div className="plaza-stack-card plaza-stack-outgoing plaza-slide" aria-hidden="true"><SlideContents key={works[turn.from].id} work={works[turn.from]} /><div className="plaza-slide-caption"><span>{en ? "FEATURED CLASSROOM" : "课堂精选"}<i />{String(turn.from+1).padStart(2,"0")} / {String(count).padStart(2,"0")}</span><h2>{works[turn.from].title}</h2>{works[turn.from].summary && <p>{works[turn.from].summary}</p>}<span className="plaza-slide-open">{en ? "Explore this classroom" : "走进这堂课"}<span>↗</span></span></div></div>}
+          <div className="plaza-slide-caption"><h2>{current.title}</h2>{current.summary && <div className="plaza-slide-summary"><p>{current.summary}</p></div>}</div>
+        </a>
+        {turn && works[turn.from] && <div className="plaza-stack-card plaza-stack-outgoing plaza-slide" aria-hidden="true"><SlideContents key={works[turn.from].id} work={works[turn.from]} /><div className="plaza-slide-caption"><h2>{works[turn.from].title}</h2>{works[turn.from].summary && <div className="plaza-slide-summary"><p>{works[turn.from].summary}</p></div>}</div></div>}
         {count > 1 && <div className="plaza-carousel-controls">
           <button onClick={() => step(-1)} aria-label={en ? "Previous case" : "上一个案例"}><ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" /></button>
           <div className="plaza-carousel-dots">{works.map((work,i) => <button key={work.id} aria-label={`${en ? "View" : "查看"}：${work.title}`} aria-current={active === i ? "true" : undefined} onClick={() => { setInteractionVersion(value => value + 1); goTo(i, i < active ? -1 : 1); }} />)}</div>

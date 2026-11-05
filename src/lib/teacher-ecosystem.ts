@@ -151,3 +151,14 @@ export async function teacherWorkFacets() {
   ]);
   return { tags: [...new Set(metadata.flatMap(w => Array.isArray(w.tags) ? w.tags.filter((t): t is string => typeof t === "string") : []))].sort(), subjects: subjects.flatMap(w => w.subject?.trim() ? [w.subject] : []), grades: grades.flatMap(w => w.grade?.trim() ? [w.grade] : []) };
 }
+
+/** Homepage selection is independent of search, filters and pagination. */
+export async function listFeaturedTeacherWorks() {
+  const works = await getPrisma().teacherWork.findMany({
+    where: { status: "PUBLISHED", featured: true },
+    include: { author: { select: { nickname: true, email: true, avatarUrl: true } } },
+    orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+    take: 8,
+  });
+  return works.map(serializeTeacherWork);
+}

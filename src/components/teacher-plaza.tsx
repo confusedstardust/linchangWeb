@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import PlazaSubjectIcon from "./plaza-subject-icon";
-import PlazaLearningIllustration from "./plaza-learning-illustration";
+import PlazaDiscovery from "./plaza-discovery";
 import { useRouter } from "next/navigation";
 import { filterParams, multiFilterKeys, type MultiFilterKey } from "@/lib/teacher-plaza-filters";
 import { CloseButton } from "@narrativeos/ui/close-button";
@@ -14,7 +14,7 @@ import { copyByLocale, plazaLabels } from "@/lib/teacher-plaza-copy";
 import { curricula, stages, gradeOptions, subjectsForStage, taxonomyLabel } from "@/lib/teacher-plaza-taxonomy";
 
 type Result = { query: string; page: number; pageSize: number; total: number; totalPages: number; works: PublicTeacherWork[] };
-type Props = { locale: Locale; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean };
+type Props = { featuredWorks: PublicTeacherWork[]; locale: Locale; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean };
 
 function workTags(work: PublicTeacherWork) {
   return [...new Set([work.subject, work.grade, ...work.tags].filter((tag): tag is string => Boolean(tag)))];
@@ -40,13 +40,12 @@ function Author({ work }: { work: PublicTeacherWork }) {
   </span>;
 }
 
-export default function TeacherPlaza({ locale, result, facets, filters, loadFailed }: Props) {
+export default function TeacherPlaza({ locale, result, featuredWorks, facets, filters, loadFailed }: Props) {
   const copy = copyByLocale[locale];
   const labels = plazaLabels[locale];
   const [selected, setSelected] = useState<PublicTeacherWork | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
-  const pick = result.works.find(work => work.featured);
   const base = teacherEcosystemPath(locale);
   const taxonomyCopy = locale === "en" ? { curriculum:"Curriculum", stage:"Stage", hint:"Some older works have no curriculum label yet. Broaden the filters to find more resources.", clear:"Clear filters", empty:"No works in this category yet" } : locale === "zh-Hant" ? { curriculum:"課程體系", stage:"適用學段", hint:"部分舊作品尚未標註課程體系；可放寬條件查看更多資源。", clear:"清除篩選", empty:"這個分類暫時還沒有作品" } : { curriculum:"课程体系", stage:"适用学段", hint:"部分旧作品尚未标注课程体系；可放宽条件查看更多资源。", clear:"清除筛选", empty:"这个分类暂时还没有作品" };
   const router = useRouter();
@@ -94,14 +93,14 @@ export default function TeacherPlaza({ locale, result, facets, filters, loadFail
     {subjects.map(subject => <Link key={subject} href={toggle("subject",subject)} title={taxonomyLabel(subject, locale)} aria-current={filters.subject?.includes(subject) ? "true" : undefined}><PlazaSubjectIcon subject={subject} /><span>{taxonomyLabel(subject, locale)}</span><span className="plaza-subject-check" aria-hidden="true">{filters.subject?.includes(subject) ? '✓' : ''}</span></Link>)}</nav>
   </aside>;
   return <div className="plaza-content">{sidebar}
-    <section className="plaza-intro"><div className="plaza-hero-copy"><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p><span className="plaza-hero-note">{labels.formats}</span></div><PlazaLearningIllustration />
+    <section className="plaza-intro"><div className="plaza-hero-copy"><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p><span className="plaza-hero-note">{labels.formats}</span></div>
       <form className="plaza-search" action={base} method="get" role="search">
         {[...filterParams(filters, "").entries()].map(([key,value],index) => <input key={index} type="hidden" name={key} value={value} />)}
         <label className="plaza-sr-only" htmlFor="plaza-query">{locale === "en" ? "Search title, description or creator" : "搜索标题、作品简介或作者"}</label>
         <input key={result.query} id="plaza-query" name="q" defaultValue={result.query} placeholder={locale === "en" ? "Title, description or creator" : "搜索标题、作品简介或作者"} maxLength={80} /><button type="submit">{copy.searchButton}</button>
       </form>
     </section>
-    {pick && !loadFailed && <section className="plaza-spotlight"><div><p className="plaza-kicker">01 / {labels.pick}</p><h2>{pick.title}</h2>{pick.summary && <p className="plaza-spot-summary">{pick.summary}</p>}<button className="plaza-primary" onClick={() => open(pick)}>{labels.preview} ↗</button><span className="plaza-spot-meta">{[pick.subject, pick.grade].filter(Boolean).join(" · ")}</span></div><Cover key={pick.id} work={pick} label={labels.noCover} /></section>}
+    <PlazaDiscovery works={featuredWorks} locale={locale} onOpen={open} />
     <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading"><div><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></div>
       {!loadFailed && <details className="plaza-filters"><summary className="plaza-filter-toggle"><span>{locale === "en" ? "Filter resources" : locale === "zh-Hant" ? "篩選資源" : "筛选资源"}</span><small>{locale === "en" ? "Curriculum · Stage · Grade · Tags" : locale === "zh-Hant" ? "課程體系 · 學段 · 年級 · 標籤" : "课程体系 · 学段 · 年级 · 标签"}</small><span className="plaza-filter-chevron" aria-hidden="true">⌄</span></summary><div className="plaza-filter-options">{filterRow("curriculum", [...curricula,"未标注"])}{filterRow("stage", stageValues)}{filterRow("subject", subjects)}{(grades.length > 0 || filters.grade?.length) && filterRow("grade", grades)}<details className="plaza-advanced"><summary>{advancedLabel}<span>{locale === "en" ? "Type · Tags · Author · Date" : "资源类型 · 标签 · 作者 · 发布时间"}</span></summary>
         <div className="plaza-filter-row"><span>{locale === "en" ? "Resource" : "资源类型"}</span><div>{[["",labels.all],["quiz",locale === "en" ? "With practice" : "附讲评练"],["story-only",locale === "en" ? "Story only" : "仅叙事作品"]].map(([value,label])=><Link key={value} href={href({resource:value,page:1})} aria-current={(filters.resource||"")===value?"true":undefined}>{label}</Link>)}<Link href={href({featuredOnly:filters.featuredOnly?"":"1",page:1})} aria-current={filters.featuredOnly?"true":undefined}>{locale === "en" ? "Featured only" : "只看精选"}</Link></div></div>

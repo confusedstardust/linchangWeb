@@ -40,3 +40,30 @@ test('cover-only PATCH preserves publication state, time and metadata',async()=>
  assert.equal(result.updated,true);
  assert.equal(JSON.stringify(calls[0]),JSON.stringify({where:{jobId:'a'.repeat(32),authorId:'author'},data:{coverUrl:'https://example.com/cover.webp'}}));
 });
+
+test('metadata PATCH preserves publication state and date, and rejects invalid featured values', async()=>{
+ const source=fs.readFileSync('src/app/api/teacher-ecosystem/internal/works/route.ts','utf8');
+ const box={exports:{}};const calls=[];
+ const dependencies={
+  'next/server':{NextResponse:{json:body=>body}},
+  '@/lib/auth/http':{jsonError:(message,status)=>({message,status}),configErrorResponse:()=>({status:500})},
+  '@/lib/db':{getPrisma:()=>({teacherWork:{updateMany:async args=>{calls.push(args);return {count:1}}}})},
+  '@/lib/teacher-ecosystem':{internalServiceAuthStatus:()=> 'ok'},
+ };
+ vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:box.exports,module:box,URL,console,require:id=>dependencies[id]||{}});
+ const identity={ownerUserId:'author',jobId:'b'.repeat(32)};
+ const result=await box.exports.PATCH({json:async()=>({...identity,title:'新版课堂',summary:'简介',featured:true,tags:['科学','科学'],status:'PUBLISHED',publishedAt:'wrong'})});
+ assert.equal(result.updated,true);
+ assert.equal(JSON.stringify(calls[0].data),JSON.stringify({title:'新版课堂',summary:'简介',tags:['科学'],featured:true}));
+ assert.equal((await box.exports.PATCH({json:async()=>({...identity,featured:'true'})})).status,400);
+ assert.equal((await box.exports.PATCH({json:async()=>identity})).status,400);
+});
+
+test('featured carousel has its own published-only bounded query', async()=>{
+ const source=fs.readFileSync('src/lib/teacher-ecosystem.ts','utf8');
+ const box={exports:{}};let query;
+ vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:box.exports,module:box,require:id=>id==='@/lib/db'?{getPrisma:()=>({teacherWork:{findMany:async args=>{query=args;return []}}})}:{}});
+ await box.exports.listFeaturedTeacherWorks();
+ assert.equal(query.take,8);assert.equal(query.where.featured,true);assert.equal(query.where.status,'PUBLISHED');
+ assert.equal(Object.keys(query.where).length,2);assert.equal(query.skip,undefined);assert.equal(query.orderBy[0].updatedAt,'desc');
+});

@@ -18,6 +18,7 @@ type PublicationPayload = {
   subject?: unknown;
   grade?: unknown;
   tags?: unknown;
+  featured?: unknown;
 };
 
 function authError(request: Request) {
@@ -70,6 +71,7 @@ function normalizePayload(payload: PublicationPayload) {
     subject: optionalText(payload.subject, 80),
     grade: optionalText(payload.grade, 80),
     tags,
+    ...(typeof payload.featured === "boolean" ? { featured: payload.featured } : {}),
   };
 }
 
@@ -127,6 +129,7 @@ export async function POST(request: Request) {
           subject: payload.subject,
           grade: payload.grade,
           tags: payload.tags as Prisma.InputJsonValue,
+          ...(payload.featured === undefined ? {} : { featured: payload.featured }),
           status: "PUBLISHED",
           publishedAt: new Date(),
           unpublishedAt: null,
@@ -142,6 +145,7 @@ export async function POST(request: Request) {
           subject: payload.subject,
           grade: payload.grade,
           tags: payload.tags as Prisma.InputJsonValue,
+          ...(payload.featured === undefined ? {} : { featured: payload.featured }),
           status: "PUBLISHED",
         },
         include: { author: { select: authorSelect } },
@@ -181,7 +185,7 @@ export async function DELETE(request: Request) {
 }
 
 
-// Cover-only updates must preserve publication dates, tags and archive state.
+// Partial metadata updates preserve publication dates and archive state.
 export async function PATCH(request: Request) {
   const denied = authError(request);
   if (denied) return denied;
@@ -190,17 +194,36 @@ export async function PATCH(request: Request) {
     const ownerUserId = requiredText(body.ownerUserId, "用户 ID", 191);
     const jobId = requiredText(body.jobId, "任务 ID", 32);
     if (!/^[a-f0-9]{32}$/.test(jobId)) return jsonError("任务 ID 格式无效", 400);
-    const coverUrl = httpUrl(body.coverUrl, "封面地址", true);
+    const data: Prisma.TeacherWorkUpdateManyMutationInput = {};
+    if ("coverUrl" in body) data.coverUrl = httpUrl(body.coverUrl, "封面地址", true);
+    // Cover clients retain the existing cover-only contract.
+    if (!("coverUrl" in body)) {
+      if ("title" in body) data.title = requiredText(body.title, "作品标题", 160);
+      if ("summary" in body) data.summary = optionalText(body.summary, 2000);
+      if ("subject" in body) data.subject = optionalText(body.subject, 80);
+      if ("grade" in body) data.grade = optionalText(body.grade, 80);
+      if ("tags" in body) {
+        if (!Array.isArray(body.tags) || body.tags.some(tag => typeof tag !== "string")) return jsonError("标签格式无效", 400);
+        const tags = [...new Set((body.tags as string[]).map(tag => tag.trim()).filter(Boolean))];
+        if (tags.length > 64 || tags.some(tag => tag.length > 80)) return jsonError("标签不能超过 64 个，每个不超过 80 字", 400);
+        data.tags = tags;
+      }
+      if ("featured" in body) {
+        if (typeof body.featured !== "boolean") return jsonError("精选格式无效", 400);
+        data.featured = body.featured;
+      }
+    }
+    if (!Object.keys(data).length) return jsonError("更新内容不能为空", 400);
     const result = await getPrisma().teacherWork.updateMany({
-      where: { jobId, authorId: ownerUserId }, data: { coverUrl },
+      where: { jobId, authorId: ownerUserId }, data,
     });
-    if (!result.count) return jsonError("未找到可更新封面的作品", 404);
-    return NextResponse.json({ updated: true, coverUrl });
+    if (!result.count) return jsonError("未找到可更新的作品", 404);
+    return NextResponse.json({ updated: true, ...(data.coverUrl ? { coverUrl: data.coverUrl } : {}) });
   } catch (error) {
     if (error instanceof SyntaxError || (error instanceof Error && /不能为空|不能超过|格式无效|必须是|Invalid URL/.test(error.message))) {
       return jsonError(error instanceof Error ? error.message : "请求内容无效", 400);
     }
-    console.error("[teacher-ecosystem] cover update failed", error);
+    console.error("[teacher-ecosystem] metadata update failed", error);
     return configErrorResponse(error);
   }
 }

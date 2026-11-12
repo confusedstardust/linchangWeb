@@ -250,6 +250,8 @@
   }
 
   body {
+    -webkit-user-select: none;
+    user-select: none;
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -261,6 +263,13 @@
   ::selection {
     background-color: var(--color-cinnabar);
     color: #fff;
+  }
+
+  /* Keep editing and diagnostic text selectable without blocking copy actions. */
+  :where(input, textarea, [contenteditable]:not([contenteditable="false"]), [role="alert"], [data-selectable]),
+  :where([contenteditable]:not([contenteditable="false"]), [role="alert"], [data-selectable]) * {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   h1,

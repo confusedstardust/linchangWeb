@@ -6,11 +6,13 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import PlazaSubjectIcon from "./plaza-subject-icon";
 import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import type { Locale } from "@/lib/i18n";
+import TeacherWorkLink from "./teacher-work-link";
 
 const tools = ["语文", "数学", "科学", "信息科技", "美术", "跨学科"];
 
-export default function PlazaDiscovery({ works, locale }: {
+export default function PlazaDiscovery({ works, locale, onViewRecorded }: {
   works: PublicTeacherWork[]; locale: Locale;
+  onViewRecorded: (workId: string, viewCount: number) => void;
 }) {
   const count = works.length;
   const [index, setIndex] = useState(0);
@@ -88,10 +90,10 @@ export default function PlazaDiscovery({ works, locale }: {
       {current ? <div className="plaza-stack-stage" ref={stage} data-moving={!!turn}>
         {count > 2 && <div className="plaza-stack-card plaza-stack-far plaza-slide" aria-hidden="true"><SlideContents key={works[(active+2)%count].id} work={works[(active+2)%count]} /></div>}
         {count > 1 && <div className="plaza-stack-card plaza-stack-near plaza-slide" aria-hidden="true"><SlideContents key={works[(active+1)%count].id} work={works[(active+1)%count]} /></div>}
-        <a className="plaza-stack-card plaza-stack-front plaza-slide" href={current.playUrl} target="_blank" rel="noopener noreferrer" aria-label={`${current.title}${en ? ' (opens in a new tab)' : '（在新标签页打开）'}`}>
+        <TeacherWorkLink workId={current.id} onViewRecorded={count => onViewRecorded(current.id, count)} className="plaza-stack-card plaza-stack-front plaza-slide" href={current.playUrl} target="_blank" rel="noopener noreferrer" aria-label={`${current.title}${en ? ' (opens in a new tab)' : '（在新标签页打开）'}`}>
           <SlideContents key={current.id} work={current} />
           <div className="plaza-slide-caption"><h2>{current.title}</h2>{current.summary && <div className="plaza-slide-summary"><p>{current.summary}</p></div>}</div>
-        </a>
+        </TeacherWorkLink>
         {turn && works[turn.from] && <div className="plaza-stack-card plaza-stack-outgoing plaza-slide" aria-hidden="true"><SlideContents key={works[turn.from].id} work={works[turn.from]} /><div className="plaza-slide-caption"><h2>{works[turn.from].title}</h2>{works[turn.from].summary && <div className="plaza-slide-summary"><p>{works[turn.from].summary}</p></div>}</div></div>}
         {count > 1 && <div className="plaza-carousel-controls">
           <button onClick={() => step(-1)} aria-label={en ? "Previous case" : "上一个案例"}><ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" /></button>

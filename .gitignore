@@ -43,3 +43,7 @@ next-env.d.ts
 
 # generated preview screenshots
 /preview
+
+# Generated uploadable teaching resource packages
+/output/teaching-resources/
+.gstack/

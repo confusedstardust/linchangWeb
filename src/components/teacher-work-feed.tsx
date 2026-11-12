@@ -6,6 +6,7 @@ import { useLenis } from "lenis/react";
 import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import { teacherEcosystemPath, type Locale } from "@/lib/i18n";
 import type { TeacherPlazaMessages } from '@/lib/messages/teacher-plaza';
+import TeacherWorkLink from "./teacher-work-link";
 type Copy = Pick<TeacherPlazaMessages, 'works' | 'clear' | 'empty' | 'emptyHint' | 'description' | 'author' | 'enter' | 'practice' | 'feed'>;
 type Batch = { works: PublicTeacherWork[]; total: number; nextOffset: number; hasMore: boolean };
 export default function TeacherWorkFeed({ query, locale, copy }: { query: string; locale: Locale; copy: Copy }) {
@@ -74,11 +75,11 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
       <section ref={gallery} className="ecosystem-gallery" aria-busy={loading}>
         {works.map((work, index) => (
           <CollectionCard className="ecosystem-card" key={work.id}>
-            <a className="ecosystem-cover" href={work.playUrl} target="_blank" rel="noreferrer">
+            <TeacherWorkLink workId={work.id} className="ecosystem-cover" href={work.playUrl} target="_blank" rel="noreferrer">
               {work.coverUrl ? <img className="ecosystem-cover-image" src={work.coverUrl} alt="" loading="lazy" decoding="async" /> : <span className="ecosystem-cover-image" aria-hidden="true" />}
               <span className="ecosystem-card-index">{String(index + 1).padStart(2, "0")}</span>
               {work.featured ? <em>FEATURED</em> : null}
-            </a>
+            </TeacherWorkLink>
             <div className="ecosystem-card-copy">
               <div className="ecosystem-tags">
                 {work.subject ? <span>{work.subject}</span> : null}
@@ -92,7 +93,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
                 <strong>{work.author.name}</strong>
               </div>
               <div className="ecosystem-actions">
-                <a href={work.playUrl} target="_blank" rel="noreferrer">{copy.enter} ↗</a>
+                <TeacherWorkLink workId={work.id} href={work.playUrl} target="_blank" rel="noreferrer">{copy.enter} ↗</TeacherWorkLink>
                 {work.quizUrl ? <a className="secondary" href={work.quizUrl} target="_blank" rel="noreferrer">{copy.practice}</a> : null}
               </div>
             </div>
@@ -102,7 +103,7 @@ export default function TeacherWorkFeed({ query, locale, copy }: { query: string
 
     {!loading && !error && !works.length ? <section className="ecosystem-empty"><span aria-hidden="true">◇</span><h2>{copy.empty}</h2><p>{copy.emptyHint}</p></section> : null}
     <div ref={sentinel} className="ecosystem-feed-status" role="status" aria-live="polite">
-      {loading ? text.loading : error ? <><span>{text.error}</span><button type="button" onClick={() => void load()}>{text.retry}</button></> : hasMore ? <button type="button" onClick={() => void load()}>{text.more}</button> : works.length ? text.end : null}
+      {loading ? text.loading : error ? <><span data-selectable>{text.error}</span><button type="button" onClick={() => void load()}>{text.retry}</button></> : hasMore ? <button type="button" onClick={() => void load()}>{text.more}</button> : works.length ? text.end : null}
     </div>
   </>;
 }

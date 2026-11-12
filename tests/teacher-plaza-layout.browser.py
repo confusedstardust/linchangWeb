@@ -18,31 +18,36 @@ with sync_playwright() as p:
  assert page.locator(".plaza-card").first.locator(".plaza-card-caption a").count() == 1
  assert page.locator(".plaza-card").first.locator(".plaza-card-caption button").count() == 0
  assert page.locator(".plaza-paper-copy").count() == 0
- assert page.locator(".plaza-sidebar").bounding_box()["x"] < 25
+ expect(page.locator(".plaza-account-dock a")).to_be_visible()
+ expect(page.locator(".plaza-workbench-actions .account-trigger")).to_have_count(0)
+ expect(page.locator(".plaza-sidebar")).to_have_count(0)
+ expect(page.locator(".plaza-subjects a[aria-current=true]")).to_have_text("全部学科")
  width=page.locator(".plaza-card-visual").first.bounding_box()["width"]
  cover=page.locator(".plaza-card-visual .plaza-cover").first.bounding_box()["width"]
  assert cover >= width - 2
  for visual in page.locator(".plaza-card-visual").all():
   box=visual.bounding_box()
   assert abs(box["height"] / box["width"] - 9/16) < .01
- heights=page.locator(".plaza-paper").evaluate_all("elements => elements.map(element => element.getBoundingClientRect().height)")
- assert max(heights)-min(heights) < 2
+ expect(page.locator(".plaza-paper")).to_have_count(0)
  assert page.locator(".plaza-card .plaza-author").count() == page.locator(".plaza-card").count()
  for card in page.locator(".plaza-card").all():
   image=card.locator(".plaza-card-visual").bounding_box()
   title=card.locator(".plaza-card-heading").bounding_box()
-  assert 0 <= title["y"]-(image["y"]+image["height"]) <= 8
+  assert 0 <= title["y"]-(image["y"]+image["height"]) <= 12
   assert image["width"] >= card.bounding_box()["width"]-3
-  assert 1 <= card.locator(".plaza-cover-tags span").count() <= 5
+  expect(card.locator(".plaza-cover-tags, .plaza-cover-preview")).to_have_count(0)
+  expect(card.locator(".plaza-card-counts > span")).to_have_count(1)
+  expect(card.locator(".plaza-cover-views")).to_be_visible()
  page.screenshot(path=str(out/"desktop.png"),full_page=True)
  page.locator(".plaza-filter-toggle").click()
  expect(page.locator(".plaza-filter-options")).to_be_visible()
+ expect(page.locator(".plaza-filter-row").get_by_text("学科领域", exact=True)).to_have_count(0)
  page.locator(".plaza-filter-toggle").click()
- subject=page.locator(".plaza-sidebar nav").get_by_role("link",name="语文",exact=True)
+ subject=page.locator(".plaza-subjects").get_by_role("link",name="语文",exact=True)
  subject.click()
  page.wait_for_load_state("networkidle")
  expect(page).to_have_url(re.compile("subject="))
- expect(page.locator(".plaza-sidebar nav a[aria-current=true]")).to_have_text("语文✓")
+ expect(page.locator(".plaza-subjects a[aria-current=true]")).to_have_text("语文")
  page.locator(".plaza-cover-button").first.click()
  expect(page.get_by_role("dialog")).to_be_visible()
  expect(page.locator(".plaza-drawer")).to_have_css("opacity","1")
@@ -69,10 +74,10 @@ with sync_playwright() as p:
  expect(page.locator(".plaza-filter-options")).to_be_visible()
  page.locator(".plaza-advanced summary").click()
  assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
- page.locator(".plaza-sort-mobile").select_option("latest")
+ page.locator(".plaza-sort").select_option("latest")
  page.wait_for_load_state("networkidle")
  expect(page).to_have_url(re.compile("sort=latest"))
- expect(page.locator(".plaza-sidebar nav a[aria-current=true]")).to_have_text("语文✓")
+ expect(page.locator(".plaza-subjects a[aria-current=true]")).to_have_text("语文")
  page.locator(".plaza-cover-button").first.click()
  expect(page.get_by_role("dialog")).to_be_visible()
  expect(page.locator(".plaza-drawer")).to_have_css("opacity","1")

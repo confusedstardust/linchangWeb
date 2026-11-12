@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
     remotePatterns: [
+      new URL("https://ecs-oss-ist.oss-cn-hangzhou.aliyuncs.com/site_asset/images/login-classroom-terrain.webp"),
+      new URL("https://ecs-oss-ist.oss-cn-hangzhou.aliyuncs.com/site_asset/icons/wechat-app-icon.svg"),
       {
         protocol: "https",
         hostname: "linchangweb.oss-cn-beijing.aliyuncs.com",

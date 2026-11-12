@@ -23,7 +23,7 @@ export function AdminLink({ client, href, children, LinkComponent = "a", ...prop
   return allowed ? <LinkComponent href={href} {...props}>{children}</LinkComponent> : null;
 }
 
-export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, onLogout, LinkComponent = "a", className = "", tour, includeAdmin = false, activePlaza = false, locale = "zh-CN", messages = accountMessages[locale] }: {
+export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, onLogout, LinkComponent = "a", className = "", tour, includeAdmin = false, activePlaza = false, locale = "zh-CN", messages = accountMessages[locale], dock }: {
   client: AccountClient;
   href: (path: string) => string;
   loginHref: () => string;
@@ -33,6 +33,7 @@ export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, 
   LinkComponent?: AccountLinkComponent | "a";
   className?: string; tour?: string; includeAdmin?: boolean; activePlaza?: boolean;
   locale?: UiLocale; messages?: AccountMessages;
+  dock?: { loginContent: ReactNode; loginLabel?: string };
 }) {
   const { user, loading, clear } = useSession(client.getCurrentUser);
   const [open, setOpen] = useState(false);
@@ -89,7 +90,7 @@ export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, 
 
   useEffect(() => { if (open) refreshAccount.current(); }, [open]);
 
-  if (!loading && !user) return <a className={`account-trigger ${className}`} href={loginHref()} data-tour={tour}>{messages.login}</a>;
+  if (!loading && !user) return <a className={`account-trigger ${className}`} href={loginHref()} data-tour={tour} aria-label={dock?.loginLabel}>{dock?.loginContent ?? messages.login}</a>;
   const name = user?.nickname || user?.email?.split("@")[0] || messages.creator;
   const avatar = user?.avatar_url && user.avatar_url !== failedAvatar
     // eslint-disable-next-line @next/next/no-img-element -- User avatars may come from arbitrary SSO providers.
@@ -110,10 +111,10 @@ export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, 
     <Popover.Trigger asChild>
       <button type="button" className={`account-trigger ${className}`} data-tour={tour} disabled={loading} aria-label={loading ? messages.loading : formatMessage(messages.accountLabel, { name })}>
         <span className="account-trigger-avatar">{loading ? <Icon kind="person" /> : avatar}</span>
-        <span>{messages.account}</span><svg className="account-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" /></svg>
+        <span>{dock && !loading ? name : messages.account}</span><svg className="account-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" /></svg>
       </button>
     </Popover.Trigger>
-    <Popover.Portal><Popover.Content className="account-popover" data-lenis-prevent align="end" sideOffset={12} collisionPadding={16} aria-labelledby={titleId}>
+    <Popover.Portal><Popover.Content className="account-popover" data-lenis-prevent align={dock ? "start" : "end"} side={dock ? "top" : "bottom"} sideOffset={12} collisionPadding={16} aria-labelledby={titleId}>
       <div className="account-profile">
         <div className="account-profile-top"><Popover.Close asChild><CloseButton size="sm" aria-label={messages.close} /></Popover.Close></div>
         <div className="account-identity"><span className="account-avatar">{avatar}<span className="account-status-dot" role="img" aria-label={status} title={status} /></span><div><h2 id={titleId}>{name}</h2><p>{user?.email || (user?.auth_type === "invite" ? messages.inviteIdentity : messages.creatorIdentity)}</p></div></div>

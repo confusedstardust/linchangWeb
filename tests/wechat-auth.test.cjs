@@ -41,8 +41,9 @@ test('email completion and WeChat link use the same portal-preserving policy', a
   const workbench = 'http://127.0.0.1:3001/';
   const params = new URLSearchParams({next:portal + '/en/teacher-ecosystem/?q=test'});
   const navigation = [];
+  let scan = true;
   const Form = load('src/components/login-form.tsx', {
-    react:{useEffect:()=>{}, useState:initial=>[typeof initial === 'function' ? initial() : initial, ()=>{}]},
+    react:{useEffect:()=>{}, useState:initial=>[initial === true ? scan : typeof initial === 'function' ? initial() : initial, ()=>{}]},
     'react/jsx-runtime':require('react/jsx-runtime'),
     'next/navigation':{useSearchParams:()=>params, useRouter:()=>({push:url=>navigation.push(url)})},
     '@/lib/content':{WORKBENCH_URL:workbench},
@@ -53,6 +54,8 @@ test('email completion and WeChat link use the same portal-preserving policy', a
     '@/components/wechat-community':{WeChatIcon:()=>null},
     '@/lib/utils':{cn:()=>''},
   }, {window:{location:{origin:portal}},fetch:async()=>new Response('{}')}).default;
+  const scanPanel = Form();
+  scan = false;
   const form = Form();
   await form.props.onSubmit({preventDefault(){}});
   assert.equal(navigation[0], params.get('next'));
@@ -62,7 +65,7 @@ test('email completion and WeChat link use the same portal-preserving policy', a
     for (const child of [node.props?.children].flat(Infinity)) { const found=findWechat(child); if(found)return found; }
     return null;
   }
-  const link = findWechat(form);
+  const link = findWechat(scanPanel);
   assert.ok(link);
   const anchor = {href:link.props.href};
   link.props.onClick({currentTarget:anchor});
@@ -161,7 +164,7 @@ function oauthRoutes(options = {}) {
   const deps = {
     '@/lib/auth/redirect':redirects,
     '@/lib/content':{WORKBENCH_URL:'https://www.narrativeos.cn/narrativeos/'},
-    'next/server':{NextResponse:{redirect}},
+    'next/server':{NextResponse:{redirect,json:body=>({...redirect(''),body})}},
     'next/headers':{cookies:async()=>({get:()=>({value:options.wrongBrowser ? 'wrong' : browser})})},
     '@/lib/db':{getPrisma:()=>db},
     '@/lib/auth/crypto':{generateSessionId:()=>`nonce-${++counter}`,sha256:s=>`hash:${s}`,safeEqual:(a,b)=>a===b},
@@ -183,6 +186,21 @@ test('real OAuth routes share state, issue session and reject duplicate callback
   assert.match((await flow.callback.GET(flow.request())).url,/error=/);
   assert.equal(flow.count(),1);
 });
+test('embedded login issues a same-origin QR attempt and reuses the OAuth callback', async () => {
+  const flow = oauthRoutes();
+  const startUrl = 'https://www.narrativeos.cn/api/auth/wechat/start?display=embedded&next=%2Faccount';
+  const denied = await flow.start.POST(new Request(startUrl, {method:'POST',headers:{Origin:'https://other.example'}}));
+  assert.equal(denied.status, 403);
+  const started = await flow.start.POST(new Request(startUrl, {method:'POST',headers:{Origin:'https://www.narrativeos.cn'}}));
+  const qr = new URL(started.body.qrUrl);
+  assert.equal(qr.origin, 'https://open.weixin.qq.com');
+  assert.equal(qr.searchParams.get('login_type'), 'jssdk');
+  assert.equal(qr.searchParams.get('self_redirect'), 'false');
+  assert.equal(qr.searchParams.get('state'), 'nonce-1');
+  assert.equal(started.headers.get('Cache-Control'), 'no-store');
+  assert.equal((await flow.callback.GET(flow.request())).url, 'https://www.narrativeos.cn/account');
+});
+
 test('OAuth refuses foreign browser and expired attempts before token exchange', async () => {
   for (const kind of ['wrongBrowser','expired']) {
     const flow=oauthRoutes({wrongBrowser:kind==='wrongBrowser'});

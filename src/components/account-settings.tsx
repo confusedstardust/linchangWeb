@@ -70,7 +70,7 @@ export default function AccountSettings({initialMessage, initialAccount}: {initi
     <main className="mx-auto min-h-screen max-w-2xl px-6 py-10 text-ink">
     <h1 className="font-display text-3xl">账号设置</h1>
     <p className="mt-3 text-ink-muted">管理登录方式。绑定后，作品和账户权益继续属于同一个账号。</p>
-    <p role="status" className="my-6 text-cinnabar">{message}</p>
+    <p role="status" data-selectable className="my-6 text-cinnabar">{message}</p>
     {!account ? <p>正在读取账号信息…</p> : <>
       <p className="mb-6 break-all text-xs text-ink-muted">账号 ID：{account.user.id}</p>
       <section className="rounded-xl border border-line bg-white/70 p-6">

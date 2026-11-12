@@ -9,23 +9,40 @@ import { WORKBENCH_URL } from "@/lib/content";
 import { wechatConfig } from "@/lib/auth/wechat";
 
 export const dynamic = "force-dynamic";
-async function start(request: Request, bind: boolean) {
+async function start(request: Request, post: boolean) {
   try {
-    if (bind) requireSameOrigin(request);
+    const params = new URL(request.url).searchParams;
+    const embedded = post && params.get("display") === "embedded";
+    const bind = post && !embedded;
+    if (bind || embedded) requireSameOrigin(request);
     const config = wechatConfig();
     const user = await readSessionUser(await sessionCookieValue());
     if (bind && !user) return jsonError("请先登录再绑定微信", 401);
-    if (!bind && user) return NextResponse.redirect(new URL("/account", config.origin));
+    if (!bind && user) {
+      return embedded
+        ? NextResponse.json({ redirectTo: "/account" }, { headers: { "Cache-Control": "no-store" } })
+        : NextResponse.redirect(new URL("/account", config.origin));
+    }
     const id = generateSessionId();
     const browser = generateSessionId();
-    const nextUrl = bind ? new URL("/account", config.origin).href : safeAuthNext(new URL(request.url).searchParams.get("next"), config.origin, WORKBENCH_URL);
+    const nextUrl = bind ? new URL("/account", config.origin).href : safeAuthNext(params.get("next"), config.origin, WORKBENCH_URL);
     const prisma = getPrisma();
     await prisma.oAuthAttempt.deleteMany({where:{expiresAt:{lt:new Date()}}});
     await prisma.oAuthAttempt.create({data:{id, browserHash:sha256(browser), userId:bind ? user!.id : null, nextUrl, expiresAt:new Date(Date.now()+600000)}});
     const url = new URL("https://open.weixin.qq.com/connect/qrconnect");
     url.search = new URLSearchParams({appid:config.appid, redirect_uri:config.redirect, response_type:"code", scope:"snsapi_login", state:id}).toString();
     url.hash = "wechat_redirect";
-    const response = NextResponse.redirect(url, 303);
+    // Use the same iframe parameters as the official WxLogin widget.
+    if (embedded) {
+      url.searchParams.set("login_type", "jssdk");
+      url.searchParams.set("self_redirect", "false");
+      url.searchParams.set("stylelite", "1");
+      url.searchParams.set("fast_login", "0");
+      url.searchParams.set("color_scheme", "light");
+      if (params.get("lang") === "en") url.searchParams.set("lang", "en");
+      url.hash = "";
+    }
+    const response = embedded ? NextResponse.json({ qrUrl: url.href }) : NextResponse.redirect(url, 303);
     response.cookies.set("nos_wechat_state", browser, {httpOnly:true, secure:new URL(config.origin).protocol === "https:", sameSite:"lax", path:"/api/auth/wechat", maxAge:600});
     response.headers.set("Cache-Control", "no-store");
     return response;

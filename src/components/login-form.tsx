@@ -1,12 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { WORKBENCH_URL } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
 import { useAuthSession } from "@/components/auth-session";
 import { localizedPath, loginPath } from "@/lib/i18n";
-import { WeChatIcon } from "@/components/wechat-community";
 import { cn } from "@/lib/utils";
 import { safeAuthNext } from "@/lib/auth/redirect";
 
@@ -15,6 +15,10 @@ type LoginMethod = "password" | "code";
 
 const inputClass =
   "h-12 rounded-md border border-line bg-white px-4 text-sm text-ink outline-none transition-colors focus:border-cinnabar/60";
+
+function LoginWeChatIcon({ size }: { size: number }) {
+  return <Image src="https://ecs-oss-ist.oss-cn-hangzhou.aliyuncs.com/site_asset/icons/wechat-app-icon.svg" alt="" width={size} height={size} />;
+}
 
 export default function LoginForm() {
   const { locale, messages } = useI18n();
@@ -27,6 +31,14 @@ export default function LoginForm() {
   const [mode, setMode] = useState<Mode>(
     searchParams.get("mode") === "register" ? "register" : "login",
   );
+  const [scan, setScan] = useState(mode === "login");
+  const [qrUrl, setQrUrl] = useState("");
+  const [loadingQr, setLoadingQr] = useState(false);
+  const scanCopy = locale === "en"
+    ? { title: "Sign in with WeChat", description: "Sign in to access your work and learning progress.", show: "Show WeChat QR code", refresh: "Refresh QR code", loading: "Loading QR code…", error: "Could not load the QR code. Please try again.", email: "Continue with email", fallback: "Open WeChat sign-in page" }
+    : locale === "zh-Hant"
+      ? { title: "微信掃碼登入", description: "登入後查看你的作品與學習進度。", show: "顯示微信登入二維碼", refresh: "重新取得二維碼", loading: "正在載入二維碼…", error: "二維碼載入失敗，請重試。", email: "使用電子郵件繼續", fallback: "開啟微信登入頁" }
+      : { title: "微信扫码登录", description: "登录后查看你的作品与学习进度。", show: "显示微信登录二维码", refresh: "刷新二维码", loading: "正在加载二维码…", error: "二维码加载失败，请重试。", email: "使用邮箱继续", fallback: "打开微信登录页" };
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -147,6 +159,71 @@ export default function LoginForm() {
       setSubmitting(false);
     }
   };
+
+  const wechatStart = (destination: string) => `/api/auth/wechat/start?next=${encodeURIComponent(destination)}`;
+
+  const loadQr = async () => {
+    setError("");
+    setQrUrl("");
+    setLoadingQr(true);
+    try {
+      const response = await fetch(`${wechatStart(nextUrl())}&display=embedded&lang=${locale}`, { method: "POST" });
+      const data = await response.json() as { qrUrl?: string; redirectTo?: string; error?: string };
+      if (response.ok && data.redirectTo === "/account") {
+        router.push(data.redirectTo);
+        return;
+      }
+      if (response.ok && data.qrUrl) setQrUrl(data.qrUrl);
+      else setError(data.error || scanCopy.error);
+    } catch {
+      setError(scanCopy.error);
+    } finally {
+      setLoadingQr(false);
+    }
+  };
+
+  if (scan) {
+    return (
+      <section className="text-center" aria-labelledby="wechat-login-title">
+        <span className="mx-auto grid size-12 place-items-center">
+          <LoginWeChatIcon size={48} />
+        </span>
+        <h2 id="wechat-login-title" className="mt-3 text-[26px] font-semibold tracking-tight text-ink">{scanCopy.title}</h2>
+        <p className="mt-1.5 text-sm text-ink-muted">{scanCopy.description}</p>
+        <div className={cn("relative mx-auto mt-5 grid min-h-[204px] w-full max-w-[224px] place-items-center overflow-hidden rounded-[22px] border border-[#ebe7df]", qrUrl ? "bg-white" : "bg-[#f9f8f3]")}>
+          {qrUrl ? (
+            // WeChat places its 160px QR image at the top of the iframe, slightly left of center.
+            <iframe title={scanCopy.title} src={qrUrl} className="absolute inset-x-0 top-[21px] h-[calc(100%-21px)] w-full translate-x-[2.5px] border-0 bg-white" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="grid justify-items-center gap-4 p-4">
+              <div aria-hidden className="relative grid size-[86px] place-items-center rounded-3xl bg-[#e9f3e9] text-[#226846]">
+                <span className="absolute left-3 top-3 size-3 rounded-tl border-l-2 border-t-2 border-[#5b9274]" />
+                <span className="absolute right-3 top-3 size-3 rounded-tr border-r-2 border-t-2 border-[#5b9274]" />
+                <span className="absolute bottom-3 left-3 size-3 rounded-bl border-b-2 border-l-2 border-[#5b9274]" />
+                <span className="absolute bottom-3 right-3 size-3 rounded-br border-b-2 border-r-2 border-[#5b9274]" />
+                <LoginWeChatIcon size={32} />
+              </div>
+              <button type="button" onClick={() => void loadQr()} disabled={loadingQr}
+                className="min-h-11 rounded-full bg-[#226846] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#174b33] disabled:opacity-60">
+                {loadingQr ? scanCopy.loading : scanCopy.show}
+              </button>
+            </div>
+          )}
+        </div>
+        {error && <p role="alert" className="mt-3 text-sm text-cinnabar">{error}</p>}
+        <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-ink-muted">
+          {qrUrl && <button type="button" onClick={() => void loadQr()} className="hover:text-cinnabar">{scanCopy.refresh}</button>}
+          <a href={wechatStart(searchParams.get("next") || WORKBENCH_URL)}
+            onClick={(event) => { event.currentTarget.href = wechatStart(nextUrl()); }}
+            className="hover:text-cinnabar">{scanCopy.fallback}</a>
+        </div>
+        <button type="button" onClick={() => { setError(""); setScan(false); }} disabled={loadingQr}
+          className="mt-5 w-full rounded-xl border border-[#e9e1d5] bg-white px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-[#f6f0e5] disabled:opacity-60">
+          {scanCopy.email}
+        </button>
+      </section>
+    );
+  }
 
   const showCode = mode === "register" || loginMethod === "code";
   const showPassword = mode === "register" || loginMethod === "password";
@@ -288,7 +365,7 @@ export default function LoginForm() {
       )}
 
       {message && <p className="text-[12px] text-gold">{message}</p>}
-      {error && <p className="text-[12px] text-cinnabar">{error}</p>}
+      {error && <p role="alert" className="text-[12px] text-cinnabar">{error}</p>}
 
       <button
         type="submit"
@@ -304,16 +381,11 @@ export default function LoginForm() {
             : copy.verify}
       </button>
 
-      <a
-        href={`/api/auth/wechat/start?next=${encodeURIComponent(searchParams.get("next") || WORKBENCH_URL)}`}
-        onClick={(event) => {
-          event.currentTarget.href = `/api/auth/wechat/start?next=${encodeURIComponent(nextUrl())}`;
-        }}
-        className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-line text-sm text-ink transition-colors hover:bg-paper"
-      >
-        <WeChatIcon className="h-4 w-4" />
+      <button type="button" onClick={() => { setError(""); setScan(true); if (!qrUrl) void loadQr(); }}
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-line text-sm text-ink transition-colors hover:bg-paper">
+        <LoginWeChatIcon size={16} />
         {copy.wechat}
-      </a>
+      </button>
 
       <a
         href={localizedPath(locale)}

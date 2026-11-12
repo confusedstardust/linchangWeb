@@ -96,7 +96,7 @@ export default function WeChatCommunity({ compact = false }: { compact?: boolean
 
   const qrUnavailable = (
     <div className="flex min-h-[160px] w-full flex-col items-center justify-center gap-3 px-4 py-8">
-      <p className="text-[12px] leading-[1.8] text-ink-muted">{copy.qrUnavailable}</p>
+      <p role="alert" className="text-[12px] leading-[1.8] text-ink-muted">{copy.qrUnavailable}</p>
       <button
         type="button"
         onClick={resetQr}

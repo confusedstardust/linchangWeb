@@ -2,6 +2,9 @@ import { parseFilters } from "@/lib/teacher-plaza-filters";
 import TeacherPlazaHeader from "@/components/teacher-plaza-header";
 import TeacherPlaza from "@/components/teacher-plaza";
 import { listFilteredTeacherWorks, listFeaturedTeacherWorks, teacherWorkFacets, type PublicTeacherWork } from "@/lib/teacher-ecosystem";
+import { teacherWorkEngagement, type TeacherWorkEngagement } from "@/lib/teacher-work-engagement";
+import { sessionCookieValue } from "@/lib/auth/http";
+import { readSessionUser } from "@/lib/auth/session";
 import { type Locale } from "@/lib/i18n";
 import "./teacher-plaza.css";
 
@@ -18,8 +21,14 @@ export default async function TeacherEcosystemPage({ locale, searchParams }: {
   let facets = { subjects: [] as string[], grades: [] as string[], tags: [] as string[] };
   let loadFailed = false;
   let featuredWorks: PublicTeacherWork[] = [];
+  let engagement: Record<string, TeacherWorkEngagement> = {};
   try {
     [result, facets, featuredWorks] = await Promise.all([listFilteredTeacherWorks(query, requested, filters.pageSize, filters), teacherWorkFacets(), listFeaturedTeacherWorks()]);
+    const user = await readSessionUser(await sessionCookieValue());
+    engagement = await teacherWorkEngagement(result.works.map(work => work.id), user?.id).catch(error => {
+      console.error("[teacher-ecosystem] metrics load failed", error);
+      return {};
+    });
   } catch (error) {
     console.error("[teacher-ecosystem] page load failed", error);
     loadFailed = true;
@@ -27,6 +36,6 @@ export default async function TeacherEcosystemPage({ locale, searchParams }: {
   }
   return <main className="plaza">
     <TeacherPlazaHeader locale={locale} />
-    <TeacherPlaza locale={locale} result={result} featuredWorks={featuredWorks} facets={facets} filters={filters} loadFailed={loadFailed} />
+    <TeacherPlaza key={`${result.page}:${result.works.map(work => work.id).join(",")}`} locale={locale} result={result} featuredWorks={featuredWorks} facets={facets} filters={filters} loadFailed={loadFailed} initialEngagement={engagement} />
   </main>;
 }

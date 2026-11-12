@@ -31,6 +31,7 @@ model User {
   sessions        AuthSession[]
   teacherProfile  TeacherProfile?
   teacherWorks    TeacherWork[]
+  workFavorites   TeacherWorkFavorite[]
 
   @@map("users")
 }
@@ -66,11 +67,32 @@ model TeacherWork {
   createdAt     DateTime          @default(now()) @map("created_at")
   updatedAt     DateTime          @updatedAt @map("updated_at")
   author        User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  metrics       TeacherWorkMetrics?
+  favorites     TeacherWorkFavorite[]
 
   @@index([status, publishedAt])
   @@index([authorId, status])
   @@index([title])
   @@map("teacher_works")
+}
+
+model TeacherWorkMetrics {
+  workId        String      @id @map("work_id")
+  viewCount     Int         @default(0) @map("view_count") @db.UnsignedInt
+  work          TeacherWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_work_metrics")
+}
+
+model TeacherWorkFavorite {
+  userId String      @map("user_id")
+  workId String      @map("work_id")
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  work   TeacherWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@id([userId, workId])
+  @@index([workId])
+  @@map("teacher_work_favorites")
 }
 
 model Account {

@@ -124,10 +124,11 @@ export async function listPublishedTeacherWorks(query: string, page: number, pag
   };
 }
 
-export async function listFilteredTeacherWorks(query: string, page: number, pageSize = TEACHER_WORK_PAGE_SIZE, filters: TeacherWorkFilters = {}) {
+export async function listFilteredTeacherWorks(query: string, page: number, pageSize = TEACHER_WORK_PAGE_SIZE, filters: TeacherWorkFilters = {}, favoriteUserId?: string) {
   const prisma = getPrisma();
   const normalizedQuery = query.trim().slice(0, 80);
   const where = teacherWorkWhere(normalizedQuery, filters);
+  if (favoriteUserId) where.favorites = { some: { userId: favoriteUserId } };
   pageSize = Math.max(1, Math.min(30, Math.floor(pageSize) || 12));
   const total = await prisma.teacherWork.count({ where });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));

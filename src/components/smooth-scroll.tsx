@@ -25,7 +25,7 @@ function ScrollSync() {
       const anchor = (event.target as Element | null)?.closest?.(
         'a[href^="#"]',
       );
-      if (!anchor) return;
+      if (!anchor || anchor.closest("[data-lenis-prevent-wheel]")) return;
 
       const href = anchor.getAttribute("href");
       if (!href || href === "#") return;

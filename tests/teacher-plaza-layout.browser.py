@@ -15,8 +15,6 @@ with sync_playwright() as p:
  assert not page.locator(".plaza-filters").evaluate("element => element.open")
  assert not page.locator(".plaza-filter-options").is_visible()
  assert page.locator(".plaza-grid").evaluate("element => getComputedStyle(element).gridTemplateColumns.split(' ').length") == 4
- assert page.locator(".plaza-card").first.locator(".plaza-card-caption a").count() == 1
- assert page.locator(".plaza-card").first.locator(".plaza-card-caption button").count() == 0
  assert page.locator(".plaza-paper-copy").count() == 0
  expect(page.locator(".plaza-account-dock a")).to_be_visible()
  expect(page.locator(".plaza-workbench-actions .account-trigger")).to_have_count(0)
@@ -36,7 +34,11 @@ with sync_playwright() as p:
   assert 0 <= title["y"]-(image["y"]+image["height"]) <= 12
   assert image["width"] >= card.bounding_box()["width"]-3
   expect(card.locator(".plaza-cover-tags, .plaza-cover-preview")).to_have_count(0)
-  expect(card.locator(".plaza-card-counts > span")).to_have_count(1)
+  expect(card.locator(".plaza-card-caption a")).to_have_count(0)
+  favorite = card.locator(".plaza-card-caption button.plaza-favorite")
+  expect(favorite).to_have_count(1)
+  expect(favorite).to_be_enabled()
+  expect(favorite).to_have_attribute("aria-pressed", re.compile("^(true|false)$"))
   expect(card.locator(".plaza-cover-views")).to_be_visible()
  page.screenshot(path=str(out/"desktop.png"),full_page=True)
  page.locator(".plaza-filter-toggle").click()
@@ -53,7 +55,9 @@ with sync_playwright() as p:
  expect(page.locator(".plaza-drawer")).to_have_css("opacity","1")
  assert page.locator(".plaza-drawer").bounding_box()["width"] >= 1000
  assert page.locator(".plaza-detail-art").bounding_box()["width"] >= 500
- assert page.locator(".plaza-detail-actions a").first.get_attribute("target") == "_blank"
+ experience = page.get_by_role("dialog").get_by_role("link", name=re.compile("^开始体验"))
+ expect(experience).to_be_visible()
+ expect(experience).to_have_attribute("target", "_blank")
  assert page.evaluate("document.body.style.overflow") == "hidden"
  page.screenshot(path=str(out/"detail-desktop.png"))
  # Long author descriptions must scroll without hiding preview or close control.

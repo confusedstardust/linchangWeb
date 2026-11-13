@@ -836,7 +836,7 @@
 @media (max-width: 620px) { .ecosystem-with-site-header header .plaza-return-link { padding: 7px; font-size: 11px; } }
 
 /* Match Forge's workbench header and floating account card. */
-.plaza-workbench-header { --ink: #1a1a1a; --ink-light: #3d3533; --ink-muted: #6b6460; --cinnabar: #9b2335; --cinnabar-deep: #7a1a28; --cinnabar-glow: rgba(155,35,53,.12); --gold: #c9a84c; --rice-dark: #ede7da; --paper: #faf7f2; --border: rgba(201,168,76,.35); --border-light: rgba(201,168,76,.18); --shadow: rgba(26,26,26,.08); position: sticky; top: 0; z-index: 60; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 64px; padding: 0 40px; background: rgba(247,243,236,.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); }
+.plaza-workbench-header { --ink: #1a1a1a; --ink-light: #3d3533; --ink-muted: #6b6460; --cinnabar: #9b2335; --cinnabar-deep: #7a1a28; --cinnabar-glow: rgba(155,35,53,.12); --gold: #c9a84c; --rice-dark: #ede7da; --paper: #faf7f2; --border: rgba(201,168,76,.35); --border-light: rgba(201,168,76,.18); --shadow: rgba(26,26,26,.08); position: sticky; top: 0; z-index: 60; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 0 40px; background: rgba(247,243,236,.60); border-bottom: 1px solid var(--border); backdrop-filter: blur(16px); }
 .plaza-workbench-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .plaza-workbench-seal { flex: 0 0 36px; width: 36px; height: 36px; overflow: hidden; border: 1px solid rgba(155,35,53,.18); border-radius: 8px; box-shadow: 0 2px 8px rgba(155,35,53,.16); }
 .plaza-workbench-seal img { width: 100%; height: 100%; object-fit: cover; }
@@ -845,4 +845,4 @@
 .plaza-workbench-brand small { color: var(--ink-muted); font-size: 10px; letter-spacing: .15em; }
 .plaza-workbench-actions { display: flex; align-items: center; flex-shrink: 0; gap: 6px; }
 .plaza-workbench-header .plaza-return-link { border-color: transparent; font-weight: 600; }
-@media (max-width: 768px) { .plaza-workbench-header { flex-wrap: wrap; padding: 10px 20px; gap: 8px; } .plaza-workbench-actions { margin-left: auto; } .plaza-workbench-brand strong { font-size: 15px; } }
+@media (max-width: 768px) { .plaza-workbench-header { flex-wrap: wrap; padding: 0 20px; gap: 8px; } .plaza-workbench-actions { margin-left: auto; } .plaza-workbench-brand strong { font-size: 15px; } }

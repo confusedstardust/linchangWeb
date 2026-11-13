@@ -8,10 +8,15 @@ import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import type { Locale } from "@/lib/i18n";
 import TeacherWorkLink from "./teacher-work-link";
 
-const tools = ["语文", "数学", "科学", "信息科技", "美术", "跨学科"];
+export type PlazaPracticeTool = {
+  job_id: string;
+  title: string;
+  cover_url: string | null;
+  play_url: string;
+};
 
-export default function PlazaDiscovery({ works, locale, onViewRecorded }: {
-  works: PublicTeacherWork[]; locale: Locale;
+export default function PlazaDiscovery({ works, practiceTools, locale, onViewRecorded }: {
+  works: PublicTeacherWork[]; practiceTools: PlazaPracticeTool[] | null; locale: Locale;
   onViewRecorded: (workId: string, viewCount: number) => void;
 }) {
   const count = works.length;
@@ -92,9 +97,8 @@ export default function PlazaDiscovery({ works, locale, onViewRecorded }: {
         {count > 1 && <div className="plaza-stack-card plaza-stack-near plaza-slide" aria-hidden="true"><SlideContents key={works[(active+1)%count].id} work={works[(active+1)%count]} /></div>}
         <TeacherWorkLink workId={current.id} onViewRecorded={count => onViewRecorded(current.id, count)} className="plaza-stack-card plaza-stack-front plaza-slide" href={current.playUrl} target="_blank" rel="noopener noreferrer" aria-label={`${current.title}${en ? ' (opens in a new tab)' : '（在新标签页打开）'}`}>
           <SlideContents key={current.id} work={current} />
-          <div className="plaza-slide-caption"><h2>{current.title}</h2>{current.summary && <div className="plaza-slide-summary"><p>{current.summary}</p></div>}</div>
         </TeacherWorkLink>
-        {turn && works[turn.from] && <div className="plaza-stack-card plaza-stack-outgoing plaza-slide" aria-hidden="true"><SlideContents key={works[turn.from].id} work={works[turn.from]} /><div className="plaza-slide-caption"><h2>{works[turn.from].title}</h2>{works[turn.from].summary && <div className="plaza-slide-summary"><p>{works[turn.from].summary}</p></div>}</div></div>}
+        {turn && works[turn.from] && <div className="plaza-stack-card plaza-stack-outgoing plaza-slide" aria-hidden="true"><SlideContents key={works[turn.from].id} work={works[turn.from]} /></div>}
         {count > 1 && <div className="plaza-carousel-controls">
           <button onClick={() => step(-1)} aria-label={en ? "Previous case" : "上一个案例"}><ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" /></button>
           <div className="plaza-carousel-dots">{works.map((work,i) => <button key={work.id} aria-label={`${en ? "View" : "查看"}：${work.title}`} aria-current={active === i ? "true" : undefined} onClick={() => { setInteractionVersion(value => value + 1); goTo(i, i < active ? -1 : 1); }} />)}</div>
@@ -103,8 +107,22 @@ export default function PlazaDiscovery({ works, locale, onViewRecorded }: {
         </div>}
       </div> : <div className="plaza-carousel-empty"><PlazaSubjectIcon /><h2>{en ? "More classroom inspiration, coming soon" : "下一份课堂灵感，即将登场"}</h2><p>{en ? "Discover teacher creations below." : "先去下方，发现老师们的课堂创意。"}</p></div>}
     </div>
-    <aside className="plaza-tools" aria-labelledby="plaza-tools-title"><div className="plaza-tools-heading"><h2 id="plaza-tools-title">{en ? "Teaching tools" : "讲练工具"}</h2><span>{en ? "Coming soon" : "敬请期待"}</span></div>
-      <div className="plaza-tools-grid">{tools.map((subject,i) => <div className="plaza-tool-placeholder" key={subject}><PlazaSubjectIcon subject={subject}/><div><strong>{en ? `Tool ${String(i+1).padStart(2,"0")}` : `讲练工具 ${String(i+1).padStart(2,"0")}`}</strong><small>{en ? "In preparation" : "正在准备中"}</small></div></div>)}</div>
+    <aside className="plaza-tools" aria-labelledby="plaza-tools-title">
+      <div className="plaza-tools-heading"><h2 id="plaza-tools-title">{en ? "Teaching tools" : locale === "zh-Hant" ? "講練工具" : "讲练工具"}</h2></div>
+      {practiceTools?.length ? <div className="plaza-tools-grid">{practiceTools.map(tool => (
+        <a className="plaza-tool-card" key={tool.job_id} href={tool.play_url} target="_blank" rel="noopener noreferrer">
+          {tool.cover_url ?
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="plaza-tool-cover" src={tool.cover_url} alt="" loading="lazy" /> :
+            <PlazaSubjectIcon />}
+          <strong>{tool.title}</strong>
+          <ArrowRight size={14} aria-hidden="true" />
+        </a>
+      ))}</div> : <p className="plaza-tools-status" role={practiceTools === null ? "status" : undefined}>
+        {practiceTools === null
+          ? (en ? "Teaching tools are temporarily unavailable." : locale === "zh-Hant" ? "講練工具暫時無法載入。" : "讲练工具暂时无法加载。")
+          : (en ? "No teaching tools yet." : locale === "zh-Hant" ? "暫無講練工具。" : "暂无讲练工具。")}
+      </p>}
     </aside>
   </section>;
 }

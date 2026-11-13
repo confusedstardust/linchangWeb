@@ -62,6 +62,7 @@ model TeacherWork {
   tags          Json?
   status        TeacherWorkStatus @default(PUBLISHED)
   featured      Boolean           @default(false)
+  isPracticeTool Boolean          @default(false) @map("is_practice_tool")
   publishedAt   DateTime          @default(now()) @map("published_at")
   unpublishedAt DateTime?         @map("unpublished_at")
   createdAt     DateTime          @default(now()) @map("created_at")

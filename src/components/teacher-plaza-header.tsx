@@ -69,9 +69,9 @@ export default function TeacherPlazaHeader({ locale, favoritesOnly }: { locale: 
   const showSidebar = sidebarOpen ?? desktop;
   const inviteDialog = useRef<HTMLDialogElement>(null);
   const copy = {
-    "zh-CN": ["欢迎来到 NarrativeOS", "登录，开启你的创作旅程", "让课堂灵感，生动发生", "发现灵感", "我的创作", "创作小指南", "邀请我的同行", "好灵感，一起分享", "邀请同行加入，让更多课堂生动起来", "广场菜单"],
-    "zh-Hant": ["歡迎來到 NarrativeOS", "登入，開啟你的創作旅程", "讓課堂靈感，生動發生", "發現靈感", "我的創作", "創作小指南", "邀請我的同行", "好靈感，一起分享", "邀請同行加入，讓更多課堂生動起來", "廣場選單"],
-    en: ["Welcome to NarrativeOS", "Sign in to start creating", "Bring classroom ideas to life", "Discover", "My creations", "Creator guide", "Invite colleagues", "Share a good idea", "Invite colleagues to bring more lessons to life", "Plaza menu"],
+    "zh-CN": ["欢迎来到 NarrativeOS", "登录，开启你的创作旅程", "创造新的知识互动体验", "发现灵感", "我的创作", "创作小指南", "邀请我的同行", "好灵感，一起分享", "邀请同行加入，让更多课堂生动起来", "广场菜单"],
+    "zh-Hant": ["歡迎來到 NarrativeOS", "登入，開啟你的創作旅程", "創造新的知識互動體驗", "發現靈感", "我的創作", "創作小指南", "邀請我的同行", "好靈感，一起分享", "邀請同行加入，讓更多課堂生動起來", "廣場選單"],
+    en: ["Welcome to NarrativeOS", "Sign in to start creating", "Create new ways to learn", "Discover", "My creations", "Creator guide", "Invite colleagues", "Share a good idea", "Invite colleagues to bring more lessons to life", "Plaza menu"],
   }[locale];
   const [welcome, login, tagline, discover, creations, guide, invite, inviteTitle, inviteText, menu] = copy;
   const favorites = plazaFavoritesCopy[locale].title;

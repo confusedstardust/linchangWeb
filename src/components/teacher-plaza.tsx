@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Award, Star } from "lucide-react";
 import PlazaSubjectIcon from "./plaza-subject-icon";
-import PlazaDiscovery from "./plaza-discovery";
+import PlazaDiscovery, { type PlazaPracticeTool } from "./plaza-discovery";
 import TeacherWorkLink from "./teacher-work-link";
 import { useRouter } from "next/navigation";
 import { filterParams, multiFilterKeys, type MultiFilterKey } from "@/lib/teacher-plaza-filters";
@@ -17,7 +17,7 @@ import { copyByLocale, plazaFavoritesCopy, plazaLabels } from "@/lib/teacher-pla
 import { curricula, stages, gradeOptions, subjectsForStage, taxonomyLabel } from "@/lib/teacher-plaza-taxonomy";
 
 type Result = { query: string; page: number; pageSize: number; total: number; totalPages: number; works: PublicTeacherWork[] };
-type Props = { featuredWorks: PublicTeacherWork[]; locale: Locale; favoritesOnly: boolean; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean; initialEngagement: Record<string, TeacherWorkEngagement> };
+type Props = { practiceTools: PlazaPracticeTool[] | null; featuredWorks: PublicTeacherWork[]; locale: Locale; favoritesOnly: boolean; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean; initialEngagement: Record<string, TeacherWorkEngagement> };
 
 function FilterSummary({ label, className = "" }: { label: string; className?: string }) {
   return <summary className={`plaza-filter-summary ${className}`}>
@@ -51,7 +51,7 @@ function Author({ work }: { work: PublicTeacherWork }) {
   </span>;
 }
 
-export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWorks, facets, filters, loadFailed, initialEngagement }: Props) {
+export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWorks, practiceTools, facets, filters, loadFailed, initialEngagement }: Props) {
   const copy = copyByLocale[locale];
   const labels = plazaLabels[locale];
   const favoritesCopy = plazaFavoritesCopy[locale];
@@ -177,7 +177,7 @@ export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWo
         <input key={result.query} id="plaza-query" name="q" defaultValue={result.query} placeholder={locale === "en" ? "Title, description or creator" : "搜索标题、作品简介或作者"} maxLength={80} /><button type="submit">{copy.searchButton}</button>
       </form>
     </section>
-    <PlazaDiscovery works={featuredWorks} locale={locale} onViewRecorded={updateView} /></>}
+    <PlazaDiscovery works={featuredWorks} practiceTools={practiceTools} locale={locale} onViewRecorded={updateView} /></>}
     <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading">{favoritesOnly ? <h1 id="plaza-heading" ref={heading} tabIndex={-1}>{favoritesCopy.title}</h1> : <><div><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></>}</div>
       {!favoritesOnly && !loadFailed && <nav className="plaza-subjects" aria-label={labels.subject} data-lenis-prevent>
         <Link href={href({ subject: [], page: 1 })} aria-current={!filters.subject?.length ? "true" : undefined}>
@@ -209,18 +209,18 @@ export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWo
           <div className="plaza-grid">{visibleWorks.map(work => (
             <article className="plaza-card" key={work.id}>
                 <div className="plaza-card-visual"><button className="plaza-cover-button" aria-label={work.title} onClick={() => open(work)}><Cover work={work} label={labels.noCover} /></button>
+                  {work.featured && <span className="plaza-featured"><Award size={15} aria-hidden="true" />{labels.pick}</span>}
                   <span className="plaza-cover-views" title={countLabels[0]}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0" /></svg>
                     <span className="plaza-sr-only">{countLabels[0]} </span>{(engagement[work.id]?.viewCount ?? 0).toLocaleString(locale)}
                   </span>
                 </div>
-              <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3>{work.featured && <span className="plaza-featured">{labels.pick}</span>}</div>
+              <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3></div>
               <div className="plaza-card-caption">
                 <Author work={work} />
                 <div className="plaza-card-counts">
                   <button type="button" className="plaza-favorite" aria-pressed={favoritesOnly || (engagement[work.id]?.favorited ?? false)} disabled={favoritePending[work.id]} title={favoriteLabel} onClick={() => void toggleFavorite(work.id)}><Star aria-hidden="true" fill={favoritesOnly || engagement[work.id]?.favorited ? "currentColor" : "none"} /><span className="plaza-sr-only">{favoriteLabel} </span>{(engagement[work.id]?.favoriteCount ?? 0).toLocaleString(locale)}</button>
                 </div>
-                <TeacherWorkLink workId={work.id} onViewRecorded={count => updateView(work.id, count)} href={work.playUrl} target="_blank" rel="noopener noreferrer">{copy.enter} <span aria-hidden="true">↗</span></TeacherWorkLink>
               </div>
             </article>
           ))}</div>

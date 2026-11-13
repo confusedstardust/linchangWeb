@@ -5,10 +5,16 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   async rewrites() {
     const workbench = (process.env.NEXT_PUBLIC_WORKBENCH_URL || "https://www.narrativeos.cn/narrativeos/").replace(/\/$/, "");
-    return ["auth/me", "credits/balance", "payments/subscription", "admin/me"].map(path => ({
-      source: `/api/workbench-account/${path}`,
-      destination: `${workbench}/api/forge/${path}`,
-    }));
+    return [
+      ...["auth/me", "credits/balance", "payments/subscription", "admin/me"].map(path => ({
+        source: `/api/workbench-account/${path}`,
+        destination: `${workbench}/api/forge/${path}`,
+      })),
+      {
+        source: "/play/_telemetry/:endpoint(visitor.js|visit)",
+        destination: `${workbench}/play/_telemetry/:endpoint`,
+      },
+    ];
   },
   trailingSlash: true,
   skipTrailingSlashRedirect: true,

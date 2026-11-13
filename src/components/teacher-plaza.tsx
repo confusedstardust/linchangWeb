@@ -12,12 +12,12 @@ import { useEffect, useRef, useState } from "react";
 import type { PublicTeacherWork, TeacherWorkFilters } from "@/lib/teacher-ecosystem";
 import type { TeacherWorkEngagement } from "@/lib/teacher-work-engagement";
 import { loginPath, teacherEcosystemPath, type Locale } from "@/lib/i18n";
-import { copyByLocale, plazaLabels } from "@/lib/teacher-plaza-copy";
+import { copyByLocale, plazaFavoritesCopy, plazaLabels } from "@/lib/teacher-plaza-copy";
 
 import { curricula, stages, gradeOptions, subjectsForStage, taxonomyLabel } from "@/lib/teacher-plaza-taxonomy";
 
 type Result = { query: string; page: number; pageSize: number; total: number; totalPages: number; works: PublicTeacherWork[] };
-type Props = { featuredWorks: PublicTeacherWork[]; locale: Locale; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean; initialEngagement: Record<string, TeacherWorkEngagement> };
+type Props = { featuredWorks: PublicTeacherWork[]; locale: Locale; favoritesOnly: boolean; result: Result; facets: { subjects: string[]; grades: string[]; tags: string[] }; filters: TeacherWorkFilters; loadFailed: boolean; initialEngagement: Record<string, TeacherWorkEngagement> };
 
 function FilterSummary({ label, className = "" }: { label: string; className?: string }) {
   return <summary className={`plaza-filter-summary ${className}`}>
@@ -51,9 +51,10 @@ function Author({ work }: { work: PublicTeacherWork }) {
   </span>;
 }
 
-export default function TeacherPlaza({ locale, result, featuredWorks, facets, filters, loadFailed, initialEngagement }: Props) {
+export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWorks, facets, filters, loadFailed, initialEngagement }: Props) {
   const copy = copyByLocale[locale];
   const labels = plazaLabels[locale];
+  const favoritesCopy = plazaFavoritesCopy[locale];
   const [selected, setSelected] = useState<PublicTeacherWork | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
@@ -64,6 +65,8 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
   const [showAllSubjects, setShowAllSubjects] = useState(false);
   const [engagement, setEngagement] = useState(initialEngagement);
   const [favoritePending, setFavoritePending] = useState<Record<string, boolean>>({});
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const sortOptions = [
     ["featured", labels.featured], ["latest", labels.latest],
     ["oldest", locale === "en" ? "Oldest" : locale === "zh-Hant" ? "最早發布" : "最早发布"],
@@ -76,6 +79,7 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
   function href(changes: Record<string, string | string[] | number> = {}) {
     const { q = result.query, page = result.page, ...rest } = changes;
     const params = filterParams({ ...filters, ...rest }, String(q), Number(page));
+    if (favoritesOnly) params.set("view", "favorites");
     return `${base}${params.size ? `?${params}` : ""}#resources`;
   }
   function toggle(key: MultiFilterKey, value: string) {
@@ -87,13 +91,13 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
     setEngagement(current => ({ ...current, [workId]: {
       viewCount: Math.max(current[workId]?.viewCount ?? 0, viewCount),
       favoriteCount: current[workId]?.favoriteCount ?? 0,
-      favorited: current[workId]?.favorited ?? false,
+      favorited: current[workId]?.favorited ?? favoritesOnly,
     } }));
   }
   async function toggleFavorite(workId: string) {
     if (favoritePending[workId]) return;
     const previous = engagement[workId] ?? { viewCount: 0, favoriteCount: 0, favorited: false };
-    const favorited = !previous.favorited;
+    const favorited = !favoritesOnly && !previous.favorited;
     function applyFavorite(favorite: Pick<TeacherWorkEngagement, "favorited" | "favoriteCount">) {
       setEngagement(current => ({ ...current, [workId]: {
         viewCount: current[workId]?.viewCount ?? previous.viewCount,
@@ -102,10 +106,13 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
       } }));
     }
     setFavoritePending(current => ({ ...current, [workId]: true }));
-    applyFavorite({
-      favorited,
-      favoriteCount: Math.max(0, previous.favoriteCount + (favorited ? 1 : -1)),
-    });
+    setFavoriteError(null);
+    if (!favoritesOnly) {
+      applyFavorite({
+        favorited,
+        favoriteCount: Math.max(0, previous.favoriteCount + (favorited ? 1 : -1)),
+      });
+    }
     try {
       const response = await fetch("/api/teacher-ecosystem/works/engagement", {
         method: "PUT",
@@ -122,8 +129,14 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
       const payload = await response.json() as { favoriteCount?: unknown; favorited?: unknown };
       if (typeof payload.favoriteCount !== "number" || typeof payload.favorited !== "boolean") throw new Error("Invalid favorite response");
       applyFavorite({ favoriteCount: payload.favoriteCount, favorited: payload.favorited });
+      if (favoritesOnly && !payload.favorited) {
+        if (selected?.id === workId) close();
+        heading.current?.focus();
+        router.refresh();
+      }
     } catch {
       applyFavorite(previous);
+      if (favoritesOnly) setFavoriteError(workId);
     } finally {
       setFavoritePending(current => ({ ...current, [workId]: false }));
     }
@@ -153,17 +166,20 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
   const subjectsExpanded = showAllSubjects || selectedBeyondFirstRows;
   const visibleSubjects = subjectsExpanded || subjectChoices.length <= 15 ? subjectChoices : subjectChoices.slice(0, 14);
   const countLabels = locale === "en" ? ["Views", "Favorites"] : locale === "zh-Hant" ? ["瀏覽量", "收藏量"] : ["浏览量", "收藏量"];
+  const favoriteLabel = favoritesOnly ? favoritesCopy.remove : countLabels[1];
+  const visibleWorks = favoritesOnly ? result.works.filter(work => engagement[work.id]?.favorited !== false) : result.works;
+  const visibleTotal = result.total - (result.works.length - visibleWorks.length);
   return <div className="plaza-content">
-    <section className="plaza-intro"><div className="plaza-hero-copy"><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p><span className="plaza-hero-note">{labels.formats}</span></div>
+    {!favoritesOnly && <><section className="plaza-intro"><div className="plaza-hero-copy"><p className="plaza-kicker">{labels.plaza}</p><h1>{labels.title}</h1><p>{copy.description}</p><span className="plaza-hero-note">{labels.formats}</span></div>
       <form className="plaza-search" action={base} method="get" role="search">
         {[...filterParams(filters, "").entries()].map(([key,value],index) => <input key={index} type="hidden" name={key} value={value} />)}
         <label className="plaza-sr-only" htmlFor="plaza-query">{locale === "en" ? "Search title, description or creator" : "搜索标题、作品简介或作者"}</label>
         <input key={result.query} id="plaza-query" name="q" defaultValue={result.query} placeholder={locale === "en" ? "Title, description or creator" : "搜索标题、作品简介或作者"} maxLength={80} /><button type="submit">{copy.searchButton}</button>
       </form>
     </section>
-    <PlazaDiscovery works={featuredWorks} locale={locale} onViewRecorded={updateView} />
-    <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading"><div><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></div>
-      {!loadFailed && <nav className="plaza-subjects" aria-label={labels.subject} data-lenis-prevent>
+    <PlazaDiscovery works={featuredWorks} locale={locale} onViewRecorded={updateView} /></>}
+    <section id="resources" className="plaza-resources" aria-labelledby="plaza-heading"><div className="plaza-section-heading">{favoritesOnly ? <h1 id="plaza-heading" ref={heading} tabIndex={-1}>{favoritesCopy.title}</h1> : <><div><h2 id="plaza-heading">{labels.browse}</h2></div><p>{labels.hint}</p></>}</div>
+      {!favoritesOnly && !loadFailed && <nav className="plaza-subjects" aria-label={labels.subject} data-lenis-prevent>
         <Link href={href({ subject: [], page: 1 })} aria-current={!filters.subject?.length ? "true" : undefined}>
           <PlazaSubjectIcon />
           {locale === "en" ? "All subjects" : locale === "zh-Hant" ? "全部學科" : "全部学科"}
@@ -176,7 +192,7 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
           {locale === "en" ? (subjectsExpanded ? "Fewer subjects" : "More subjects") : locale === "zh-Hant" ? (subjectsExpanded ? "收起學科" : "更多學科") : (subjectsExpanded ? "收起学科" : "更多学科")}
         </button>}
       </nav>}
-      {!loadFailed && <details className="plaza-filters"><FilterSummary className="plaza-filter-toggle"
+      {!favoritesOnly && !loadFailed && <details className="plaza-filters"><FilterSummary className="plaza-filter-toggle"
         label={locale === "en" ? "Filter resources" : locale === "zh-Hant" ? "篩選資源" : "筛选资源"}
       /><div className="plaza-filter-options">{filterRow("curriculum", [...curricula,"未标注"])}{filterRow("stage", stageValues)}
         <div className="plaza-filter-row"><span>{locale === "en" ? "Resource" : "资源类型"}</span><div>{[["",labels.all],["quiz",locale === "en" ? "With practice" : "附讲评练"],["story-only",locale === "en" ? "Story only" : "仅叙事作品"]].map(([value,label])=><Link key={value} href={href({resource:value,page:1})} aria-current={(filters.resource||"")===value?"true":undefined}>{label}</Link>)}<Link href={href({featuredOnly:filters.featuredOnly?"":"1",page:1})} aria-current={filters.featuredOnly?"true":undefined}>{locale === "en" ? "Featured only" : "只看精选"}</Link></div></div>
@@ -188,8 +204,9 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
 
       <div className="plaza-workspace">
 
-        <div className="plaza-results"><div className="plaza-result-bar"><span role="status" aria-live="polite"><strong>{result.total}</strong> {copy.works}</span>{hasFilters && <Link href={base}>{taxonomyCopy.clear}</Link>}<select className="plaza-sort" aria-label={locale === "en" ? "Sort resources" : "资源排序"} value={filters.sort || "featured"} onChange={event => router.push(href({sort:event.target.value,page:1}))}>{sortOptions.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></div>
-          <div className="plaza-grid">{result.works.map(work => (
+        <div className="plaza-results"><div className="plaza-result-bar"><span role="status" aria-live="polite"><strong>{visibleTotal}</strong> {favoritesOnly ? favoritesCopy.count : copy.works}</span>{hasFilters && <Link href={base}>{taxonomyCopy.clear}</Link>}{!favoritesOnly && <select className="plaza-sort" aria-label={locale === "en" ? "Sort resources" : "资源排序"} value={filters.sort || "featured"} onChange={event => router.push(href({sort:event.target.value,page:1}))}>{sortOptions.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select>}</div>
+          {favoriteError && !selected && <p role="alert">{favoritesCopy.removeFailed}</p>}
+          <div className="plaza-grid">{visibleWorks.map(work => (
             <article className="plaza-card" key={work.id}>
                 <div className="plaza-card-visual"><button className="plaza-cover-button" aria-label={work.title} onClick={() => open(work)}><Cover work={work} label={labels.noCover} /></button>
                   <span className="plaza-cover-views" title={countLabels[0]}>
@@ -201,17 +218,17 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
               <div className="plaza-card-caption">
                 <Author work={work} />
                 <div className="plaza-card-counts">
-                  <button type="button" className="plaza-favorite" aria-pressed={engagement[work.id]?.favorited ?? false} disabled={favoritePending[work.id]} title={countLabels[1]} onClick={() => void toggleFavorite(work.id)}><Star aria-hidden="true" fill={engagement[work.id]?.favorited ? "currentColor" : "none"} /><span className="plaza-sr-only">{countLabels[1]} </span>{(engagement[work.id]?.favoriteCount ?? 0).toLocaleString(locale)}</button>
+                  <button type="button" className="plaza-favorite" aria-pressed={favoritesOnly || (engagement[work.id]?.favorited ?? false)} disabled={favoritePending[work.id]} title={favoriteLabel} onClick={() => void toggleFavorite(work.id)}><Star aria-hidden="true" fill={favoritesOnly || engagement[work.id]?.favorited ? "currentColor" : "none"} /><span className="plaza-sr-only">{favoriteLabel} </span>{(engagement[work.id]?.favoriteCount ?? 0).toLocaleString(locale)}</button>
                 </div>
                 <TeacherWorkLink workId={work.id} onViewRecorded={count => updateView(work.id, count)} href={work.playUrl} target="_blank" rel="noopener noreferrer">{copy.enter} <span aria-hidden="true">↗</span></TeacherWorkLink>
               </div>
             </article>
           ))}</div>
-          {!result.works.length && <div className="plaza-empty" role={loadFailed ? "alert" : "status"}><span aria-hidden="true">◇</span><h3>{loadFailed ? labels.error : hasFilters ? taxonomyCopy.empty : copy.empty}</h3><p>{loadFailed ? labels.errorHint : hasFilters ? taxonomyCopy.hint : copy.emptyHint}</p>{loadFailed ? <a href={href()}>{labels.retry}</a> : hasFilters ? <Link href={base}>{taxonomyCopy.clear}</Link> : null}</div>}
+          {!visibleWorks.length && (!favoritesOnly || !visibleTotal || loadFailed) && <div className="plaza-empty" role={loadFailed ? "alert" : "status"}><span aria-hidden="true">◇</span><h3>{loadFailed ? labels.error : favoritesOnly ? favoritesCopy.empty : hasFilters ? taxonomyCopy.empty : copy.empty}</h3><p>{loadFailed ? labels.errorHint : favoritesOnly ? favoritesCopy.hint : hasFilters ? taxonomyCopy.hint : copy.emptyHint}</p>{loadFailed ? <a href={href()}>{labels.retry}</a> : favoritesOnly ? <a href={`${base}#resources`}>{favoritesCopy.discover}</a> : hasFilters ? <Link href={base}>{taxonomyCopy.clear}</Link> : null}</div>}
           {result.totalPages > 1 && <nav className="plaza-pagination" aria-label={labels.collection}>{result.page > 1 ? <Link href={href({ page: result.page - 1 })}>← {copy.previous}</Link> : <span />}<span>{result.page} / {result.totalPages}</span>{result.page < result.totalPages ? <Link href={href({ page: result.page + 1 })}>{copy.next} →</Link> : <span />}</nav>}
         </div>
       </div>
-    </section><footer className="plaza-footer"><p>{labels.footer}</p><small>NarrativeOS</small></footer>
+    </section>
     <dialog ref={dialog} className="plaza-dialog" aria-labelledby="plaza-detail-title" onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }}>
       {selected && <section className="plaza-drawer" data-lenis-prevent>
         <CloseButton className="plaza-close" aria-label={labels.close} onClick={close} autoFocus />
@@ -221,7 +238,8 @@ export default function TeacherPlaza({ locale, result, featuredWorks, facets, fi
           <div className="plaza-tags">{workTags(selected).map(tag => <span key={tag}>{taxonomyLabel(tag,locale)}</span>)}</div>
           {selected.summary && <><h3>{labels.about}</h3><p className="plaza-detail-summary">{selected.summary}</p></>}
           <p className="plaza-detail-date">{labels.published} <time dateTime={selected.publishedAt}>{new Date(selected.publishedAt).toLocaleDateString(locale, { timeZone: "Asia/Shanghai" })}</time></p>
-          <div className="plaza-detail-actions"><TeacherWorkLink workId={selected.id} onViewRecorded={count => updateView(selected.id, count)} className="plaza-primary" href={selected.playUrl} target="_blank" rel="noreferrer">{copy.enter} <span aria-hidden="true">↗</span></TeacherWorkLink><button type="button" className="plaza-favorite" aria-pressed={engagement[selected.id]?.favorited ?? false} disabled={favoritePending[selected.id]} onClick={() => void toggleFavorite(selected.id)}><Star aria-hidden="true" fill={engagement[selected.id]?.favorited ? "currentColor" : "none"} />{engagement[selected.id]?.favorited ? (locale === "en" ? "Saved" : "已收藏") : countLabels[1]} ({engagement[selected.id]?.favoriteCount ?? 0})</button>{selected.quizUrl && <a href={selected.quizUrl} target="_blank" rel="noreferrer">{copy.practice} <span aria-hidden="true">↗</span></a>}</div>
+          <div className="plaza-detail-actions"><TeacherWorkLink workId={selected.id} onViewRecorded={count => updateView(selected.id, count)} className="plaza-primary" href={selected.playUrl} target="_blank" rel="noreferrer">{copy.enter} <span aria-hidden="true">↗</span></TeacherWorkLink><button type="button" className="plaza-favorite" aria-pressed={favoritesOnly || (engagement[selected.id]?.favorited ?? false)} disabled={favoritePending[selected.id]} onClick={() => void toggleFavorite(selected.id)}><Star aria-hidden="true" fill={favoritesOnly || engagement[selected.id]?.favorited ? "currentColor" : "none"} />{favoritesOnly ? favoritesCopy.remove : engagement[selected.id]?.favorited ? (locale === "en" ? "Saved" : "已收藏") : countLabels[1]} ({engagement[selected.id]?.favoriteCount ?? 0})</button>{selected.quizUrl && <a href={selected.quizUrl} target="_blank" rel="noreferrer">{copy.practice} <span aria-hidden="true">↗</span></a>}</div>
+          {favoriteError === selected.id && <p role="alert">{favoritesCopy.removeFailed}</p>}
         </div>
       </section>}
 

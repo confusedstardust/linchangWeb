@@ -52,6 +52,12 @@ export const copyByLocale = {
   },
 } as const;
 
+export const plazaFavoritesCopy = {
+  "zh-CN": { title: "我的收藏", empty: "还没有收藏的作品", hint: "在广场点击作品上的星标，即可收藏。", discover: "发现灵感", count: "个收藏作品", remove: "取消收藏", removeFailed: "取消收藏失败，请重试。" },
+  "zh-Hant": { title: "我的收藏", empty: "還沒有收藏的作品", hint: "在廣場點擊作品上的星標，即可收藏。", discover: "發現靈感", count: "個收藏作品", remove: "取消收藏", removeFailed: "取消收藏失敗，請重試。" },
+  en: { title: "My favorites", empty: "No favorites yet", hint: "Select the star on a work to save it here.", discover: "Discover", count: "saved works", remove: "Remove from favorites", removeFailed: "Could not remove this favorite. Try again." },
+} as const;
+
 export const plazaLabels = {
   "zh-CN": { title: "给课堂，多一点惊喜。", formats: "互动课件 · 叙事课堂 · 讲评练", plaza: "教师资源广场", collection: "课堂资源", pick: "本期精选", preview: "查看作品", subject: "学科领域", grade: "适用年级", all: "全部", featured: "精选优先", latest: "最新发布", note: "课堂笺", noCover: "暂无封面", close: "关闭作品预览", about: "作品介绍", details: "适用信息", published: "发布时间", resource: "叙事课堂 · 教师共创", browse: "发现课堂灵感", hint: "按学科与年级，寻找课堂灵感。", error: "作品列表暂时无法加载", retry: "重新加载", errorHint: "请稍后重试。", footer: "每一份课堂灵感，都来自一次用心的创作。" },
   en: { title: "A little wonder. A better lesson.", formats: "Interactive lessons · Stories · Practice", plaza: "Teacher resources", collection: "Classroom collection", pick: "Featured work", preview: "Preview work", subject: "Subject", grade: "Grade", all: "All", featured: "Featured first", latest: "Newest", note: "Classroom note", noCover: "No cover yet", close: "Close preview", about: "About this work", details: "Classroom information", published: "Published", resource: "Narrative classrooms · Teacher creations", browse: "Discover your next lesson", hint: "Explore by subject and grade.", error: "Unable to load resources", retry: "Try again", errorHint: "Please try again later.", footer: "Every classroom idea begins with a thoughtful creation." },

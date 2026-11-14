@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma, TeacherResourceType } from "@prisma/client";
 import { configErrorResponse, jsonError } from "@/lib/auth/http";
 import { getPrisma } from "@/lib/db";
 import { internalServiceAuthStatus, serializeTeacherWork } from "@/lib/teacher-ecosystem";
@@ -18,6 +18,7 @@ type PublicationPayload = {
   subject?: unknown;
   grade?: unknown;
   tags?: unknown;
+  resourceType?: unknown;
   featured?: unknown;
 };
 
@@ -71,6 +72,11 @@ function normalizePayload(payload: PublicationPayload) {
     subject: optionalText(payload.subject, 80),
     grade: optionalText(payload.grade, 80),
     tags,
+    resourceType: payload.resourceType == null
+      ? TeacherResourceType.RPG
+      : Object.values(TeacherResourceType).includes(payload.resourceType as TeacherResourceType)
+        ? payload.resourceType as TeacherResourceType
+        : (() => { throw new Error("资源类型无效"); })(),
     ...(typeof payload.featured === "boolean" ? { featured: payload.featured } : {}),
   };
 }
@@ -129,6 +135,7 @@ export async function POST(request: Request) {
           subject: payload.subject,
           grade: payload.grade,
           tags: payload.tags as Prisma.InputJsonValue,
+          resourceType: payload.resourceType,
           ...(payload.featured === undefined ? {} : { featured: payload.featured }),
           status: "PUBLISHED",
           publishedAt: new Date(),
@@ -145,6 +152,7 @@ export async function POST(request: Request) {
           subject: payload.subject,
           grade: payload.grade,
           tags: payload.tags as Prisma.InputJsonValue,
+          resourceType: payload.resourceType,
           ...(payload.featured === undefined ? {} : { featured: payload.featured }),
           status: "PUBLISHED",
         },
@@ -154,7 +162,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ published: true, work: serializeTeacherWork(work) });
   } catch (error) {
-    if (error instanceof SyntaxError || (error instanceof Error && /不能为空|不能超过|格式无效|必须是/.test(error.message))) {
+    if (error instanceof SyntaxError || (error instanceof Error && /不能为空|不能超过|格式无效|必须是|资源类型无效/.test(error.message))) {
       return jsonError(error instanceof Error ? error.message : "请求内容无效", 400);
     }
     console.error("[teacher-ecosystem] publish work failed", error);

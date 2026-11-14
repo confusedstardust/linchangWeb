@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma, TeacherResourceType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { configErrorResponse, jsonError } from "@/lib/auth/http";
 import { getPrisma } from "@/lib/db";
 import { internalServiceAuthStatus, serializeTeacherWork } from "@/lib/teacher-ecosystem";
@@ -73,9 +73,9 @@ function normalizePayload(payload: PublicationPayload) {
     grade: optionalText(payload.grade, 80),
     tags,
     resourceType: payload.resourceType == null
-      ? TeacherResourceType.RPG
-      : Object.values(TeacherResourceType).includes(payload.resourceType as TeacherResourceType)
-        ? payload.resourceType as TeacherResourceType
+      ? "RPG" as const
+      : payload.resourceType === "RPG" || payload.resourceType === "INTERACTIVE_HTML"
+        ? payload.resourceType
         : (() => { throw new Error("资源类型无效"); })(),
     ...(typeof payload.featured === "boolean" ? { featured: payload.featured } : {}),
   };

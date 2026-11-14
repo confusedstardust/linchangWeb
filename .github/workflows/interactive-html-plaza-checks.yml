@@ -1,0 +1,31 @@
+name: interactive-html-plaza-contract
+on:
+  pull_request:
+    paths:
+      - 'prisma/**'
+      - 'src/app/api/teacher-ecosystem/**'
+      - 'src/lib/teacher-ecosystem.ts'
+      - 'src/lib/teacher-plaza-filters.ts'
+      - 'src/components/teacher-plaza.tsx'
+      - 'src/app/teacher-plaza.css'
+      - 'tests/teacher-plaza-filters.test.mjs'
+      - '.github/workflows/interactive-html-plaza-checks.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx prisma generate
+      - run: node --test tests/teacher-plaza-filters.test.mjs
+      - run: npm run build
+        env:
+          DATABASE_URL: mysql://user:pass@127.0.0.1:3306/narrativeos
+          NEXT_PUBLIC_WORKBENCH_URL: https://www.narrativeos.cn/narrativeos/

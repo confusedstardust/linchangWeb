@@ -1,6 +1,7 @@
 import { teacherWorkWhere, type TeacherWorkFilters } from "./teacher-plaza-filters";
 export type { TeacherWorkFilters } from "./teacher-plaza-filters";
 import { timingSafeEqual } from "node:crypto";
+import type { TeacherResourceType } from "@prisma/client";
 import { getPrisma } from "@/lib/db";
 
 export const TEACHER_WORK_PAGE_SIZE = 12;
@@ -12,6 +13,7 @@ export type PublicTeacherWork = {
   summary: string | null;
   coverUrl: string | null;
   playUrl: string;
+  resourceType: TeacherResourceType;
   quizUrl: string | null;
   subject: string | null;
   grade: string | null;
@@ -52,6 +54,7 @@ export function serializeTeacherWork(work: {
   summary: string | null;
   coverUrl: string | null;
   playUrl: string;
+  resourceType: TeacherResourceType;
   quizUrl: string | null;
   subject: string | null;
   grade: string | null;
@@ -67,6 +70,7 @@ export function serializeTeacherWork(work: {
     summary: work.summary,
     coverUrl: work.coverUrl,
     playUrl: work.playUrl,
+    resourceType: work.resourceType,
     quizUrl: work.quizUrl,
     subject: work.subject,
     grade: work.grade,

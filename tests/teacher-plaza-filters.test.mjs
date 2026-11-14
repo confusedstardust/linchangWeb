@@ -67,3 +67,23 @@ test('featured carousel has its own published-only bounded query', async()=>{
  assert.equal(query.take,8);assert.equal(query.where.featured,true);assert.equal(query.where.status,'PUBLISHED');
  assert.equal(Object.keys(query.where).length,2);assert.equal(query.skip,undefined);assert.equal(query.orderBy[0].updatedAt,'desc');
 });
+
+test('interactive HTML filtering keeps older RPG resources intact',()=>{
+ const filters=api.parseFilters({resource:'html'});
+ assert.equal(filters.resource,'html');
+ const params=api.filterParams(filters,'',1);
+ assert.equal(params.get('resource'),'html');
+ const html=api.teacherWorkWhere('',filters);
+ assert.equal(html.AND[0].resourceType,'INTERACTIVE_HTML');
+ const story=api.teacherWorkWhere('',api.parseFilters({resource:'story-only'}));
+ assert.equal(story.AND[0].resourceType,'RPG');
+});
+test('portal publication distinguishes interactive HTML from legacy RPG jobs',()=>{
+ const source=fs.readFileSync('src/app/api/teacher-ecosystem/internal/works/route.ts','utf8')+'\nexport { normalizePayload as normalizeForTest };';
+ const box={exports:{}};
+ vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:box.exports,module:box,URL,require:()=>({})});
+ const base={ownerUserId:'user',jobId:'a'.repeat(32),title:'课堂实验',playUrl:'https://example.com/narrativeos/practice/works/abc'};
+ assert.equal(box.exports.normalizeForTest(base).resourceType,'RPG');
+ assert.equal(box.exports.normalizeForTest({...base,resourceType:'INTERACTIVE_HTML'}).resourceType,'INTERACTIVE_HTML');
+ assert.throws(()=>box.exports.normalizeForTest({...base,resourceType:'OTHER'}),/资源类型无效/);
+});

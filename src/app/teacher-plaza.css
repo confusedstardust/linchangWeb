@@ -329,3 +329,6 @@ html:has(.plaza[data-lenis-prevent-wheel]) { scroll-behavior:auto; }
 .plaza-invite-body textarea { width:100%; min-height:85px; margin-top:8px; }
 .plaza-invite-poster { display:grid; justify-items:center; gap:10px; margin-top:14px; }
 .plaza-invite-poster img { width:auto; height:auto; max-width:100%; max-height:52dvh; border-radius:6px; }
+
+/* Resource-type labels are distinct from search tags and preserve the 16:9 cover layout. */
+.plaza-html-type{display:inline-flex;flex-shrink:0;align-items:center;border-radius:5px;padding:2px 5px;background:#edf3e6;color:#5a7655;font-size:10px;line-height:1.4;white-space:nowrap;font-weight:550}

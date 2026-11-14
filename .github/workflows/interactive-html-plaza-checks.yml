@@ -25,4 +25,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx prisma generate
       - run: node --test tests/teacher-plaza-filters.test.mjs
-      - run: npx tsc --noEmit --pretty false
+      - run: npm run build
+        env:
+          DATABASE_URL: mysql://user:pass@127.0.0.1:3306/narrativeos
+          NEXT_PUBLIC_WORKBENCH_URL: https://www.narrativeos.cn/narrativeos/

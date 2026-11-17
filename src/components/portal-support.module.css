@@ -1,0 +1,16 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: min(760px, calc(100% - 32px));
+  height: min(620px, calc(100dvh - 48px));
+  margin: auto;
+  padding: 0;
+  border: 1px solid #ded6c7;
+  border-radius: 20px;
+  background: #f6f2ea;
+  box-shadow: 0 24px 90px #132b3240;
+}
+.dialog::backdrop { background: #142b3290; }
+.surface { display: flex; flex-direction: column; position: relative; height: 100%; padding-top: 36px; }
+.dialog .close { position: absolute; top: 9px; right: 10px; }
+.frame { flex: 1; width: 100%; min-height: 0; border: 0; }

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { navLinks, WORKBENCH_URL } from "@/lib/content";
 import { useI18n } from "@/components/i18n-provider";
 import { useAuthSession } from "@/components/auth-session";
-import { localizedPath, loginPath, type Locale } from "@/lib/i18n";
+import { localizedPath, loginPath, teacherEcosystemPath, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/brand-logo";
 import WeChatCommunity from "@/components/wechat-community";
@@ -271,7 +271,7 @@ export default function SiteHeader() {
             ))}
           {!onAuthPage && (
             <a
-              href={WORKBENCH_URL}
+              href={teacherEcosystemPath(locale)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-md border border-line px-4 py-2.5 text-xs text-ink transition-all hover:-translate-y-0.5 hover:border-cinnabar/50 hover:text-cinnabar"
@@ -372,7 +372,7 @@ export default function SiteHeader() {
             ))}
           {!onAuthPage && (
             <a
-              href={WORKBENCH_URL}
+              href={teacherEcosystemPath(locale)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}

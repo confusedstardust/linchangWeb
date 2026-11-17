@@ -1,6 +1,6 @@
 {
   "name": "@narrativeos/ui",
-  "version": "0.1.5",
+  "version": "0.2.5",
   "private": true,
   "type": "module",
   "exports": {
@@ -12,7 +12,10 @@
     "./logo.png": "./logo.png",
     "./styles.css": "./styles.css",
     "./collection-card": "./collection-card.tsx",
-    "./close-button": "./close-button.tsx"
+    "./close-button": "./close-button.tsx",
+    "./workspace-sidebar": "./workspace-sidebar.tsx",
+    "./app-links": "./app-links.ts",
+    "./workspace-chrome": "./workspace-chrome.tsx"
   },
   "files": [
     "*.ts",
@@ -30,6 +33,7 @@
   },
   "peerDependencies": {
     "@radix-ui/react-popover": "^1.1.23",
+    "lucide-react": "^1.69.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

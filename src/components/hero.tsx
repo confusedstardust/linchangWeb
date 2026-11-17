@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { WORKBENCH_URL } from "@/lib/content";
+import { teacherEcosystemPath } from "@/lib/i18n";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { useI18n } from "@/components/i18n-provider";
 import Magnetic from "@/components/magnetic";
@@ -394,7 +394,7 @@ export default function Hero() {
           <div className="hero-fade mt-9 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Magnetic className="flex h-12 w-full sm:w-auto">
               <a
-                href={WORKBENCH_URL}
+                href={teacherEcosystemPath(locale)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative flex h-full w-full items-center justify-center gap-5 overflow-hidden rounded-md bg-cinnabar px-7 text-sm text-paper-soft shadow-[0_14px_34px_rgba(112,34,46,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-cinnabar-deep hover:shadow-[0_18px_42px_rgba(112,34,46,0.45)] sm:gap-10"

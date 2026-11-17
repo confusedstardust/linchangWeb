@@ -33,7 +33,7 @@ export function AccountMenu({ client, href, loginHref, plazaHref, settingsHref, 
   LinkComponent?: AccountLinkComponent | "a";
   className?: string; tour?: string; includeAdmin?: boolean; activePlaza?: boolean;
   locale?: UiLocale; messages?: AccountMessages;
-  dock?: { loginContent: ReactNode; loginLabel?: string };
+  dock?: { loginContent?: ReactNode; loginLabel?: string };
 }) {
   const { user, loading, clear } = useSession(client.getCurrentUser);
   const [open, setOpen] = useState(false);

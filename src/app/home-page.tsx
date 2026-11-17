@@ -10,7 +10,7 @@ import { AuthSessionProvider } from "@/components/auth-session";
 import InkRipple from "@/components/ink-ripple";
 import ProductsDock from "@/components/products-dock";
 import ScrollProgress from "@/components/scroll-progress";
-import SiteFooter from "@/components/site-footer";
+import { HomeFooter } from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import Stories from "@/components/stories";
 import SubjectMarquee from "@/components/subject-marquee";
@@ -58,7 +58,7 @@ export default function HomePage({ locale }: { locale: Locale }) {
         <About />
         <FinalCta />
       </main>
-      <SiteFooter />
+      <HomeFooter />
       </AuthSessionProvider>
     </I18nProvider>
   );

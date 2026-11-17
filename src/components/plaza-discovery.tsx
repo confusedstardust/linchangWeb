@@ -8,15 +8,8 @@ import type { PublicTeacherWork } from "@/lib/teacher-ecosystem";
 import type { Locale } from "@/lib/i18n";
 import TeacherWorkLink from "./teacher-work-link";
 
-export type PlazaPracticeTool = {
-  job_id: string;
-  title: string;
-  cover_url: string | null;
-  play_url: string;
-};
-
-export default function PlazaDiscovery({ works, practiceTools, locale, onViewRecorded }: {
-  works: PublicTeacherWork[]; practiceTools: PlazaPracticeTool[] | null; locale: Locale;
+export default function PlazaDiscovery({ works, locale, onViewRecorded }: {
+  works: PublicTeacherWork[]; locale: Locale;
   onViewRecorded: (workId: string, viewCount: number) => void;
 }) {
   const count = works.length;
@@ -88,8 +81,7 @@ export default function PlazaDiscovery({ works, practiceTools, locale, onViewRec
   }, [count, hovered, focused, interactionVersion]);
   function step(direction: number) { setInteractionVersion(value => value + 1); goTo(requested.current + direction, direction); }
 
-  return <section className="plaza-discovery">
-    <div className="plaza-carousel" role="region" aria-roledescription={en ? "carousel" : "轮播"} aria-label={en ? "Featured cases" : "精选案例"}
+  return <div className="plaza-carousel" role="region" aria-roledescription={en ? "carousel" : "轮播"} aria-label={en ? "Featured cases" : "精选案例"}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onFocusCapture={event => setFocused(event.target.matches(":focus-visible"))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
       {current ? <div className="plaza-stack-stage" ref={stage} data-moving={!!turn}>
@@ -106,25 +98,8 @@ export default function PlazaDiscovery({ works, practiceTools, locale, onViewRec
 
         </div>}
       </div> : <div className="plaza-carousel-empty"><PlazaSubjectIcon /><h2>{en ? "More classroom inspiration, coming soon" : "下一份课堂灵感，即将登场"}</h2><p>{en ? "Discover teacher creations below." : "先去下方，发现老师们的课堂创意。"}</p></div>}
-    </div>
-    <aside className="plaza-tools" aria-labelledby="plaza-tools-title">
-      <div className="plaza-tools-heading"><h2 id="plaza-tools-title">{en ? "Teaching tools" : locale === "zh-Hant" ? "講練工具" : "讲练工具"}</h2></div>
-      {practiceTools?.length ? <div className="plaza-tools-grid">{practiceTools.map(tool => (
-        <a className="plaza-tool-card" key={tool.job_id} href={tool.play_url} target="_blank" rel="noopener noreferrer">
-          {tool.cover_url ?
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="plaza-tool-cover" src={tool.cover_url} alt="" loading="lazy" /> :
-            <PlazaSubjectIcon />}
-          <strong>{tool.title}</strong>
-          <ArrowRight size={14} aria-hidden="true" />
-        </a>
-      ))}</div> : <p className="plaza-tools-status" role={practiceTools === null ? "status" : undefined}>
-        {practiceTools === null
-          ? (en ? "Teaching tools are temporarily unavailable." : locale === "zh-Hant" ? "講練工具暫時無法載入。" : "讲练工具暂时无法加载。")
-          : (en ? "No teaching tools yet." : locale === "zh-Hant" ? "暫無講練工具。" : "暂无讲练工具。")}
-      </p>}
-    </aside>
-  </section>;
+    </div>;
+
 }
 
 function SlideContents({ work }: { work: PublicTeacherWork }) {

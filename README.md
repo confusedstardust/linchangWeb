@@ -6,6 +6,8 @@
 
 - [封面优先卡片、折叠筛选与学科栏](deploy/teacher-plaza-layout.md)
 
+教师资源广场右侧的讲练工具复用共用 MySQL 的 `teacher_works` 表。`is_practice_tool` 默认关闭，由 Forge Admin 管理，广场发布与取消发布保留该标记。部署前用 `npm run db:migrate` 应用 `20261113000000_add_practice_tool_flag`，然后部署 Forge 后端和教师资源广场。
+
 ## 技术栈
 
 - Next.js 16（App Router / TypeScript / Turbopack）
@@ -62,7 +64,7 @@ NEXT_PUBLIC_WORKBENCH_URL=http://127.0.0.1:3001/ npm run dev
 
 ## 目录结构
 
-账户菜单、管理员入口、账户请求、会话生命周期、图标、样式和小尺寸 Logo 统一由 `packages/narrativeos-ui` 中的 `@narrativeos/ui` 提供。官网和工作台组件只负责各自的接口及导航地址。修改共享行为时直接修改该包，勿在页面中再复制实现。
+页头、侧栏、页脚与账号组件由 `packages/narrativeos-ui` 中的 `@narrativeos/ui` 提供。官网以 `PortalWorkspace` 为广场、登录和账号设置接入同一外框，Forge 使用相同组件。广场始终隐藏返回按钮，其余页面默认返回上一页，直接打开时回广场。官网 `/` 和多语言首页沿用原有门户顶部导航及页脚布局。修改共享行为时直接修改该包。
 
 工作台通过提交到仓库的 npm 版本包使用同一份实现，因此两个仓库均可独立构建 Docker 镜像。共享包的打包、升级步骤见 [维护说明](packages/narrativeos-ui/README.md)。广场正文、返回导航和加载状态文案统一在 `src/lib/messages/teacher-plaza.ts`，由现有 `getMessages(locale).ui.plaza` 提供；账户文案使用 `getMessages(locale).ui.account`。
 
@@ -91,3 +93,5 @@ npm run lint   # 代码检查
 后续部署前须在官网仓库的 `development` Environment 配置正确的 `DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY`、`DEPLOY_PATH`。不要将凭据写入仓库。服务器修正后，再检查既有官网容器及代理端口，复用其实际路由；不能根据另一台服务器的结构推断需要改 Nginx。公开广场 HTML、静态资源和工作台路由均需单独验收。
 
 状态：目标配置错误已确认，调查用代理变更已撤回；目标校验已实现。指定公网开发页面仍为旧版，正确服务器部署待完成。
+
+教师资源广场通过 `teacher_works.resource_type` 识别 Forge 发布的互动网页。上线前需执行 `20261114080000_add_teacher_resource_type`，既有记录默认是 RPG。早期互动网页如需重新分类，应根据原发布记录单独核对。广场在搜索旁的筛选面板按类型筛选，并在卡片和详情标记互动网页。

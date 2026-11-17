@@ -18,6 +18,11 @@ enum TeacherWorkStatus {
   ARCHIVED
 }
 
+enum TeacherResourceType {
+  RPG
+  INTERACTIVE_HTML
+}
+
 model User {
   id              String        @id @default(cuid())
   email           String?       @unique
@@ -63,6 +68,7 @@ model TeacherWork {
   status        TeacherWorkStatus @default(PUBLISHED)
   featured      Boolean           @default(false)
   isPracticeTool Boolean          @default(false) @map("is_practice_tool")
+  resourceType  TeacherResourceType @default(RPG) @map("resource_type")
   publishedAt   DateTime          @default(now()) @map("published_at")
   unpublishedAt DateTime?         @map("unpublished_at")
   createdAt     DateTime          @default(now()) @map("created_at")

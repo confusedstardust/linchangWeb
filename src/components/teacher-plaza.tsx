@@ -195,12 +195,12 @@ export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWo
       {!favoritesOnly && !loadFailed && <details className="plaza-filters"><FilterSummary className="plaza-filter-toggle"
         label={locale === "en" ? "Filter resources" : locale === "zh-Hant" ? "篩選資源" : "筛选资源"}
       /><div className="plaza-filter-options">{filterRow("curriculum", [...curricula,"未标注"])}{filterRow("stage", stageValues)}
-        <div className="plaza-filter-row"><span>{locale === "en" ? "Resource" : "资源类型"}</span><div>{[["",labels.all],["quiz",locale === "en" ? "With practice" : "附讲评练"],["story-only",locale === "en" ? "Story only" : "仅叙事作品"]].map(([value,label])=><Link key={value} href={href({resource:value,page:1})} aria-current={(filters.resource||"")===value?"true":undefined}>{label}</Link>)}<Link href={href({featuredOnly:filters.featuredOnly?"":"1",page:1})} aria-current={filters.featuredOnly?"true":undefined}>{locale === "en" ? "Featured only" : "只看精选"}</Link></div></div>
+        <div className="plaza-filter-row"><span>{locale === "en" ? "Resource" : "资源类型"}</span><div>{[["",labels.all],["quiz",locale === "en" ? "With practice" : "附讲评练"],["story-only",locale === "en" ? "Story only" : "仅叙事作品"],["html",locale === "en" ? "Interactive HTML" : "互动网页"]].map(([value,label])=><Link key={value} href={href({resource:value,page:1})} aria-current={(filters.resource||"")===value?"true":undefined}>{label}</Link>)}<Link href={href({featuredOnly:filters.featuredOnly?"":"1",page:1})} aria-current={filters.featuredOnly?"true":undefined}>{locale === "en" ? "Featured only" : "只看精选"}</Link></div></div>
         <details className="plaza-advanced">
           <FilterSummary label={advancedLabel} />
           {filterRow("grade", grades)}
         </details><div className="plaza-filter-tools"><small>{locale === "en" ? "Within a category: OR. Across categories: AND." : "同类多选满足任一，跨类条件同时满足。"}</small><button onClick={async()=>{try{await navigator.clipboard.writeText(window.location.href);setShareStatus(locale==='en'?'Link copied':'筛选链接已复制');}catch{setShareStatus(locale==='en'?'Copy the address bar URL':'可复制浏览器地址栏分享筛选');}}}>{locale === "en" ? "Share filters" : "分享筛选"}</button><span role="status">{shareStatus}</span><label>{locale === "en" ? "Per page" : "每页"}<select value={filters.pageSize||12} onChange={e=>router.push(href({pageSize:Number(e.target.value),page:1}))}>{[12,24,30].map(n=><option key={n} value={n}>{n}</option>)}</select></label></div></div></details>}
-      {hasFilters && <div className="plaza-active-filters"><strong>{locale === "en" ? "Selected" : "已选条件"}</strong>{multiFilterKeys.flatMap(key=>(filters[key]||[]).map(value=><Link key={`${key}:${value}`} href={href({[key]:(filters[key]||[]).filter(v=>v!==value),page:1})}>{taxonomyLabel(value,locale)} ×</Link>))}{([['q',result.query],['author',filters.author],['after',filters.after],['before',filters.before],['resource',filters.resource==='quiz'?'附讲评练':filters.resource==='story-only'?'仅叙事作品':''],['featuredOnly',filters.featuredOnly?'只看精选':'']] as const).filter(([,value])=>value).map(([key,value])=><Link key={key} href={href({[key]:"",page:1})}>{key==='after'?"自 ":key==='before'?"至 ":""}{value} ×</Link>)}<Link href={base}>{taxonomyCopy.clear}</Link></div>}
+      {hasFilters && <div className="plaza-active-filters"><strong>{locale === "en" ? "Selected" : "已选条件"}</strong>{multiFilterKeys.flatMap(key=>(filters[key]||[]).map(value=><Link key={`${key}:${value}`} href={href({[key]:(filters[key]||[]).filter(v=>v!==value),page:1})}>{taxonomyLabel(value,locale)} ×</Link>))}{([['q',result.query],['author',filters.author],['after',filters.after],['before',filters.before],['resource',filters.resource==='quiz'?'附讲评练':filters.resource==='story-only'?'仅叙事作品':filters.resource==='html'?'互动网页':''],['featuredOnly',filters.featuredOnly?'只看精选':'']] as const).filter(([,value])=>value).map(([key,value])=><Link key={key} href={href({[key]:"",page:1})}>{key==='after'?"自 ":key==='before'?"至 ":""}{value} ×</Link>)}<Link href={base}>{taxonomyCopy.clear}</Link></div>}
 
       <div className="plaza-workspace">
 
@@ -215,7 +215,8 @@ export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWo
                     <span className="plaza-sr-only">{countLabels[0]} </span>{(engagement[work.id]?.viewCount ?? 0).toLocaleString(locale)}
                   </span>
                 </div>
-              <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3></div>
+              <div className="plaza-card-heading"><h3><button onClick={() => open(work)} title={work.title}>{work.title}</button></h3>
+                {work.resourceType === "INTERACTIVE_HTML" && <small className="plaza-html-type">{locale === "en" ? "Interactive HTML" : "互动网页"}</small>}</div>
               <div className="plaza-card-caption">
                 <Author work={work} />
                 <div className="plaza-card-counts">
@@ -235,7 +236,9 @@ export default function TeacherPlaza({ locale, favoritesOnly, result, featuredWo
         <div className="plaza-detail-art"><Cover key={selected.id} work={selected} label={labels.noCover} priority /></div>
         <div className="plaza-detail-body"><p className="plaza-kicker">{labels.collection}</p><h2 id="plaza-detail-title">{selected.title}</h2>
           <Author key={selected.id} work={selected} />
-          <div className="plaza-tags">{workTags(selected).map(tag => <span key={tag}>{taxonomyLabel(tag,locale)}</span>)}</div>
+          <div className="plaza-tags">
+             {selected.resourceType === "INTERACTIVE_HTML" && <span>{locale === "en" ? "Interactive HTML" : "互动网页"}</span>}
+             {workTags(selected).map(tag => <span key={tag}>{taxonomyLabel(tag,locale)}</span>)}</div>
           {selected.summary && <><h3>{labels.about}</h3><p className="plaza-detail-summary">{selected.summary}</p></>}
           <p className="plaza-detail-date">{labels.published} <time dateTime={selected.publishedAt}>{new Date(selected.publishedAt).toLocaleDateString(locale, { timeZone: "Asia/Shanghai" })}</time></p>
           <div className="plaza-detail-actions"><TeacherWorkLink workId={selected.id} onViewRecorded={count => updateView(selected.id, count)} className="plaza-primary" href={selected.playUrl} target="_blank" rel="noreferrer">{copy.enter} <span aria-hidden="true">↗</span></TeacherWorkLink><button type="button" className="plaza-favorite" aria-pressed={favoritesOnly || (engagement[selected.id]?.favorited ?? false)} disabled={favoritePending[selected.id]} onClick={() => void toggleFavorite(selected.id)}><Star aria-hidden="true" fill={favoritesOnly || engagement[selected.id]?.favorited ? "currentColor" : "none"} />{favoritesOnly ? favoritesCopy.remove : engagement[selected.id]?.favorited ? (locale === "en" ? "Saved" : "已收藏") : countLabels[1]} ({engagement[selected.id]?.favoriteCount ?? 0})</button>{selected.quizUrl && <a href={selected.quizUrl} target="_blank" rel="noreferrer">{copy.practice} <span aria-hidden="true">↗</span></a>}</div>

@@ -26,8 +26,8 @@ const zh = {
   "returnNames": {
     "/": "首页",
     "/history": "我的作品",
-    "/assets": "素材库",
-    "/my-assets": "我的资产",
+    "/assets": "素材广场",
+    "/my-assets": "我的素材",
     "/recharge": "创作套餐",
     "/admin": "平台管理",
     "workspace": "创作入口",
@@ -65,8 +65,8 @@ export const teacherPlazaMessages: Record<UiLocale, TeacherPlazaMessages> = {
   "returnNames": {
     "/": "Home",
     "/history": "My works",
-    "/assets": "Asset library",
-    "/my-assets": "My assets",
+    "/assets": "Asset plaza",
+    "/my-assets": "My materials",
     "/recharge": "Plans",
     "/admin": "Administration",
     "workspace": "Create",
@@ -101,8 +101,8 @@ export const teacherPlazaMessages: Record<UiLocale, TeacherPlazaMessages> = {
   "returnNames": {
     "/": "首頁",
     "/history": "我的作品",
-    "/assets": "素材庫",
-    "/my-assets": "我的資產",
+    "/assets": "素材廣場",
+    "/my-assets": "我的素材",
     "/recharge": "創作套餐",
     "/admin": "平台管理",
     "workspace": "創作入口",

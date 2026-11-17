@@ -1,14 +1,13 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { BookOpen, Clapperboard, LayoutGrid } from "lucide-react";
 import I18nProvider from "@/components/i18n-provider";
 import { AuthSessionProvider } from "@/components/auth-session";
-import BrandLogo from "@/components/brand-logo";
+import PortalWorkspace from "@/components/portal-workspace";
 import LoginForm from "@/components/login-form";
 import LoginLanguage from "@/components/login-language";
-import { localizedPath, type Locale } from "@/lib/i18n";
+import { getMessages, type Locale } from "@/lib/i18n";
 
 export const loginMetadata: Metadata = {
   robots: { index: false, follow: false },
@@ -44,15 +43,9 @@ export default function LoginPage({ locale }: { locale: Locale }) {
   return (
     <I18nProvider locale={locale}>
       <AuthSessionProvider>
-        <div className="min-h-[100svh] bg-[#faf6ee] text-[#28241e] [background-image:radial-gradient(ellipse_at_13%_46%,#f8ead6_0%,transparent_56%)]">
-          <header className="mx-auto flex h-[76px] max-w-[1280px] items-center justify-between px-5 sm:px-10">
-            <Link href={localizedPath(locale)} className="inline-flex items-center gap-2.5 text-[19px] font-semibold tracking-tight">
-              <BrandLogo size={36} />
-              NarrativeOS
-            </Link>
-            <LoginLanguage />
-          </header>
-          <main className="mx-auto grid min-h-[calc(100svh-76px)] max-w-[1192px] items-center gap-7 px-5 pb-9 pt-3 sm:px-10 lg:grid-cols-[minmax(0,1fr)_410px] lg:gap-16 lg:pb-14">
+        <PortalWorkspace locale={locale} title={getMessages(locale).ui.header.login} actions={<LoginLanguage />}>
+        <div className="min-h-[calc(100svh-48px)] bg-[#faf6ee] text-[#28241e] [background-image:radial-gradient(ellipse_at_13%_46%,#f8ead6_0%,transparent_56%)]">
+          <main className="mx-auto grid min-h-[calc(100svh-48px)] max-w-[1192px] items-center gap-7 px-5 pb-9 pt-3 sm:px-10 lg:grid-cols-[minmax(0,1fr)_410px] lg:gap-16 lg:pb-14">
             <section className="mx-auto w-full max-w-[610px]">
               <h1 className="font-serif text-[clamp(2rem,4.6vw,4rem)] font-bold leading-[1.14] tracking-tight">
                 {copy.title[0]}<br />
@@ -82,6 +75,7 @@ export default function LoginPage({ locale }: { locale: Locale }) {
             </div>
           </main>
         </div>
+        </PortalWorkspace>
       </AuthSessionProvider>
     </I18nProvider>
   );

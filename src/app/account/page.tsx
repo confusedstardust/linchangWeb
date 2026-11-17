@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { sessionCookieValue } from "@/lib/auth/http";
 import { readSessionUser } from "@/lib/auth/session";
+import PortalWorkspace from "@/components/portal-workspace";
 import AccountSettings from "@/components/account-settings";
 import { getPrisma } from "@/lib/db";
 
@@ -14,5 +15,5 @@ export default async function AccountPage({searchParams}: {searchParams:Promise<
     redirect(`/login?next=${encodeURIComponent(target)}`);
   }
   const record = await getPrisma().user.findUniqueOrThrow({where:{id:user.id}, select:{passwordHash:true}});
-  return <AccountSettings initialAccount={{user, hasPassword:Boolean(record.passwordHash)}} initialMessage={params.error || (params.success === "wechat" ? "微信绑定成功" : "")} />;
+  return <PortalWorkspace locale="zh-CN" title="账号设置" subtitle="ACCOUNT SETTINGS"><AccountSettings initialAccount={{user, hasPassword:Boolean(record.passwordHash)}} initialMessage={params.error || (params.success === "wechat" ? "微信绑定成功" : "")} /></PortalWorkspace>;
 }

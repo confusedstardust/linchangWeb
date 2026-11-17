@@ -1,17 +1,22 @@
 {
-  "version": "0.1.5",
+  "version": "0.2.5",
   "files": {
-    "account-menu.tsx": "cdf6bebee9bfa428784d472b5f0d6de928966bf6b13b6853a1fc7109c1b8d41e",
+    "account-menu.tsx": "573a320754b671465fcd8a1c11b6d2bc70c9a5876950ca86ffa44eedd0ac87fe",
+    "app-links.ts": "0b680602f9fc44f6b4400522f093303b19e612a496c2fbc76f39012e5c2ce697",
     "brand-logo.tsx": "ef0608bc3a19b81a028dcdc717db93457f658e6d220990142e2c87315b7cce17",
     "client.ts": "236bc0b5184d8cd403e9b2b51ae7a513426e3356898d35c1ce85d0c4c7f4a787",
     "close-button.module.css": "fa8aee607f3b471d52f2eefb447dc180a2f9715c356f1b9af00a22883c9359b3",
     "close-button.tsx": "21617876430fa3d3ef31570f1ac94bbed6550740f1af462c844dd6650b607d52",
     "collection-card.tsx": "9ee3ef9cb00c79d905184454aa12c1f28ea846b6dc27d736cff59c2288f107ba",
-    "i18n.ts": "574421f8e1a276f722a8df70cea0959a57f047d9c1ea6aa7d0c6711240a2c1cf",
+    "i18n.ts": "b8f62964ad7d0ebd33304f085bfeea712edb57039f538db246f09f11c3e9bf60",
     "logo.png": "87f17c480e081f62862b7a30ae7d1a0640e9733cc4dd9d3459c5bd8ef8eb233d",
-    "package.json": "f6fe96c75fa0e26445099b59db50ef78edf7234971d22efe7ca9ee15cc978668",
+    "package.json": "462a3b2f8cf1965be5db49cb9ca91b4570cf5f4b2fef443b91ac715fbe9af2a7",
     "session.ts": "45afe5970242b27cde675e176cea2342de688f5ad2f06c30d42d73d0ca3a1187",
     "styles.css": "4b2b0893f2b65fe78eaf579040af50c8738d876586dfdc4a692923158f1e2585",
-    "verify-release.cjs": "0933332941b9cf83f4889de545a94500f85e7608f661a49541407b80d0f393a7"
+    "verify-release.cjs": "0933332941b9cf83f4889de545a94500f85e7608f661a49541407b80d0f393a7",
+    "workspace-chrome.module.css": "8eb522ebfe14e0ef6def414abc226df35d823076a5a4cf2cdf4970b69d86a5e9",
+    "workspace-chrome.tsx": "1d03ce866e3b3d8d8da8030ab037a390a4080a0e4a30be485cbf556f459860d9",
+    "workspace-sidebar.module.css": "2bafeb512c899f7ee6fdf960aa4c11adaf1a56c2ababa8ab9d8a9273976042a1",
+    "workspace-sidebar.tsx": "352ee1ab1827c78cf678a5c0919e674bec015be5f12457114623150683b9cc65"
   }
 }

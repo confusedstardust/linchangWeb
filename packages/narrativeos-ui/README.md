@@ -18,6 +18,10 @@ Both Next.js apps must list `@narrativeos/ui` in `transpilePackages` and import 
 
 `./collection-card` exports CollectionCard and CardAction. Cards share surface, hover and focus styles; optional actions enable right-click, Shift+F10 and a visible more button. Callers supply links or existing business callbacks and filter actions by ownership. Editable fields retain their native context menu.
 
+`./workspace-sidebar` exports WorkspaceSidebar. The resource plaza and Forge use the same brand header, navigation rows, promotion card and account dock styles. Callers supply localized routes, actions and account adapters. An optional middle section accommodates Agent history. Both apps load Noto Sans SC for the sidebar.
+
+`./workspace-chrome` exports WorkspaceFrame, WorkspaceHeader and WorkspaceFooter. The header uses browser history and a caller-supplied fallback, and can hide the back button for the plaza. The studio places the same bars around its resizable layout. Keep these controls outside embedded previews and outside the standalone game player.
+
 ## Migration stage 1: verified releases
 
 Before packing, bump the version and run `npm run release:manifest` in this package.

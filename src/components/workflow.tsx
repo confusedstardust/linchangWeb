@@ -1,6 +1,6 @@
 "use client";
 
-import { WORKBENCH_URL } from "@/lib/content";
+import { teacherEcosystemPath } from "@/lib/i18n";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import Reveal from "@/components/reveal";
@@ -31,7 +31,7 @@ export default function Workflow() {
             {copy.description}
           </p>
           <a
-            href={WORKBENCH_URL}
+            href={teacherEcosystemPath(locale)}
             target="_blank"
             rel="noopener noreferrer"
             className="group mt-8 inline-flex min-h-[48px] items-center justify-center gap-10 rounded-md border border-ink px-6 text-[13px] text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper-soft"

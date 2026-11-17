@@ -93,3 +93,5 @@ npm run lint   # 代码检查
 后续部署前须在官网仓库的 `development` Environment 配置正确的 `DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY`、`DEPLOY_PATH`。不要将凭据写入仓库。服务器修正后，再检查既有官网容器及代理端口，复用其实际路由；不能根据另一台服务器的结构推断需要改 Nginx。公开广场 HTML、静态资源和工作台路由均需单独验收。
 
 状态：目标配置错误已确认，调查用代理变更已撤回；目标校验已实现。指定公网开发页面仍为旧版，正确服务器部署待完成。
+
+教师资源广场通过 `teacher_works.resource_type` 识别 Forge 发布的互动网页。上线前需执行 `20261114080000_add_teacher_resource_type`，既有记录默认是 RPG。早期互动网页如需重新分类，应根据原发布记录单独核对。广场在搜索旁的筛选面板按类型筛选，并在卡片和详情标记互动网页。
